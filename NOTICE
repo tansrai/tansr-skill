@@ -1,0 +1,31 @@
+Tansr skill adaptation — 2026-09-24
+
+The task routing, application-building workflow and version-grounded
+documentation pattern are adapted from these Apache-2.0 projects:
+
+1. Atlassian Forge Skills — forge-app-builder
+   https://github.com/atlassian/forge-skills
+   Revision: 4f04ae02879435f23808a4798da28f75d3ab74c3
+   Files: skills/forge-app-builder/SKILL.md and its planning, new-app,
+   existing-app and validation references.
+
+2. Mastra Skills — mastra
+   Copyright (c) 2026 Kepler Software, Inc.
+   https://github.com/mastra-ai/skills
+   Revision: f7add7cfff24e2b540815d596512e62f88ab782c
+   File: skills/mastra/SKILL.md
+
+Modifications: rewritten in Chinese for Tansr; replaced platform-specific
+commands, APIs and prerequisites; added Tansr product-use, SDK, Serve,
+mobile, billing and troubleshooting guidance. No upstream telemetry,
+automatic deployment, or unrelated skill dependency is carried over.
+The modified entrypoint and references are newly composed adaptations,
+not unmodified copies of the original skills. See LICENSE for Apache-2.0.
+
+The feedback-starter adapts the user's existing local feedback-agent
+example. Runtime packages are dependencies installed separately, with
+their own licenses. Tansr CLI binaries and credentials are not bundled.
+
+Tansr technical facts were checked against its official public website,
+documentation, npm metadata and published type declarations on 2026-09-24.
+Product trademarks and hosted services retain their respective terms.

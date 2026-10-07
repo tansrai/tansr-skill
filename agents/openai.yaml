@@ -1,0 +1,4 @@
+interface:
+  display_name: "Tansr 应用开发与产品使用"
+  short_description: "从模糊想法开发可运行的 AI 应用，并协助接入、使用和排查 Tansr"
+  default_prompt: "使用 $tansr 帮我把应用想法变成可运行的小样，并指导我完成 Tansr 接入和验证。"

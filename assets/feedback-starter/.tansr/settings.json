@@ -1,0 +1,13 @@
+{
+  "$schemaVersion": 1,
+  "providers": {
+    "example": {
+      "protocol": "openai",
+      "baseUrl": "https://YOUR_MODEL_PROVIDER/v1",
+      "models": { "agent": "YOUR_TOOL_CAPABLE_MODEL_ID" },
+      "auth": { "env": "MODEL_API_KEY" }
+    }
+  },
+  "modelAliases": { "main": "example/agent" },
+  "telemetry": { "enabled": false }
+}

@@ -1,0 +1,3 @@
+.env
+node_modules/
+.tansr/settings.local.json

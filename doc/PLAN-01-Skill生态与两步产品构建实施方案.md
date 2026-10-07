@@ -272,3 +272,4 @@ R0 可进入安装发行与首页闭环，支持列表只包含已验证范围�
 | 2026-10-07 | S1-02、A1-04、A1-08 | Codex自然/显式/负触发补验；正式错误合同与首败停止52测试、独立增量复核通过；完整安装和原生UI仍分列 | host-behavior/behavior-review.md；live/review-v3.md；runtime-incremental-review.md |
 | 2026-10-07 | S1-06 | 第三轮授权实平台分析完成；真实工具读取两条合成反馈，两次模型请求均200，结果持久化、终态及资源关闭通过；保留前两次红例 | live/run-2026-10-07T14-18-36-994Z-6e249333/report.json |
 | 2026-10-07 | S1-05/A1-06 | Mac改址后，公开iOS Demo Release构建、5项XCTest和unsigned Simulator App构建均通过；8步退出0，UI/当前Serve配对仍待验 | ios-apple-review/20261007T135234Z/address-192.168.0.2/RESULT.md |
+| 2026-10-07 | S1-05/A1-06 | 正式Android0.4.0与Serve0.15.0的1项连续JVM测试通过，8检查点覆盖真实TCP会话/事件/工具/权限/取消/重连/重启恢复/用户隔离与资源关闭；无模型费用，UI和其他原生配对仍待验 | serve-pairing/attempt-20261007T143237530Z/consumer-receipt.json |

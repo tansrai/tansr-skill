@@ -177,7 +177,8 @@
         "session persistence",
         "resource settlement"
       ],
-      "status": "public-package-static-verified; application-runtime-unverified"
+      "status": "public-demo-static-verified; formal-serve015-controlled-legacy-runtime-paired-with-android040; public-demo-login-and-device-runtime-unverified",
+      "controlledPairingEvidence": "archive/TPB-01-two-step-product/stage1/serve-pairing/attempt-20261007T143237530Z/consumer-receipt.json"
     },
     {
       "id": "electron",
@@ -220,7 +221,19 @@
       },
       "minApi": 26,
       "status": "frozen_public_demo040_build_and_106_unit_tests_passed; updater_23_tests_passed; isolated_debug_APK_signature_verified; device_UI_and_sdk050_serve_pairing_unverified",
-      "evidence": "archive/TPB-01-two-step-product/stage1/platform-android/"
+      "evidence": "archive/TPB-01-two-step-product/stage1/platform-android/",
+      "controlledServePairing": {
+        "sdk": "0.4.0",
+        "serve": "0.15.0",
+        "protocol": "legacy /v2 readwrite",
+        "status": "passed",
+        "tests": 1,
+        "checkpoints": 8,
+        "scope": "real loopback TCP and official SDK/Serve; synthetic model and identities; session/SSE/tool results/permissions/cancel/reconnect/store restart/ownership/resource close",
+        "realPlatformRequests": 0,
+        "notVerified": ["device UI", "mobile foreground/background", "recording and media playback", "SDK 0.5.0 /api pairing", "iOS and Harmony pairing"],
+        "evidence": "archive/TPB-01-two-step-product/stage1/serve-pairing/attempt-20261007T143237530Z/consumer-receipt.json"
+      }
     },
     {
       "id": "ios",

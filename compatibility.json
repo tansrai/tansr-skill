@@ -256,9 +256,24 @@
         "demo040": "legacy /v2"
       },
       "minApi": 26,
-      "status": "frozen_public_demo040_build_and_106_unit_tests_passed; updater_23_tests_passed; isolated_debug_APK_signature_verified; device_UI_and_sdk050_serve_pairing_unverified",
+      "status": "public_demo040_build_and_106_unit_tests_passed; updater_23_tests_passed; repaired_isolated_API36_App_eight_instrumented_and_three_system_flow_scopes_accepted; history_image_fix_double_cold_start_verified; sdk050_serve_pairing_unverified",
       "evidence": "archive/TPB-01-two-step-product/stage1/platform-android/",
+      "consumerRepair": {
+        "preparation": "scripts/prepare-demo.mjs",
+        "platformArgument": "android",
+        "manifest": "assets/demo-repairs/android.json",
+        "scope": "two existing public Demo presentation files plus one history-image adapter; safe drawing area, explicit IME resize, paused audio caption and official-history image projection; SDK, locks and business tools unchanged",
+        "publicZipUpdated": false,
+        "packagedApkUpdated": false,
+        "preparationEvidence": "archive/TPB-01-two-step-product/stage1-closure/review/prepare-demo-android-history-public-receipt.json",
+        "preparationDeliveryEvidence": "archive/TPB-01-two-step-product/stage1-closure/review/prepare-demo-android-history-delivery.json",
+        "nativeStatus": "eight_instrumented_journeys_125_steps_and_three_system_flows_passed_scoped_review; IME_repair_retested; history_image_fix_eighteen_targeted_tests_and_two_native_cold_starts_four_checks_each_passed; same_session_original_image_hash_and_zero_new_message_model_calls_crosschecked; owned_AVD_processes_exited_data_preserved",
+        "nativeReview": "archive/TPB-01-two-step-product/stage1-closure/review/android-native-final-review.md",
+        "historyImageReview": "archive/TPB-01-two-step-product/stage1-closure/review/android-cold-image-projection-review.md",
+        "evidenceRoot": "archive/TPB-01-two-step-product/stage1-closure/android/"
+      },
       "controlledServePairing": {
+        "evidenceStage": "historical_initial_TCP_pairing; later native UI validation is recorded separately",
         "sdk": "0.4.0",
         "serve": "0.15.0",
         "protocol": "legacy /v2 readwrite",
@@ -372,7 +387,7 @@
       "protocol": "public HAR legacy /v2; local SDK2/UAPI not same artifact",
       "minApi": 20,
       "targetApi": 22,
-      "status": "public bundled HAR frozen-consumer-install-hap-test-hap-and-lint-passed; unsigned; 9 Hypium cases compiled but not executed; device-interaction-unverified",
+      "status": "public_bundled_HAR_install_build_lint_passed; isolated_API22_App_and_test_HAP_installed; actual_22_unique_Hypium_cases_covered_across_original_21_pass_1_error_and_unchanged_UI_retest_pass; full_App_business_and_media_journeys_pending",
       "evidence": "archive/TPB-01-two-step-product/stage1/platform-harmony/result.json"
     }
   ],

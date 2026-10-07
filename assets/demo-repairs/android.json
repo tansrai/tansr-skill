@@ -1,0 +1,229 @@
+{
+  "schemaVersion": 1,
+  "id": "android-public-demo-repairs",
+  "issue": "TPB-01 P05/P06: system bars and keyboard pan obscure the toolbar; paused audio caption is wrong; public SDK 0.4.0 omits user images from restored history presentation",
+  "source": {
+    "url": "https://download.tansr.com/demo/android/android-demo.zip",
+    "sha256": "e28eff64928d72d924d98fc072a2322cf058279aff120c2d159ff153c05cf35b",
+    "sdkVersion": "0.4.0",
+    "license": "MIT",
+    "licenseFile": "ANDROID-LICENSE.txt",
+    "licenseSha256": "86773852fe0f303b24abb108b25576a3b95f955ff62dea9da5d04af509a1c167",
+    "copyright": "Copyright (c) 2026 tansr",
+    "verifiedOn": "2026-10-08",
+    "archiveTargets": [
+      "android-demo/sample/src/main/kotlin/com/tansr/sdk/sample/OrderAssistantActivity.kt",
+      "android-demo/sample/src/main/kotlin/com/tansr/sdk/sample/DemoMediaPreview.kt"
+    ],
+    "addedFile": {
+      "target": "sample/src/main/kotlin/com/tansr/sdk/sample/DemoHistoryImages.kt",
+      "origin": "Local Demo presentation adapter using only public SDK 0.4.0 APIs",
+      "license": "MIT; original public Demo license retained"
+    }
+  },
+  "encoding": "UTF-8; original Activity and Media CRLF preserved; new DemoHistoryImages.kt uses LF",
+  "files": [
+    {
+      "target": "sample/src/main/kotlin/com/tansr/sdk/sample/OrderAssistantActivity.kt",
+      "before": {
+        "bytes": 63159,
+        "sha256": "9cdfa9123810f819250a9232d5684dcd249e3182fdf1a2a54e917c3f6da96cab"
+      },
+      "after": {
+        "bytes": 66630,
+        "sha256": "8d3498242e973184267bb7e0d165df1037e3a212386bd944340e8e0ecba4eb51"
+      },
+      "replacements": [
+        {
+          "before": "import androidx.compose.foundation.layout.padding\r\n",
+          "after": "import androidx.compose.foundation.layout.padding\r\nimport androidx.compose.foundation.layout.safeDrawingPadding\r\n"
+        },
+        {
+          "before": "import androidx.lifecycle.Lifecycle\r\n",
+          "after": "import androidx.core.view.WindowCompat\r\nimport androidx.lifecycle.Lifecycle\r\n"
+        },
+        {
+          "before": "        super.onCreate(savedInstanceState)",
+          "after": "        super.onCreate(savedInstanceState)\r\n        WindowCompat.getInsetsController(window, window.decorView).apply {\r\n            isAppearanceLightStatusBars = true\r\n            isAppearanceLightNavigationBars = true\r\n        }"
+        },
+        {
+          "before": "                Surface(modifier = Modifier.fillMaxSize()) {\r\n                    Column {",
+          "after": "                Surface(modifier = Modifier.fillMaxSize()) {\r\n                    Column(modifier = Modifier.safeDrawingPadding()) {"
+        },
+        {
+          "before": "import android.os.Bundle\r\n",
+          "after": "import android.os.Bundle\r\nimport android.view.WindowManager\r\n"
+        },
+        {
+          "before": "        super.onCreate(savedInstanceState)\r\n",
+          "after": "        super.onCreate(savedInstanceState)\r\n        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)\r\n"
+        },
+        {
+          "before": "import kotlinx.coroutines.delay\r\n",
+          "after": "import kotlinx.coroutines.delay\r\nimport kotlinx.coroutines.ensureActive\r\n"
+        },
+        {
+          "before": "            SessionPane(\r\n                session = active,",
+          "after": "            SessionPane(\r\n                client = client,\r\n                session = active,"
+        },
+        {
+          "before": "private fun androidx.compose.foundation.layout.ColumnScope.SessionPane(\r\n    session: AgentSession,",
+          "after": "private fun androidx.compose.foundation.layout.ColumnScope.SessionPane(\r\n    client: TansrAgentClient,\r\n    session: AgentSession,"
+        },
+        {
+          "before": "    val connection by session.collectConnectionStateAsStateWithLifecycle()\r\n",
+          "after": "    val connection by session.collectConnectionStateAsStateWithLifecycle()\r\n    val historyRequests = remember(client, session) { DemoHistoryImageRequestState() }\r\n    var historyRevision by remember(client, session) { mutableStateOf(0) }\r\n    var historyAttempt by remember(client, session) { mutableStateOf(0) }\r\n    val historyDelivery = session.delivery\r\n    DisposableEffect(historyRequests) { onDispose { historyRequests.close() } }\r\n    LaunchedEffect(client, session, historyAttempt, historyDelivery) {\r\n        val ticket = historyRequests.begin(client, session, session.sessionId)\r\n        try {\r\n            val history = client.history(session.sessionId)\r\n            check(history.sessionId == session.sessionId) { \"Foreign session history\" }\r\n            val projection = withContext(Dispatchers.Default) {\r\n                val context = kotlin.coroutines.coroutineContext\r\n                DemoHistoryImages.build(history, historyDelivery, imageBounds = { bytes ->\r\n                    val bounds = android.graphics.BitmapFactory.Options().apply { inJustDecodeBounds = true }\r\n                    android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)\r\n                    bounds.outWidth to bounds.outHeight\r\n                }, checkActive = { context.ensureActive() })\r\n            }\r\n            kotlin.coroutines.coroutineContext.ensureActive()\r\n            if (historyRequests.complete(ticket, projection)) {\r\n                historyRevision++\r\n                // Await only the local SDK watermark, never poll history or model endpoints.\r\n                var remaining = 50\r\n                while (session.lastConsumedSeq < history.lastSeq && remaining-- > 0) delay(100)\r\n                kotlin.coroutines.coroutineContext.ensureActive()\r\n                if (historyRequests.accepts(ticket)) historyRevision++\r\n            }\r\n        } catch (cancelled: kotlinx.coroutines.CancellationException) {\r\n            historyRequests.cancel(ticket)\r\n            throw cancelled\r\n        } catch (_: Exception) {\r\n            if (historyRequests.fail(ticket)) historyRevision++\r\n        }\r\n    }\r\n    val historyPresentation = remember(historyRevision, view, connection, historyDelivery) {\r\n        historyRequests.projection?.present(view, session.lastConsumedSeq, historyDelivery)\r\n            ?: DemoHistoryImages.Presentation(view, null)\r\n    }\r\n"
+        },
+        {
+          "before": "    TansrErrorBanner(view.lastError)\r\n",
+          "after": "    TansrErrorBanner(view.lastError)\r\n    val historyWarning = historyRequests.error ?: historyPresentation.warning\r\n    if (historyWarning != null) {\r\n        Text(historyWarning, style = MaterialTheme.typography.labelMedium)\r\n        OutlinedButton(onClick = { historyAttempt++ }) { Text(\"重试历史图片\") }\r\n    }\r\n"
+        },
+        {
+          "before": "    TansrMessageList(\r\n        view,",
+          "after": "    TansrMessageList(\r\n        historyPresentation.view,"
+        },
+        {
+          "before": "remember(historyRevision, view, connection, historyDelivery)",
+          "after": "remember(historyRequests, historyRevision, view, connection, historyDelivery)"
+        },
+        {
+          "before": "bounds.outWidth to bounds.outHeight",
+          "after": "Triple(bounds.outWidth, bounds.outHeight, bounds.outMimeType)"
+        },
+        {
+          "before": "            if (historyRequests.complete(ticket, projection)) {\r\n",
+          "after": "            if (historyRequests.complete(ticket, projection)) {\r\n                android.util.Log.i(TAG, \"history-images session=${history.sessionId} lastSeq=${history.lastSeq} messages=${history.messages.size} validated=${projection.validatedImageHashes.size} sha256=${projection.validatedImageHashes.joinToString(\",\")}\")\r\n"
+        }
+      ],
+      "upgrades": [
+        {
+          "before": {
+            "bytes": 63490,
+            "sha256": "b6004e3182f202a0fb89bd039b86f2f75c7ffd99aca29b24e30976737bf04d2d"
+          },
+          "replacements": [
+            {
+              "before": "import android.os.Bundle\r\n",
+              "after": "import android.os.Bundle\r\nimport android.view.WindowManager\r\n"
+            },
+            {
+              "before": "        super.onCreate(savedInstanceState)\r\n",
+              "after": "        super.onCreate(savedInstanceState)\r\n        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)\r\n"
+            },
+            {
+              "before": "import kotlinx.coroutines.delay\r\n",
+              "after": "import kotlinx.coroutines.delay\r\nimport kotlinx.coroutines.ensureActive\r\n"
+            },
+            {
+              "before": "            SessionPane(\r\n                session = active,",
+              "after": "            SessionPane(\r\n                client = client,\r\n                session = active,"
+            },
+            {
+              "before": "private fun androidx.compose.foundation.layout.ColumnScope.SessionPane(\r\n    session: AgentSession,",
+              "after": "private fun androidx.compose.foundation.layout.ColumnScope.SessionPane(\r\n    client: TansrAgentClient,\r\n    session: AgentSession,"
+            },
+            {
+              "before": "    val connection by session.collectConnectionStateAsStateWithLifecycle()\r\n",
+              "after": "    val connection by session.collectConnectionStateAsStateWithLifecycle()\r\n    val historyRequests = remember(client, session) { DemoHistoryImageRequestState() }\r\n    var historyRevision by remember(client, session) { mutableStateOf(0) }\r\n    var historyAttempt by remember(client, session) { mutableStateOf(0) }\r\n    val historyDelivery = session.delivery\r\n    DisposableEffect(historyRequests) { onDispose { historyRequests.close() } }\r\n    LaunchedEffect(client, session, historyAttempt, historyDelivery) {\r\n        val ticket = historyRequests.begin(client, session, session.sessionId)\r\n        try {\r\n            val history = client.history(session.sessionId)\r\n            check(history.sessionId == session.sessionId) { \"Foreign session history\" }\r\n            val projection = withContext(Dispatchers.Default) {\r\n                val context = kotlin.coroutines.coroutineContext\r\n                DemoHistoryImages.build(history, historyDelivery, imageBounds = { bytes ->\r\n                    val bounds = android.graphics.BitmapFactory.Options().apply { inJustDecodeBounds = true }\r\n                    android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)\r\n                    bounds.outWidth to bounds.outHeight\r\n                }, checkActive = { context.ensureActive() })\r\n            }\r\n            kotlin.coroutines.coroutineContext.ensureActive()\r\n            if (historyRequests.complete(ticket, projection)) {\r\n                historyRevision++\r\n                // Await only the local SDK watermark, never poll history or model endpoints.\r\n                var remaining = 50\r\n                while (session.lastConsumedSeq < history.lastSeq && remaining-- > 0) delay(100)\r\n                kotlin.coroutines.coroutineContext.ensureActive()\r\n                if (historyRequests.accepts(ticket)) historyRevision++\r\n            }\r\n        } catch (cancelled: kotlinx.coroutines.CancellationException) {\r\n            historyRequests.cancel(ticket)\r\n            throw cancelled\r\n        } catch (_: Exception) {\r\n            if (historyRequests.fail(ticket)) historyRevision++\r\n        }\r\n    }\r\n    val historyPresentation = remember(historyRevision, view, connection, historyDelivery) {\r\n        historyRequests.projection?.present(view, session.lastConsumedSeq, historyDelivery)\r\n            ?: DemoHistoryImages.Presentation(view, null)\r\n    }\r\n"
+            },
+            {
+              "before": "    TansrErrorBanner(view.lastError)\r\n",
+              "after": "    TansrErrorBanner(view.lastError)\r\n    val historyWarning = historyRequests.error ?: historyPresentation.warning\r\n    if (historyWarning != null) {\r\n        Text(historyWarning, style = MaterialTheme.typography.labelMedium)\r\n        OutlinedButton(onClick = { historyAttempt++ }) { Text(\"重试历史图片\") }\r\n    }\r\n"
+            },
+            {
+              "before": "    TansrMessageList(\r\n        view,",
+              "after": "    TansrMessageList(\r\n        historyPresentation.view,"
+            },
+            {
+              "before": "remember(historyRevision, view, connection, historyDelivery)",
+              "after": "remember(historyRequests, historyRevision, view, connection, historyDelivery)"
+            },
+            {
+              "before": "bounds.outWidth to bounds.outHeight",
+              "after": "Triple(bounds.outWidth, bounds.outHeight, bounds.outMimeType)"
+            },
+            {
+              "before": "            if (historyRequests.complete(ticket, projection)) {\r\n",
+              "after": "            if (historyRequests.complete(ticket, projection)) {\r\n                android.util.Log.i(TAG, \"history-images session=${history.sessionId} lastSeq=${history.lastSeq} messages=${history.messages.size} validated=${projection.validatedImageHashes.size} sha256=${projection.validatedImageHashes.joinToString(\",\")}\")\r\n"
+            }
+          ]
+        },
+        {
+          "before": {
+            "bytes": 63611,
+            "sha256": "22e7b2725824c7c3ce5ae1c0afa053fceada590a781f2c6f09bb89c0d5c44c97"
+          },
+          "replacements": [
+            {
+              "before": "import kotlinx.coroutines.delay\r\n",
+              "after": "import kotlinx.coroutines.delay\r\nimport kotlinx.coroutines.ensureActive\r\n"
+            },
+            {
+              "before": "            SessionPane(\r\n                session = active,",
+              "after": "            SessionPane(\r\n                client = client,\r\n                session = active,"
+            },
+            {
+              "before": "private fun androidx.compose.foundation.layout.ColumnScope.SessionPane(\r\n    session: AgentSession,",
+              "after": "private fun androidx.compose.foundation.layout.ColumnScope.SessionPane(\r\n    client: TansrAgentClient,\r\n    session: AgentSession,"
+            },
+            {
+              "before": "    val connection by session.collectConnectionStateAsStateWithLifecycle()\r\n",
+              "after": "    val connection by session.collectConnectionStateAsStateWithLifecycle()\r\n    val historyRequests = remember(client, session) { DemoHistoryImageRequestState() }\r\n    var historyRevision by remember(client, session) { mutableStateOf(0) }\r\n    var historyAttempt by remember(client, session) { mutableStateOf(0) }\r\n    val historyDelivery = session.delivery\r\n    DisposableEffect(historyRequests) { onDispose { historyRequests.close() } }\r\n    LaunchedEffect(client, session, historyAttempt, historyDelivery) {\r\n        val ticket = historyRequests.begin(client, session, session.sessionId)\r\n        try {\r\n            val history = client.history(session.sessionId)\r\n            check(history.sessionId == session.sessionId) { \"Foreign session history\" }\r\n            val projection = withContext(Dispatchers.Default) {\r\n                val context = kotlin.coroutines.coroutineContext\r\n                DemoHistoryImages.build(history, historyDelivery, imageBounds = { bytes ->\r\n                    val bounds = android.graphics.BitmapFactory.Options().apply { inJustDecodeBounds = true }\r\n                    android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)\r\n                    bounds.outWidth to bounds.outHeight\r\n                }, checkActive = { context.ensureActive() })\r\n            }\r\n            kotlin.coroutines.coroutineContext.ensureActive()\r\n            if (historyRequests.complete(ticket, projection)) {\r\n                historyRevision++\r\n                // Await only the local SDK watermark, never poll history or model endpoints.\r\n                var remaining = 50\r\n                while (session.lastConsumedSeq < history.lastSeq && remaining-- > 0) delay(100)\r\n                kotlin.coroutines.coroutineContext.ensureActive()\r\n                if (historyRequests.accepts(ticket)) historyRevision++\r\n            }\r\n        } catch (cancelled: kotlinx.coroutines.CancellationException) {\r\n            historyRequests.cancel(ticket)\r\n            throw cancelled\r\n        } catch (_: Exception) {\r\n            if (historyRequests.fail(ticket)) historyRevision++\r\n        }\r\n    }\r\n    val historyPresentation = remember(historyRevision, view, connection, historyDelivery) {\r\n        historyRequests.projection?.present(view, session.lastConsumedSeq, historyDelivery)\r\n            ?: DemoHistoryImages.Presentation(view, null)\r\n    }\r\n"
+            },
+            {
+              "before": "    TansrErrorBanner(view.lastError)\r\n",
+              "after": "    TansrErrorBanner(view.lastError)\r\n    val historyWarning = historyRequests.error ?: historyPresentation.warning\r\n    if (historyWarning != null) {\r\n        Text(historyWarning, style = MaterialTheme.typography.labelMedium)\r\n        OutlinedButton(onClick = { historyAttempt++ }) { Text(\"重试历史图片\") }\r\n    }\r\n"
+            },
+            {
+              "before": "    TansrMessageList(\r\n        view,",
+              "after": "    TansrMessageList(\r\n        historyPresentation.view,"
+            },
+            {
+              "before": "remember(historyRevision, view, connection, historyDelivery)",
+              "after": "remember(historyRequests, historyRevision, view, connection, historyDelivery)"
+            },
+            {
+              "before": "bounds.outWidth to bounds.outHeight",
+              "after": "Triple(bounds.outWidth, bounds.outHeight, bounds.outMimeType)"
+            },
+            {
+              "before": "            if (historyRequests.complete(ticket, projection)) {\r\n",
+              "after": "            if (historyRequests.complete(ticket, projection)) {\r\n                android.util.Log.i(TAG, \"history-images session=${history.sessionId} lastSeq=${history.lastSeq} messages=${history.messages.size} validated=${projection.validatedImageHashes.size} sha256=${projection.validatedImageHashes.joinToString(\",\")}\")\r\n"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target": "sample/src/main/kotlin/com/tansr/sdk/sample/DemoMediaPreview.kt",
+      "before": {
+        "bytes": 18839,
+        "sha256": "01936ef8c72f1f8efaa342d3b72272271d26e0ed0bbff1be0bfeb5c369e5d3d4"
+      },
+      "after": {
+        "bytes": 18979,
+        "sha256": "f7ded0758b588f261d51df7456321d0cb7f69f267e65d5fd1144a8b93fc2482d"
+      },
+      "replacements": [
+        {
+          "before": "    val preparing = active && player.state is AudioPlayerController.State.Preparing",
+          "after": "    val preparing = active && player.state is AudioPlayerController.State.Preparing\r\n    val paused = active && player.state is AudioPlayerController.State.Paused"
+        },
+        {
+          "before": "            \"音频载入中…\"\r\n        } else if (active) {",
+          "after": "            \"音频载入中…\"\r\n        } else if (paused) {\r\n            \"音频已暂停\"\r\n        } else if (active) {"
+        }
+      ]
+    },
+    {
+      "target": "sample/src/main/kotlin/com/tansr/sdk/sample/DemoHistoryImages.kt",
+      "before": null,
+      "after": {
+        "bytes": 10400,
+        "sha256": "b6cf743fb01834103e2909cc7f1dd72677db521290d750fb1f40fdd1cf186581"
+      },
+      "content": "package com.tansr.sdk.sample\n\nimport com.tansr.sdk.client.SessionHistory\nimport com.tansr.sdk.protocol.IRBlock\nimport com.tansr.sdk.view.SessionViewDelivery\nimport com.tansr.sdk.view.SessionViewState\nimport com.tansr.sdk.view.UIImagePart\nimport com.tansr.sdk.view.UIMessage\nimport com.tansr.sdk.view.UIMessagePart\nimport com.tansr.sdk.view.UITextPart\nimport com.tansr.sdk.view.viewStateFromHistory\nimport java.security.MessageDigest\nimport java.util.Base64\n\n/** Demo presentation compatibility for public SDK 0.4.0, which omits history Image blocks. */\ninternal class DemoHistoryImages private constructor(\n    val sessionId: String,\n    val lastSeq: Long,\n    private val baseline: List<UIMessage>,\n    private val enhanced: List<UIMessage>,\n    private val delivery: SessionViewDelivery,\n    private val warning: String?,\n    val validatedImageHashes: List<String>,\n) {\n    data class Presentation(val view: SessionViewState, val warning: String?)\n\n    fun present(live: SessionViewState, consumedSeq: Long, currentDelivery: SessionViewDelivery): Presentation {\n        if (currentDelivery != delivery) return Presentation(live, \"历史图片显示方式已变化，请重试加载\")\n        if (consumedSeq < lastSeq) return Presentation(live, \"正在等待会话历史同步，图片稍后恢复\")\n        // Idempotence also covers callers that already hold the exact enhanced prefix.\n        if (live.messages.take(enhanced.size) == enhanced) return Presentation(live, warning)\n        if (live.messages.size < baseline.size) return Presentation(live, \"历史图片尚未对齐，请重试加载\")\n        val byId = enhanced.associateBy { it.id }\n        for (index in baseline.indices) {\n            val actual = live.messages[index]\n            val original = baseline[index]\n            // Never strip arbitrary live images: only either complete known message is accepted.\n            if (actual != original && actual != byId[original.id]) {\n                return Presentation(live, \"历史图片尚未对齐，请重试加载\")\n            }\n        }\n        val tail = live.messages.drop(baseline.size)\n        if (enhanced.size > baseline.size && tail.any { it.role == \"user\" && it.parts.any { part -> part is UIImagePart } }) {\n            return Presentation(live, \"纯图片历史与实时图片尚未对齐，请重试加载\")\n        }\n        if (tail.any { row -> enhanced.any { it.id == row.id } }) {\n            return Presentation(live, \"历史图片标识冲突，已保留当前消息\")\n        }\n        return Presentation(live.copy(messages = enhanced + tail), warning)\n    }\n\n    companion object {\n        // Preview budgets, not SDK/wire upload limits. Over-budget images stay visible as explanations.\n        const val MAX_IMAGE_BYTES = 8 * 1024 * 1024\n        const val MAX_TOTAL_BYTES = 16 * 1024 * 1024\n        const val MAX_IMAGE_COUNT = 64\n        const val MAX_HISTORY_MESSAGES = 2000\n        const val MAX_PROJECTION_WORK = 100_000L\n        const val MAX_DIMENSION = 1280 // Same long-edge limit as original ImageAttachment.\n        private val mimePattern = Regex(\"^image/(png|jpeg|webp|gif)$\")\n\n        fun build(\n            history: SessionHistory,\n            delivery: SessionViewDelivery,\n            imageBounds: (ByteArray) -> Triple<Int, Int, String?>,\n            checkActive: () -> Unit = {},\n        ): DemoHistoryImages {\n            checkActive()\n            require(history.messages.size <= MAX_HISTORY_MESSAGES) { \"历史消息超过 2000 条预览预算\" }\n            val imageRows = history.messages.withIndex().filter { row ->\n                row.value.role == \"user\" && row.value.blocks.any { it is IRBlock.Image }\n            }\n            require(history.messages.size.toLong() * (1L + 2L * imageRows.size) <= MAX_PROJECTION_WORK) {\n                \"历史图片投影超过本机预览预算\"\n            }\n            val baseline = viewStateFromHistory(history.messages, delivery).view.messages\n            val enhanced = baseline.toMutableList()\n            val namespace = MessageDigest.getInstance(\"SHA-256\").digest(history.sessionId.toByteArray())\n                .take(12).joinToString(\"\") { \"%02x\".format(it) }\n            var inserts = 0\n            var totalBytes = 0L\n            var imageCount = 0\n            var warnings = 0\n            val imageHashes = mutableListOf<String>()\n            fun imagePart(image: IRBlock.Image): UIMessagePart {\n                checkActive()\n                imageCount++\n                val reason = when {\n                    imageCount > MAX_IMAGE_COUNT -> \"超过每次 64 张预览预算\"\n                    !mimePattern.matches(image.mime) -> \"不支持的图片格式\"\n                    image.data.length > ((MAX_IMAGE_BYTES.toLong() + 2) / 3 * 4) -> \"超过单图 8 MiB 预览预算\"\n                    else -> null\n                }\n                fun unavailable(message: String): UIMessagePart {\n                    warnings++\n                    return UITextPart(\"[历史图片无法预览：$message；原消息仍保留]\")\n                }\n                if (reason != null) return unavailable(reason)\n                val bytes = try { Base64.getDecoder().decode(image.data) } catch (_: IllegalArgumentException) {\n                    return unavailable(\"图片编码无效\")\n                }\n                checkActive()\n                if (bytes.isEmpty() || bytes.size > MAX_IMAGE_BYTES) return unavailable(\"图片字节超出预览预算\")\n                if (totalBytes + bytes.size > MAX_TOTAL_BYTES) return unavailable(\"超过合计 16 MiB 预览预算\")\n                totalBytes += bytes.size\n                val bounds = imageBounds(bytes)\n                checkActive()\n                if (bounds.third != image.mime) return unavailable(\"图片格式与内容不一致\")\n                if (bounds.first <= 0 || bounds.second <= 0 || maxOf(bounds.first, bounds.second) > MAX_DIMENSION) {\n                    return unavailable(\"图片不可解码或尺寸超过 1280 像素\")\n                }\n                imageHashes.add(MessageDigest.getInstance(\"SHA-256\").digest(bytes).joinToString(\"\") { \"%02x\".format(it) })\n                return UIImagePart(image.mime, image.data)\n            }\n            for ((irIndex, message) in imageRows) {\n                checkActive()\n                require(message.blocks.all { it is IRBlock.Text || it is IRBlock.Image }) {\n                    \"历史图片含不支持的混合内容，已保留当前消息\"\n                }\n                // Complete prefixes preserve the public projector's cross-message tool pairing.\n                val before = viewStateFromHistory(history.messages.take(irIndex), delivery).view.messages\n                checkActive()\n                val through = viewStateFromHistory(history.messages.take(irIndex + 1), delivery).view.messages\n                checkActive()\n                val parts = message.blocks.mapNotNull { block ->\n                    when (block) {\n                        is IRBlock.Text -> block.text.takeIf { it.isNotEmpty() }?.let(::UITextPart)\n                        is IRBlock.Image -> imagePart(block)\n                        else -> null\n                    }\n                }\n                val slot = before.size\n                if (through.size == before.size) {\n                    require(message.blocks.filterIsInstance<IRBlock.Text>().all { it.text.isEmpty() }) {\n                        \"历史图片槽位不匹配，已保留当前消息\"\n                    }\n                    val id = \"demo-history-image:$namespace:$irIndex\"\n                    require(enhanced.none { it.id == id }) { \"历史图片标识冲突\" }\n                    enhanced.add(slot + inserts, UIMessage(id, \"user\", parts))\n                    inserts++\n                } else {\n                    require(through.size == before.size + 1 && slot < baseline.size) { \"历史图片槽位不匹配\" }\n                    val original = baseline[slot]\n                    require(original.id == through.last().id && original.role == \"user\") { \"历史图片消息归属不匹配\" }\n                    val originalTexts = message.blocks.filterIsInstance<IRBlock.Text>()\n                        .mapNotNull { it.text.takeIf(String::isNotEmpty)?.let(::UITextPart) }\n                    require(original.parts == originalTexts) {\n                        \"历史图片文本投影不匹配，已保留当前消息\"\n                    }\n                    enhanced[slot + inserts] = original.copy(parts = parts)\n                }\n            }\n            checkActive()\n            return DemoHistoryImages(history.sessionId, history.lastSeq, baseline, enhanced, delivery,\n                if (warnings > 0) \"$warnings 张历史图片无法预览，原因已在原位置显示\" else null, imageHashes.toList())\n        }\n    }\n}\n\n/** Main-thread request generation: old account/connection/session responses cannot commit. */\ninternal class DemoHistoryImageRequestState {\n    data class Ticket(val generation: Long, val client: Any, val session: Any, val sessionId: String)\n    private var generation = 0L\n    private var current: Ticket? = null\n    var projection: DemoHistoryImages? = null\n        private set\n    var error: String? = null\n        private set\n\n    fun begin(client: Any, session: Any, sessionId: String): Ticket {\n        if (current?.let { it.client === client && it.session === session && it.sessionId == sessionId } != true) projection = null\n        error = null\n        return Ticket(++generation, client, session, sessionId).also { current = it }\n    }\n    fun accepts(ticket: Ticket): Boolean = current?.let {\n        it.generation == ticket.generation && it.client === ticket.client && it.session === ticket.session && it.sessionId == ticket.sessionId\n    } == true\n    fun complete(ticket: Ticket, value: DemoHistoryImages): Boolean {\n        if (!accepts(ticket) || value.sessionId != ticket.sessionId) return false\n        projection = value\n        error = null\n        return true\n    }\n    fun fail(ticket: Ticket): Boolean {\n        if (!accepts(ticket)) return false\n        error = \"历史图片未加载，原消息仍保留；可重试\"\n        return true\n    }\n    fun cancel(ticket: Ticket) { if (accepts(ticket)) { generation++; current = null } }\n    fun close() { generation++; current = null; projection = null; error = null }\n}\n"
+    }
+  ],
+  "scope": "Three public-consumer paths only: Activity safe-area/system-icon/keyboard-resize fixes and public-API history presentation wiring, paused-audio caption, and one new DemoHistoryImages.kt adapter. Exact public original, P05, and IME Activity inputs converge to the same final hash. The new path must be absent or match its exact final bytes; unknown changes and linked paths are refused. Does not modify SDK/player state machine, protocol, dependencies, locks, published ZIP or configuration, and never resends messages. All inputs and outputs are verified before writes; each publication is atomic per file, not a cross-file transaction. Cleanup failures retain partial-state diagnostics and unverified temporary paths. No network, installation, application launch or native UI certification. Keep the original Demo MIT LICENSE."
+}

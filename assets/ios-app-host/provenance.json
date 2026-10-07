@@ -1,0 +1,60 @@
+{
+  "task": "TPB-01",
+  "schemaVersion": 1,
+  "hostSource": {
+    "repository": "tansrai/tansr-ios",
+    "sourceCommit": "6343d52507506cd48088c12f9abd45150a3e307a",
+    "license": "MIT",
+    "sourcePath": "Examples/OrderAssistantApp/",
+    "note": "Existing App host reused from the source revision of released SDK 0.3.0; private SDK source is not included."
+  },
+  "publicDemo": {
+    "url": "https://download.tansr.com/demo/ios/ios-demo.zip",
+    "bytes": 3900527,
+    "sha256": "a33431aa41e4a945931de2c52de24d76e65163fe57a2b1292e844f7efb9056e1"
+  },
+  "sdk": {
+    "version": "0.3.0",
+    "revision": "1737b4d5bc1def33bb2796278ee27ad188ca05d7",
+    "release": "https://github.com/tansrai/tansr-ios-spm/releases/tag/0.3.0",
+    "delivery": "Unmodified bundled original XCFramework ZIPs"
+  },
+  "changes": [
+    "Source group ../OrderAssistant -> ../Sources/OrderAssistant.",
+    "SPM local package ../.. -> ../SDK/tansr-sdk; same three products.",
+    "Remove DemoServeAuth references; use the public Demo developer-login App entrypoint.",
+    "Remove old UI-test target, source/configuration references and shared-scheme test entries; no test pass is claimed.",
+    "Preserve original App Info.plist, product, bundle ID, iOS minimum and Swift language version."
+  ],
+  "hostFiles": [
+    {
+      "path": "OrderAssistant.xcodeproj/project.pbxproj",
+      "sourcePath": "Examples/OrderAssistantApp/OrderAssistant.xcodeproj/project.pbxproj",
+      "sourceSha256": "ad3c2c12bf435dae2f07630b9a4877f1e8033c9085c687d6f130476b4c6394f3",
+      "sha256": "8ac109e78d885fd705e06d68d812b1a92f12153e1174787d503e5ab9ea5712a7",
+      "bytes": 21256
+    },
+    {
+      "path": "OrderAssistant.xcodeproj/xcshareddata/xcschemes/OrderAssistant.xcscheme",
+      "sourcePath": "Examples/OrderAssistantApp/OrderAssistant.xcodeproj/xcshareddata/xcschemes/OrderAssistant.xcscheme",
+      "sourceSha256": "8a8059f9c8e1176c36e6584faa8f1f5331899c6aedf77e4d2849c600fe4209b2",
+      "sha256": "99bded15517b5d8c6c07ff722a6adb7c856794a817c0091a7addb11c1e1e93a8",
+      "bytes": 2228
+    },
+    {
+      "path": "Info.plist",
+      "sourcePath": "Examples/OrderAssistantApp/Info.plist",
+      "sourceSha256": "b939be7f7724e70a571243c2793e7aca7ab8c2016db1ac38ea8ef6f6c5203ba1",
+      "sha256": "b939be7f7724e70a571243c2793e7aca7ab8c2016db1ac38ea8ef6f6c5203ba1",
+      "bytes": 1952
+    },
+    {
+      "path": "LICENSE",
+      "sourcePath": "LICENSE",
+      "sourceSha256": "6dd2fdae3fff79ee9753b1a9f10592b5fc4cf831463e04dba43c060dfec6e063",
+      "sha256": "6dd2fdae3fff79ee9753b1a9f10592b5fc4cf831463e04dba43c060dfec6e063",
+      "bytes": 1074
+    }
+  ],
+  "verificationBoundary": "Windows preparation only; Apple compilation, simulator UI and device signing remain unverified for this adapted host."
+}

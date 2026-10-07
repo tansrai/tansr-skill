@@ -1,0 +1,318 @@
+{
+  "schemaVersion": 1,
+  "task": "TPB-01",
+  "skill": {
+    "name": "tansr",
+    "version": "0.1.0",
+    "status": "stage1-development",
+    "license": "Apache-2.0",
+    "publishedInstaller": null
+  },
+  "checkedAt": "2026-10-07",
+  "source": {
+    "originalCommit": "d103799",
+    "runtimeSourceCommit": "3a5ba4f87b387b375e2b5b86bfceeda2c6f6db54",
+    "remote": null
+  },
+  "packages": {
+    "sdk": {
+      "name": "@tansr/sdk",
+      "version": "0.18.1",
+      "node": ">=22.19",
+      "license": "MIT",
+      "registry": "https://registry.npmjs.org/@tansr%2fsdk",
+      "tarball": "https://registry.npmjs.org/@tansr/sdk/-/sdk-0.18.1.tgz",
+      "integrity": "sha512-W3Oxri6WO3+j7JpRI+RNR+PjQQN8Sdo5Dy2m3k4FB5cJd8Mv/UG+PMYFqN+5mD5yaeLcxYLtQ7oQ2sRkvNLpfw==",
+      "integrityVerified": true
+    },
+    "serve": {
+      "name": "@tansr/serve",
+      "version": "0.15.0",
+      "node": ">=22.19",
+      "license": "MIT",
+      "registry": "https://registry.npmjs.org/@tansr%2fserve",
+      "tarball": "https://registry.npmjs.org/@tansr/serve/-/serve-0.15.0.tgz",
+      "integrity": "sha512-EwzlJttHwTEr6nfqhyHLC/tu3Ai6xQ1o0JfRigF8XPnNsR9jZqXNJi3Xhq3T603TyzjK8AN3f9msQT/7X7pwkg==",
+      "integrityVerified": true
+    },
+    "cli": {
+      "name": "@tansr/cli",
+      "version": "0.10.2",
+      "node": ">=22.19",
+      "license": "UNLICENSED",
+      "registry": "https://registry.npmjs.org/@tansr%2fcli",
+      "tarball": "https://registry.npmjs.org/@tansr/cli/-/cli-0.10.2.tgz",
+      "integrity": "sha512-KWWWq169e1O8oFiVoq9HfgGHTsqAcMK9ZTZFVI/kk3zLr/oIll1TIpOGoq83afgvaC3gmhcZhD7qUA5+QAS2eA==",
+      "integrityVerified": true
+    }
+  },
+  "nativeCliAcceptance": {
+    "platform": "windows-x64",
+    "version": "0.10.2",
+    "status": "isolated_install_version_help_and_empty_configuration_diagnostics_passed",
+    "notVerified": ["TUI", "live model", "active task cancellation", "macOS", "Linux", "SEA"],
+    "evidence": "archive/TPB-01-two-step-product/stage1/native-cli/report.json"
+  },
+  "templates": [
+    {
+      "id": "web",
+      "directory": "assets/product-starter",
+      "version": "0.1.0",
+      "scope": "Single-user loopback Web product; explicit offline or Tansr platform mode",
+      "localRuntime": "clean_install_tests_52_typecheck_lint_build_and_browser_cancel_resume_passed",
+      "livePlatform": "authorized_analysis_completed_two_model_requests_one_business_tool_persisted_and_closed",
+      "liveEvidence": "archive/TPB-01-two-step-product/stage1/live/run-2026-10-07T14-18-36-994Z-6e249333/report.json",
+      "liveScope": "One synthetic analysis; two model requests capped at 4000 output tokens each; no retries; prior failed attempts retained; monetary cost not returned"
+    },
+    {
+      "id": "node",
+      "directory": "assets/feedback-starter",
+      "version": "1.0.0",
+      "scope": "Node tool-loop example; no product UI",
+      "localRuntime": "clean_generated_install_and_offline_tests_passed_after_config_fix",
+      "livePlatform": "not_tested"
+    }
+  ],
+  "hosts": [
+    {
+      "id": "codex",
+      "documentationStatus": "documented",
+      "systems": {
+        "windows": "官方有原生桌面形态；本机存在 Codex 二进制",
+        "macos": "官方支持；本轮未实测",
+        "linux": "官方桌面 Quickstart 列出支持；发行版细节与本机实测不在本轮结论中",
+        "sourceIds": [
+          "OAI-OS"
+        ]
+      },
+      "loading": {
+        "projectDirectories": [
+          "$CWD/.agents/skills",
+          "$CWD/../.agents/skills ... $REPO_ROOT/.agents/skills"
+        ],
+        "userDirectories": [
+          "$HOME/.agents/skills"
+        ],
+        "otherLocations": [
+          "/etc/codex/skills（官方 admin 位置；未推定 Windows 映射）",
+          "OpenAI bundled system skills"
+        ],
+        "format": {
+          "file": "SKILL.md",
+          "frontmatterRequired": [
+            "name",
+            "description"
+          ],
+          "body": "Markdown instructions",
+          "optional": [
+            "scripts/",
+            "references/",
+            "assets/",
+            "agents/openai.yaml"
+          ]
+        },
+        "explicit": "直接在 prompt 中提及；CLI/IDE 使用 /skills 或 $ 选择。桌面 UI 实际选择路径本轮未测试。",
+        "automatic": "description 匹配任务；先发现元数据和路径，再按需读取全文。",
+        "reload": "技能变化自动检测；未出现时重启 Codex。修改全局技能配置后文档要求重启；本轮未读取或修改该配置。",
+        "conflicts": "相同 name 不合并，可同时出现在选择器。",
+        "sourceIds": [
+          "OAI-SKILLS"
+        ]
+      },
+      "actualDiscovery": "windows_cli_0.158.0-alpha.2.1_natural_trigger_and_actual_skill_read_passed",
+      "actualInvocation": "explicit_read_passed; unrelated_negative_zero_tools; no_project_changes; full_installer_and_other_hosts_not_verified",
+      "behaviorEvidence": "archive/TPB-01-two-step-product/stage1/host-behavior/behavior-review.md",
+      "installationAdapter": "phase2_pending"
+    },
+    {
+      "id": "workbuddy",
+      "documentationStatus": "partial_unknown",
+      "systems": {
+        "windows": "官方安装导航/FAQ/更新日志确认 Windows 产品存在；最低版本与架构矩阵未冻结，ARM64 资料存在冲突信号",
+        "macos": "macOS 12+；Intel X64、M 系列 ARM64，文档事实，本轮未实测",
+        "linux": "更新日志提及 Linux；正式安装入口/发行版/架构未核实，不列已适配",
+        "sourceIds": [
+          "WB-MAC",
+          "WB-FAQ",
+          "WB-CHANGELOG"
+        ]
+      },
+      "loading": {
+        "projectDirectories": null,
+        "userDirectories": null,
+        "format": {
+          "file": null,
+          "frontmatterRequired": null,
+          "status": "WorkBuddy 专属中文页面未定义 SKILL.md 必填结构；英文创建页写典型 skill.yml，保留未知。"
+        },
+        "explicit": "官方描述在对话框选择已安装技能；未确认 /skill-name、$skill-name 语法。",
+        "automatic": "自定义技能可由自然语言意图触发；文件系统自动发现规则未知。",
+        "reload": "UI 导入会自动配置；外部文件变化的热重载/重启规则未知。",
+        "import": "技能面板上传本地包并导入，随后可启用/关闭/卸载。",
+        "sourceIds": [
+          "WB-SKILLS",
+          "WB-TASK",
+          "WB-CREATE-ZH",
+          "WB-CREATE-EN"
+        ]
+      },
+      "actualDiscovery": "not_tested",
+      "actualInvocation": "not_tested",
+      "installationAdapter": "phase2_pending"
+    }
+  ],
+  "platformBaselines": [
+    {
+      "id": "node-web",
+      "releasedDemo": {
+        "serve": "0.15.0",
+        "apiClient": "0.4.0",
+        "url": "https://download.tansr.com/demo/android/serve-demo.zip"
+      },
+      "protocol": "/api",
+      "reuse": [
+        "unified-client",
+        "developer login/refresh",
+        "permission and tool bridges",
+        "session persistence",
+        "resource settlement"
+      ],
+      "status": "public-package-static-verified; application-runtime-unverified"
+    },
+    {
+      "id": "electron",
+      "releasedDemo": {
+        "sdk": "0.17.0",
+        "electron": "44.1.0",
+        "url": "https://download.tansr.com/demo/electron/electron.zip"
+      },
+      "localDemoSdk": "0.18.1",
+      "protocol": "full SDK in main process; named IPC; not Serve",
+      "reuse": [
+        "SessionView",
+        "token-server",
+        "permission/question bridges",
+        "store and lifecycle"
+      ],
+      "status": "public-combo-frozen-install-tests-51-typecheck-build-and-hidden-lifecycle-passed; GUI-live-platform-and-upgrade-unverified",
+      "evidence": "archive/TPB-01-two-step-product/stage1/platform-electron/consumer-report.json"
+    },
+    {
+      "id": "android",
+      "releasedSdk": "0.5.0",
+      "modules": [
+        "core",
+        "client",
+        "compose",
+        "receiver-android"
+      ],
+      "repository": "https://repo1.maven.org/maven2/com/tansr/sdk/",
+      "releasedDemoSdk": "0.4.0",
+      "releasedDemoModules": [
+        "core",
+        "client",
+        "compose"
+      ],
+      "apk": "0.4.0-demo.3-debug",
+      "protocol": {
+        "sdk050": "/api",
+        "demo040": "legacy /v2"
+      },
+      "minApi": 26,
+      "status": "frozen_public_demo040_build_and_106_unit_tests_passed; updater_23_tests_passed; isolated_debug_APK_signature_verified; device_UI_and_sdk050_serve_pairing_unverified",
+      "evidence": "archive/TPB-01-two-step-product/stage1/platform-android/"
+    },
+    {
+      "id": "ios",
+      "releasedSdk": "0.3.0",
+      "spm": "https://github.com/tansrai/tansr-ios-spm.git",
+      "modules": [
+        "TansrCore",
+        "TansrClient",
+        "TansrUI"
+      ],
+      "protocol": "public 0.3.0 legacy /v2; local SDK2/UAPI not released",
+      "minOS": {
+        "ios": 16,
+        "macOS": 13
+      },
+      "status": "public_sdk030_demo_swift_release_and_unsigned_simulator_app_build_passed; five_synthetic_XCTests_passed; eight_apple_steps_exit0; UI_serve_pairing_device_and_signing_unverified",
+      "hostPreparation": "assets/ios-app-host/prepare.mjs",
+      "hostPreparationEvidence": "archive/TPB-01-two-step-product/stage1/ios-host-receipt.json",
+      "acceptance": {
+        "checkedAt": "2026-10-07",
+        "macOSSwiftReleaseBuild": "passed",
+        "unsignedSimulatorAppBuild": "passed",
+        "syntheticXCTest": { "executed": 5, "passed": 5, "failed": 0 },
+        "appleSteps": { "executed": 8, "allExitCodesZero": true },
+        "environment": { "xcode": "26.6 (17F113)", "swift": "6.3.3", "architecture": "arm64", "swiftLanguageMode": "5" },
+        "inputTreeUnchanged": true,
+        "warnings": "Existing public Demo Swift 6 concurrency migration warnings retained",
+        "notVerified": ["simulator UI", "Serve 0.15.0 pairing", "device interaction", "signing"],
+        "scope": "Public SDK/Demo consumption and adapted App host; not the private SDK full test pool"
+      },
+      "evidence": "archive/TPB-01-two-step-product/stage1/ios-apple-review/20261007T135234Z/address-192.168.0.2/verified-result.json"
+    },
+    {
+      "id": "harmony",
+      "releasedSdk": "0.1.0",
+      "publicOhpmRelease": false,
+      "publicHar": {
+        "bytes": 73946,
+        "sha256": "dab5df5926d391e34f597a1323479564e3a96cd8c313782ce6fce19def750387"
+      },
+      "localHar": {
+        "bytes": 1195463,
+        "sha256": "2391fc0819592593443bf57e97f7ed21870034e279c92e31aa56bee1bb2e6748"
+      },
+      "protocol": "public HAR legacy /v2; local SDK2/UAPI not same artifact",
+      "minApi": 20,
+      "targetApi": 22,
+      "status": "public bundled HAR frozen-consumer-install-hap-test-hap-and-lint-passed; unsigned; 9 Hypium cases compiled but not executed; device-interaction-unverified",
+      "evidence": "archive/TPB-01-two-step-product/stage1/platform-harmony/result.json"
+    }
+  ],
+  "publicDemoArtifacts": [
+    {
+      "url": "https://download.tansr.com/demo/android/android-demo.zip",
+      "bytes": 12650974,
+      "sha256": "e28eff64928d72d924d98fc072a2322cf058279aff120c2d159ff153c05cf35b"
+    },
+    {
+      "url": "https://download.tansr.com/demo/android/serve-demo.zip",
+      "bytes": 106339,
+      "sha256": "8ab5e120966db862c224bdfa9b8bdee7281d95beff444560d7c4d96f595d3bc9"
+    },
+    {
+      "url": "https://download.tansr.com/demo/ios/ios-demo.zip",
+      "bytes": 3900527,
+      "sha256": "a33431aa41e4a945931de2c52de24d76e65163fe57a2b1292e844f7efb9056e1"
+    },
+    {
+      "url": "https://download.tansr.com/demo/harmony/harmony-demo.zip",
+      "bytes": 290604,
+      "sha256": "47971ff28f285f9179e9218b934b625d88401b78ec1a63b8baa4505b159e1011"
+    },
+    {
+      "url": "https://download.tansr.com/demo/harmony/harmony-sdk.zip",
+      "bytes": 86168,
+      "sha256": "33049c9df0c19e3fe32b1118e64b3d57bcdb983057fdf40aed2f7c3983014e0b"
+    },
+    {
+      "url": "https://download.tansr.com/demo/electron/electron.zip",
+      "bytes": 192945,
+      "sha256": "345cff2d2c3d370f25eba2801d8f1cba6e2cde3960e361ea4f32e09ff634cb42"
+    }
+  ],
+  "policy": {
+    "existingProject": "Preserve the existing lockfile and architecture; upgrades require affected checks.",
+    "newProject": "Start from the verified template lockfile; metadata latest is not a runtime compatibility claim.",
+    "networkFailure": "Report failure; never switch a platform request to offline output.",
+    "evidence": "Documentation, artifact download, build, UI runtime, live model and publication are separate facts."
+  },
+  "evidence": [
+    "doc/S1-01-来源与支持矩阵.md",
+    "doc/PLAN-01-Skill生态与两步产品构建实施方案.md",
+    "doc/S1-实施回执.md"
+  ]
+}

@@ -1,16 +1,18 @@
 ---
 name: tansr
-description: 使用 Tansr 开发可运行的 AI 应用、为已有产品接入 AI 能力，并帮助用户安装、配置、使用和排查 Tansr SDK、CLI、Serve 与移动端。显式调用时可从模糊的应用想法开始；不将无关开发任务强制迁移到 Tansr。
+description: 用 Tansr 把想法开发成可运行的 AI 产品，为已有项目接入智能体能力，并协助配置、验证和排错。Build AI products with Tansr, integrate the SDK or Serve into existing apps, and troubleshoot Tansr projects. 从模糊需求开始；不把无关开发任务强制迁移到 Tansr。
 license: Apache-2.0
 ---
 
 <!-- Adapted and rewritten for Tansr on 2026-09-24 from Forge and Mastra skills; see NOTICE. -->
 
-# Tansr 应用开发与产品使用
+# Tansr 产品构建
 
 把用户想完成的业务任务落实为可操作、可验证的应用，同时解决使用 Tansr 的实际障碍。Tansr 提供智能体运行能力；应用界面、业务数据、用户登录、业务授权和面向用户的收费仍需实现。不要把聊天回答、静态效果预览或 SDK 调用片段当成完整应用。
 
-本 skill 承接“理解产品 → 做出首个有用应用 → 接通所选模型来源 → 能继续使用和排错”。按用户目前所处阶段推进；已有 Tansr 平台应用就沿平台接入，不因示例用了自有供应商而要求用户另买模型密钥。
+用户安装本 Skill 后，只需向当前编程助手描述希望做出的产品。你负责把需求推进为可运行成果，必要时澄清业务选择、解释配置并完成验证。这个开发辅助 Skill 与应用中运行的 SDK/运行时 Skill 不同，安装本 Skill 也不代表已创建平台账号或部署应用。
+
+按“理解需求 → 做出完整流程 → 接通所选模型来源 → 验证并继续改进”推进。已有 Tansr 平台应用就沿平台接入，不因示例用了自有供应商而要求用户另买模型密钥。
 
 ## 先识别任务
 
@@ -19,11 +21,16 @@ license: Apache-2.0
 | 用户现在要做什么 | 读取与行动 |
 | --- | --- |
 | 不知道 Tansr 能做什么、该选哪种方式 | [产品与接入选择](references/product.md)，用业务例子解释 |
-| 从想法新建应用、为现有应用增加功能 | [应用开发](references/build.md)，再读所选运行形态的参考 |
+| 从模糊想法开始、不知道如何描述产品 | [需求与产品说明](references/product-brief.md)，明确输入、动作、结果后进入开发 |
+| 新建应用、为现有应用增加功能 | [应用开发](references/build.md)，再按需读所选运行形态 |
 | 接入 Node / Electron SDK | [SDK 接入](references/sdk.md) |
 | Web 后端、多用户、移动端、服务部署 | [Serve 与移动端](references/serve-mobile.md) |
 | 安装、登录、模型配置、套餐和日常使用 | [产品使用](references/use.md) |
+| 安装本开发 Skill、助手找不到技能 | [编程助手接入](references/assistant-setup.md)，只使用已核实机制 |
+| 选择桌面或移动端、获取正式依赖 | [平台与公开产物](references/platforms.md)，区分当前发行与源码路线图 |
 | 报错、权限拒绝、没有输出、恢复失败 | [排错](references/troubleshoot.md)，必要时补读对应形态 |
+| 检查成果、继续修改、准备交接或部署 | [验证与交付](references/validation.md) |
+| 用户用英文开始 | [English starting guide](references/quickstart-en.md)，后续按需要读取相同技术资料 |
 | 只讨论设计、可行性或方案 | 给具体小样与验收条件，保持只读 |
 
 一次任务可以组合路径，例如先修接入再继续开发。独立的产品问题直接解决，不强迫用户先建应用。
@@ -38,7 +45,7 @@ license: Apache-2.0
 
 ## 让产品事实与运行版本一致
 
-参考资料是 **2026-09-24 核对的知识基线**，不是永久版本承诺。实施前先读项目依赖、锁文件、已安装包的导出和类型；未知字段、命令或协议再查对应官方页。已有依赖按锁文件恢复，不为配合最新示例自动升级。
+版本与支持情况见 [兼容基线](compatibility.json)。该清单区分正式发行、文档核对与运行实证，不是永久版本承诺。实施前先读项目依赖、锁文件、已安装包的导出和类型；未知字段、命令或协议再查对应官方页。已有依赖按锁文件恢复，不为配合最新示例自动升级。
 
 新项目才核对当前发布版本和运行环境。在线文档、官网文案和已装版本冲突时：实现以该版本可证实的契约为准；价格、额度、模型授权以当前控制台或服务端报价为准。说明具体冲突及尚未验证的部分，不凭名称猜 API，也不把路线图当现有能力。无法联网时沿用有版本的本地证据并标注限制。官方入口见[产品参考](references/product.md)。
 

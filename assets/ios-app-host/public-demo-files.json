@@ -1,0 +1,246 @@
+{
+  "schemaVersion": 1,
+  "sourceZipSha256": "a33431aa41e4a945931de2c52de24d76e65163fe57a2b1292e844f7efb9056e1",
+  "files": [
+    {
+      "path": ".env",
+      "bytes": 463,
+      "sha256": "34537d540a8a1f9beb6f14d60530ce447abf435663f8eef86bf13ece2a95eb18"
+    },
+    {
+      "path": ".env.example",
+      "bytes": 463,
+      "sha256": "34537d540a8a1f9beb6f14d60530ce447abf435663f8eef86bf13ece2a95eb18"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 148,
+      "sha256": "dd44d7c3efbb511f828557f246e3f1e897e164fe21c2740d73c21e9473d92dc6"
+    },
+    {
+      "path": "DISTRIBUTION-MANIFEST.json",
+      "bytes": 9006,
+      "sha256": "4a37a51228436c11abb1daa20bc81063be0b1177416022bf6cef3ffbe13404f1"
+    },
+    {
+      "path": "Info.plist",
+      "bytes": 1163,
+      "sha256": "dbbfe0c96b7818c3dfad5f58294955301fbc71f7c60e496dbc411a0845476ba1"
+    },
+    {
+      "path": "LICENSE",
+      "bytes": 1095,
+      "sha256": "a2376ef366cbf8b064a73156845b4813ba700f1349771e59bdaf145aa43c1cd8"
+    },
+    {
+      "path": "Package.swift",
+      "bytes": 675,
+      "sha256": "ea99da5ab27528f07545a36e77c0e179b8b5f348f169f9a9bb332a1b88f0a5f7"
+    },
+    {
+      "path": "README.md",
+      "bytes": 10900,
+      "sha256": "3b65132d922ddbd5bde74b6530de7a813a9cf92d3c505a628cb11b9f46945871"
+    },
+    {
+      "path": "SDK-INTEGRATION-IOS.md",
+      "bytes": 51509,
+      "sha256": "92580fd9f45c78aa521693ad35c16b68641b7f2e97001e4471973f70eb47107f"
+    },
+    {
+      "path": "SDK/tansr-sdk/Artifacts/TansrClient.xcframework.zip",
+      "bytes": 215534,
+      "sha256": "06b0b6c0614290ddc74c611bbcc4bd1bc14c7120f90996ed30b6eaeaa9b82abd"
+    },
+    {
+      "path": "SDK/tansr-sdk/Artifacts/TansrCore.xcframework.zip",
+      "bytes": 3083526,
+      "sha256": "93b65f1136529fc72b324be2ce74918c13611280f4a7b2f1777f2808b8038a27"
+    },
+    {
+      "path": "SDK/tansr-sdk/Artifacts/TansrUI.xcframework.zip",
+      "bytes": 551734,
+      "sha256": "d1311e1ad2a944d17953cfd3fbb0d7d97553f9637320b791f9636d408259f921"
+    },
+    {
+      "path": "SDK/tansr-sdk/LICENSE",
+      "bytes": 1074,
+      "sha256": "6dd2fdae3fff79ee9753b1a9f10592b5fc4cf831463e04dba43c060dfec6e063"
+    },
+    {
+      "path": "SDK/tansr-sdk/Package.swift",
+      "bytes": 751,
+      "sha256": "959f39e9bf1e87a40d0b0d342550a894367f1db5d644c3c2bdced8587cb9ef8d"
+    },
+    {
+      "path": "SDK/tansr-sdk/README.md",
+      "bytes": 305,
+      "sha256": "20ee3b4ec17d67a982dae5295771a7eb00e5a73307ed0afff5acaa0c2174020b"
+    },
+    {
+      "path": "SDK/tansr-sdk/SDK-RELEASE.json",
+      "bytes": 972,
+      "sha256": "ed47d4b3a0b38810ff8a401eb0b0ddf6d0cc9a4ca952ee3149fc41bf0a484608"
+    },
+    {
+      "path": "SDK/tansr-sdk/SHA256SUMS",
+      "bytes": 306,
+      "sha256": "12c8627ea74ea9f7db961b3d54335ee09030fc2a3475ada5ad714a089f94db32"
+    },
+    {
+      "path": "SDK/tansr-sdk/UPSTREAM-Package.swift",
+      "bytes": 344,
+      "sha256": "d5101ab7e5c0d313794f0997c41956dd3259c7e6570103c70285e0d3356031e0"
+    },
+    {
+      "path": "SDK/tansr-sdk/UPSTREAM.resolved",
+      "bytes": 310,
+      "sha256": "3a05e35fa80d088a9bdab8a9289daa401df3f56a00d567a88456d16b5b93e4ef"
+    },
+    {
+      "path": "Sources/OrderAssistant/AudioPlayerController.swift",
+      "bytes": 10437,
+      "sha256": "a72b1880215de3b0e352cf8ee3e6f776b7525ae0379e47b3eefc58e19060cd5c"
+    },
+    {
+      "path": "Sources/OrderAssistant/AudioRecorderController.swift",
+      "bytes": 7189,
+      "sha256": "af59fc17f9b3b6b6b100901a3c19501abdbd222a276c0c38bac7dcf29433a47a"
+    },
+    {
+      "path": "Sources/OrderAssistant/ChatScreen.swift",
+      "bytes": 54561,
+      "sha256": "3aeb58b3dece082cd6092d9a405e58d70ebb6dee1daf81b82aee1c244424ca1b"
+    },
+    {
+      "path": "Sources/OrderAssistant/ContinuousSpeechRun.swift",
+      "bytes": 12216,
+      "sha256": "032118144d32a473b4138d378bd93620ba2c2eba0d7f91144bc5c9365e7b2bd7"
+    },
+    {
+      "path": "Sources/OrderAssistant/CustomFunctionExamples.swift",
+      "bytes": 4593,
+      "sha256": "966b638f2e8c2a74dd27215904b929f1b09c4a064a502de4a65cec58c5c50465"
+    },
+    {
+      "path": "Sources/OrderAssistant/DemoConnectionPanel.swift",
+      "bytes": 6683,
+      "sha256": "eafb206158fafaa0e93f9d1583483507a9c010498ffeaa74ed4fabcb57c9059d"
+    },
+    {
+      "path": "Sources/OrderAssistant/DemoConnectionRoot.swift",
+      "bytes": 4725,
+      "sha256": "b0431d4b8db87b7c2851e91243c1e2e6e9dc438d5cf52fd15ba21b109de57e4b"
+    },
+    {
+      "path": "Sources/OrderAssistant/DemoConnectionRuntime.swift",
+      "bytes": 5036,
+      "sha256": "59d78cef4414875522a8ab954d9ea29b1c47f35249e96e78fa17514cc9f70ebe"
+    },
+    {
+      "path": "Sources/OrderAssistant/DemoConnectionSettings.swift",
+      "bytes": 7165,
+      "sha256": "e50f96e6268a334a839791921b09cbcdd78c8a9497c60019ad9e74a04d40d9c4"
+    },
+    {
+      "path": "Sources/OrderAssistant/DemoScopeDigest.swift",
+      "bytes": 3454,
+      "sha256": "6241b42a91669cad65cb88b57d87aa891b6ac09800b4a01269b88a216f68574f"
+    },
+    {
+      "path": "Sources/OrderAssistant/DemoSessionOpener.swift",
+      "bytes": 4839,
+      "sha256": "affa2afa6ab1e47f916f0266d877ab0710521968b88fe06772daf5c0ac7455e3"
+    },
+    {
+      "path": "Sources/OrderAssistant/DemoSessionScope.swift",
+      "bytes": 3526,
+      "sha256": "a521262c0e70c1c9d104ef7e026c92bcef793d6f774391576ed9c4323c2acf34"
+    },
+    {
+      "path": "Sources/OrderAssistant/DeveloperLogin.swift",
+      "bytes": 8384,
+      "sha256": "63c42f2fc995c47e2488e3d9fb76239949c8b5e6b11912be104878b1f1658bf9"
+    },
+    {
+      "path": "Sources/OrderAssistant/ImageDraft.swift",
+      "bytes": 2255,
+      "sha256": "9358a2e8625dbdb6ca172e2116c7965dd6a3300b27f72cf2476d3b1179ae26f1"
+    },
+    {
+      "path": "Sources/OrderAssistant/InputDeliveryPanel.swift",
+      "bytes": 13287,
+      "sha256": "5f819ac9edbf345f18297766e458b1295c7729e30b1c1f234fce3c9ff6e7ea1a"
+    },
+    {
+      "path": "Sources/OrderAssistant/MediaArtifactPreview.swift",
+      "bytes": 19399,
+      "sha256": "70007353deb210a75ee7ac587ac4041bfa0664488bddd591e149a0dfdcf0a668"
+    },
+    {
+      "path": "Sources/OrderAssistant/OrderAssistantApp.swift",
+      "bytes": 963,
+      "sha256": "db827fdd45be97683b9922c9baaf6995fdafeea13d5c52895cb20cd76f7d4e64"
+    },
+    {
+      "path": "Sources/OrderAssistant/OrderRepository.swift",
+      "bytes": 3865,
+      "sha256": "d9331927c604324d2930f4285585d436dbd8b8258d937730d97704858033fca2"
+    },
+    {
+      "path": "Sources/OrderAssistant/PhotoAttachment.swift",
+      "bytes": 2732,
+      "sha256": "e0d37920065c6907c61ec29ed9fbc9504119f7b4469812219c5ebb0be25266e6"
+    },
+    {
+      "path": "Sources/OrderAssistant/PlaybackLifecycle.swift",
+      "bytes": 1324,
+      "sha256": "87085799f179e58d9e14695beec4d3d620116a0a21800f24e8043dd461193597"
+    },
+    {
+      "path": "Sources/OrderAssistant/RecoveredImages.swift",
+      "bytes": 2003,
+      "sha256": "d561e438f195898d660174cf079ac07fc73186268634f2635324c86abb5a88fd"
+    },
+    {
+      "path": "Sources/OrderAssistant/SampleMediaFile.swift",
+      "bytes": 16613,
+      "sha256": "b19c430ca994dbd9b7af8c6c8066c0416d4960831e1645b5e39cd56840a09d72"
+    },
+    {
+      "path": "Sources/OrderAssistant/SpeechAudioCache.swift",
+      "bytes": 3265,
+      "sha256": "9261b5055dd338e380b4cccbced703225d68c97144cd7352931e0f5d980a2933"
+    },
+    {
+      "path": "Sources/OrderAssistant/SpeechInputPolicy.swift",
+      "bytes": 8557,
+      "sha256": "c6c69dba7da1d3d9dbede6524d5ccc5b2bf04527c2a89e83083beb456121927d"
+    },
+    {
+      "path": "Sources/OrderAssistant/SpeechSegmentsPanel.swift",
+      "bytes": 8967,
+      "sha256": "944f0b7fc7c4e0aafa50948ced86943a1064656c19967afa0428c31d65e98c68"
+    },
+    {
+      "path": "Sources/OrderAssistant/SystemMediaExamples.swift",
+      "bytes": 1117,
+      "sha256": "8d59cd91db296a04f376800ea87af6bd3fc51edfa31c47d3e726be706283ae23"
+    },
+    {
+      "path": "start-macos.sh",
+      "bytes": 2806,
+      "sha256": "54b9fcc4ef85100346ec3fd708a89c15b9f4599fd990f02cd500cdf82f509e08"
+    },
+    {
+      "path": "tools/audit-sdk-zip.py",
+      "bytes": 5513,
+      "sha256": "aaefe5a12b5e9cc8db5cfb49d8edc75fa39249c1e0a5ea767fdafa4500aaf0ab"
+    },
+    {
+      "path": "tools/update-sdk.py",
+      "bytes": 11002,
+      "sha256": "3305cf8b73affb03ff0ddc962e3c63840dd7a462d635dcda086d3cce4d871236"
+    }
+  ]
+}

@@ -1,54 +1,69 @@
 # Serve 与移动端
 
-## 多用户服务的边界
+核对日期：2026-10-07。平台选择、公开包和运行验收见[跨平台接入](platforms.md)；精确运行基线以项目锁文件和本 Skill 的 `compatibility.json` 为准。“已发布”只说明发行物可取得，不表示当前应用已完成联调。
 
-`@tansr/serve` 是嵌入 Node 后端的 REST + SSE 服务库。通常用 `createAgentSessionFactory` 接平台、`createServeAgentSessionStore` 接本地存储、`startServer` 接 `/v2`。三个函数的完整参数必须对照目标版本类型；文档中的 `myAuth.verify` 等是宿主占位函数，不是 Tansr API 或已实现的登录。
+## 先确认客户端与服务端属于同一条路径
 
-0.12.0 的 `startServer.createSession` 是 `/v1` 的 SessionFactory，`create()` 返回 SessionHandle；`v2.createSession` 才接 AgentSessionFactory，其 `create()` 返回 `{ handle, resumed }`。不要照部分起步示例把 `build.factory` 同时塞给两者。只做 `/v2` 时明确处理未用的 `/v1` 创建入口，仍保留独立运维 token，不能随意给它一个终端用户身份。
+当前公开 Serve Demo 锁定 `@tansr/serve@0.15.0` 与 `@tansr/api-client@0.4.0`，新 Node/Web 客户端经公开 `@tansr/api-client/api` 使用统一 `/api`。客户端先读取 manifest/capabilities，再按操作名调用；参数与返回类型从实际安装包读取，不复制旧 `/v2` 的请求和 SSE 解析器。
 
-| 路径 | 鉴权与职责 |
+公开原生客户端并未同时换版：Android Maven 已有 `0.5.0` 的 `/api` 消费实现，但公开 Android Demo 仍锁 `0.4.0`；iOS 公开 SPM/Demo 仍为 `0.3.0`；鸿蒙公开 HAR 仍是旧 `0.1.0` 分发件。这三份旧 Demo 按自身 SDK 使用 legacy `/v2`。不能批量替换 URL，把旧事件和错误体当作统一包络，也不能把 Android `0.5.0` 接到未经核对的旧 Serve。
+
+| 选定路径 | 实施规则 |
 | --- | --- |
-| 客户端 → 自家 `/v2` | `authenticate(req)` 校验真实登录态，返回 `{ endUserId }` 或 null；身份从服务端会话取得，不信任请求体/自报头 |
-| Serve → 平台 | 服务端保管 appid/appkey，工厂按用户换取 app_user；app_user 不发给手机/网页 |
-| 运维 → `/v1` | `startServer.token` 的独立强随机 Bearer；不发给终端用户，不与 `/v2` 混用 |
+| 新 Node/Web 服务客户端 | 采用已发布的 Serve/API client 匹配组合，复用官方 Serve Demo 的统一客户端接线；先完成能力协商 |
+| Android `0.5.0` | 三核心模块统一 `0.5.0`，需要档案接收器才加入同版 `receiver-android`；搭配具有 `/api` 门面及所需合同族的 Serve，做实际兼容验收 |
+| 公开 Android `0.4.0`、iOS `0.3.0`、鸿蒙旧 HAR Demo | 保留包内精确锁和 SDK 行为；明确登记其 legacy `/v2` 依赖，检查目标服务仍提供所需读写操作 |
+| 既有旧应用 | 先记录服务版本、客户端版本、合同族和实际入口；迁移按一组版本完成，保留回滚材料；不静默回退旧入口 |
+| Electron | 保持主进程完整 SDK 与 IPC 模式，见[桌面路径](platforms.md#electron)；无需为了统一移动接线改成 Serve 薄客户端 |
 
-每个按 sessionId 访问的接口都要校验归属。CORS、难猜 ID、页面登录按钮不能替代这层授权。应用工具访问业务数据时仍需独立校验用户与租户，不以模型提供的用户 ID 为准。CLI `serve --v2` 的共享 Bearer + `x-tansr-end-user` 仅用于可信调用方，不作为公网用户登录。
+旧入口处于退役安排中。`0.15.0` 的退役提示不等于已经移除 `/v2`；目标部署也可能使用只读或禁用策略。收到 410、合同不可用或能力缺失时，展示具体原因并升级匹配的客户端/服务端，不试探其他前缀绕过。禁止承诺旧 Demo 可永久连接未来 Serve。
 
-生产接 store，重启后才能 resume。工厂的 store 与 `v2.store: build.storeReader` 要同时接对；无 store 时 `resume_unavailable` 是配置问题。store 目录各副本私有，不能多个进程共享 NFS/同一卷并发写。需要多副本时再查分片前缀路由；小应用不预建集群。
+## 多用户服务与登录
 
-## REST 与流式恢复
+`@tansr/serve` 是嵌入 Node 后端的 REST + SSE 服务库。使用该版本公开的 `createAgentSessionFactory`、`createServeAgentSessionStore`、`startServer`，复用官方 Demo 的宿主装配。`myAuth.verify` 等业务占位函数要由应用实现，不能当作库自带登录。
 
-- `POST /v2/sessions` 建会或 resume；`POST /v2/sessions/:id/messages` 发普通用户消息，202 只说明接纳。
-- `GET /v2/sessions/:id/events` 为 SSE：业务事件在 data 内，控制帧用 `event: server.*`。按 seq 去重；重连发送 Last-Event-ID。
-- `server.replay.gap` 时重新取元信息与 `/history` 构建视图，从 `history.lastSeq` 继续。休眠看 `live: false`，不以 `lastSeq === 0` 判断。
-- 冷启动保留原 sessionId，先 attach/resume；不能每次断网都新建付费会话。严格同轮追加另走 `/input-capabilities`、`/inputs` 和回执查询，未知状态不自动降级发新消息。
-- `DELETE /v2/sessions/:id` 返回 202/accepted，表示接纳关闭运行态，store 历史保留；它不证明底层资源已收尾。真正删除是 store 层动作。不能把“关闭”按钮写成删除所有历史。
-- 权限、提问和端侧工具分别有桥。权限需要正确 requestId/digest、时限和真实确认；普通消息或补充文本不等于批准工具。未接权限桥按拒绝处理。
+`startServer.createSession` 与 `v2.createSession` 在旧例中分别对应不同工厂合同；即使外部改走 `/api`，宿主内部装配也不等于把两个字段合并。不要把同一个 `build.factory` 盲填所有入口，不为未使用的管理入口杜撰终端用户身份。以安装版本类型和官方 Demo 的完整装配核对。
 
-## 部署和停止
+| 信任边界 | 接线 |
+| --- | --- |
+| 网页/手机 → 自家服务 | `authenticate(req)` 校验真实登录态，身份从可信登录系统取得；每个 sessionId 操作再校验归属 |
+| Serve → Tansr 平台 | 应用 ID/AppKey 留服务端；按用户取得平台运行凭据，不将其发给网页或手机 |
+| 运维 → 管理入口 | 若该版本仍装配管理接口，使用独立强随机运维凭据；终端用户不能复用它 |
 
-本地先绑回环；公网由宿主完成 TLS、登录、入口限流与必要网络控制。SSE 反代关闭缓冲，读超时覆盖心跳。`/healthz`、`/readyz`、`/metrics` 的暴露行为依 host/配置而定，不把免鉴权 metrics 暴露公网。
+官方 Serve Demo 的登录与刷新服务是可复用示例。生产要接现有用户系统、限速和撤销；公开账号注册并非 Demo 已有功能。终端只持有自己的短期开发者登录票据。CORS、难猜 sessionId、登录按钮和模型提交的 userId 均不能替代用户/租户授权。
 
-宿主接 SIGINT/SIGTERM：先 `server.drain`，再按当前包的资源收尾接口等待；不要假定库替宿主注册信号。确实需要环境变量旋钮时查 `resolveServeRuntimeOptions` 和官方表，CLI 与库并非所有默认值一致。例如 CLI 0.9 的每轮墙钟默认值不等于库的默认值。
+系统角色在平台或服务端配置；`prompt`、`send()` 是普通用户输入。业务工具在执行处校验用户与租户，应用能力、工具权限与预算仍由原执行层裁决。
 
-持久化失败应在界面提示未可靠保存，不能静默展示“已保存”。物理删除、保留期扫描和存储升级先确定范围/备份。原始请求、消息、工具参数或 cause 可能包含秘密，不全量发往日志/浏览器。
+## 统一 API 的流式与完成语义
 
-Webhook 只提供轮末通知接缝，手机推送由宿主完成。需要时查当前签名协议，验证原始请求体、时间和 nonce，已出现 v2 签名时不降级验 v1；网络超时不能触发重复的业务写入或收费媒体生成。
+复用官方 `unified-client.ts` 对公开 API client 的接线，不另写协议实现：
 
-## 移动端选择
+- 先发现 manifest、capabilities 和可用会话族；操作名、请求头与 schema 取自所选公开包。缺合同头或协商失败即停止。
+- 202 只代表已受理。统一事件流中以 `terminalStatus` 判断 completed/aborted/unknown；终态前 EOF、坏帧和网络失败保持未完成，部分文字不算成功。
+- 五种游标各守原语义；事件续流游标、历史位置和档案 ACK 不互换。保存和透传实际 SDK 给出的值，不自行加一、猜测或重建。
+- 写请求超时不自动重发、换幂等键或改前缀。保留原操作身份，按该操作公开合同查询/对账；若没有恢复入口则显示“结果未确认”。
+- 权限、提问和端侧工具分别接桥。权限按原 requestId/digest、期限和真实用户决定回执；普通消息不表示批准。没有处理者按拒绝处理。
 
-| 平台 | 官方交付形态与基线 | 主要宿主工作 |
-| --- | --- | --- |
-| Android | `com.tansr.sdk:core` / `client` / `compose`，minSdk 26 | authProvider、生命周期、业务工具、可选 Compose 对话框 |
-| iOS | SwiftPM，TansrCore / TansrClient / TansrUI，iOS 16+、macOS 13+ | 自有登录、SwiftUI/其他 UI 接线、前后台收放 |
-| 原生鸿蒙 | 独立版本 HAR `@tansr/harmony`，文档基线 0.1.0、HarmonyOS 6 / API 20 | ArkUI、网络权限、AuthProvider、生命周期与桥；不是公共 OHPM 包 |
+旧 SDK 的 `/v2` 事件泵、seq 去重、Last-Event-ID、gap 后历史恢复仍由该 SDK 负责，不把上面的统一包络字段套到旧原生 Demo。两种事件格式不能在同一解析器中靠猜测混用。
 
-移动端只连自己的 Serve。系统角色在平台/服务端设，`prompt` 和 `send()` 是普通用户消息。SDK 的状态投影与 L1/L2/L3 恢复尽量复用；iOS/Android 有 UI 绑定，鸿蒙 HAR 不附页面。
+## 持久化、生命周期与媒体
 
-回后台 stop 订阅、回前台 start；stop 不等于删会话。退出登录要隔离账户对应的 sessionId，迟到结果不能写入新用户/新会话。401 刷新有限次仍失败时由宿主修登录态，403/429/5xx 不等于令牌失效。
+生产接入持久化 store 后再承诺重启恢复。工厂写入 store 与服务端读取端必须对应；无 store 的 `resume_unavailable` 是配置问题。文件存储不可由多个进程共享同一卷并发写；确有多副本需求时再按该版本支持方式设计路由与存储。
 
-Android 模拟器访问开发机用 `10.0.2.2`；iOS 模拟器通常用 `127.0.0.1`；真机用可达开发机地址和适当防火墙规则。HTTP 仅开发时按平台明确放行，生产用 HTTPS。录音权限、录音/播放、APNs/FCM 等由宿主实现。媒体下载失败不能自动重新付费生成。
+重连保留原 sessionId，由 SDK 执行 attach/resume 和视图恢复；断网不自动新建付费会话。回后台停止订阅、回前台按 SDK 生命周期恢复。退出登录隔离账户的历史、草稿、游标与迟到结果。401 只在公开合同允许时有限刷新，403/429/5xx 不等于令牌失效。
 
-获取移动依赖前从官方页面确认实际发布地址与版本，不编造 Maven 仓库或 Swift git URL。不具备平台工具链/设备时可检查源码、协议与服务端，但不得声称已通过安装包或真机验收。
+档案接收、耐久 ACK、设备工具和加密只在所选**已发行包**确有该能力时启用。下载完成不等于持久化完成；本地源码出现 `sdk2` 类型不证明公共 iOS/HAR 已包含。已保存、已关闭、已删除和底层资源已释放必须分开表示。
 
-来源：[Serve 起步](https://docs.tansr.com/getting-started/serve/) · [部署与鉴权](https://docs.tansr.com/serve/deploy-and-auth/) · [协议](https://docs.tansr.com/serve/v2-and-webhooks/) · [存储治理](https://docs.tansr.com/serve/retention-and-governance/) · [环境变量](https://docs.tansr.com/serve/env/) · [Android](https://docs.tansr.com/android/) · [iOS](https://docs.tansr.com/ios/) · [鸿蒙](https://docs.tansr.com/harmony/)
+媒体复用 SDK 的工具产物投影。图片、视频、语音下载失败时保留原执行状态，不自动再次付费生成；不从文本中的 URL 猜出未保存的工具产物。录音、播放、相册授权及系统推送由宿主适配，手机系统权限不能替代工具审批。
+
+## 部署、停止与验证
+
+本地先绑定回环。生产由宿主提供 HTTPS、登录与必要的网络控制；SSE 反代关闭缓冲并让读超时覆盖心跳。健康/指标入口的暴露依实际配置，不把管理面直接当公开 API。
+
+宿主接 SIGINT/SIGTERM，按所选包执行 drain、等待资源收尾，再释放 store/MCP 等资源。`@tansr/serve@0.15.0` 的官方 Demo 使用 `settleResources()`；停止 HTTP 监听、手机断开或有限观察超时都不能代替资源结算成功。持久化失败要让界面显示未可靠保存，原始请求或 cause 不能无筛选写进日志。
+
+Android 模拟器通常通过 `10.0.2.2` 访问开发机，也可显式设置 ADB 转发；iOS 模拟器通常可用 `127.0.0.1`。真机填写可达服务地址，不能填 `0.0.0.0`。HTTP 调试遵守所选 Demo 的显式开关，生产保持 HTTPS。
+
+至少验证真实界面的登录、建会/发消息、流式终态、拒绝审批、取消、断网重连、服务重启恢复和两用户隔离。媒体与设备工具按承诺的能力单独验收；付费调用须有既有授权或具体预算确认。只有协议测试或构建时，交付明确写“平台运行待验”。详细逐平台门见[跨平台接入](platforms.md)。
+
+官方入口：[Serve 起步](https://docs.tansr.com/getting-started/serve/) · [部署与鉴权](https://docs.tansr.com/serve/deploy-and-auth/) · [旧会话协议说明](https://docs.tansr.com/serve/v2-and-webhooks/) · [存储治理](https://docs.tansr.com/serve/retention-and-governance/) · [环境变量](https://docs.tansr.com/serve/env/)。在线页若仍展示旧版本例子，优先核对选定发行包的类型、合同和随包 Demo，登记差异。

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f5f6f8">
+    <meta name="description" content="在本机收集真实反馈，选择记录进行分析，并核对结果依据。">
+    <title>反馈工作台</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">跳到工作区</a>
+    <aside class="sidebar" aria-label="工作台导航">
+      <a class="brand" href="#main"><span class="brand-mark" aria-hidden="true">f.</span><span>反馈工作台<small>FEEDBACK WORKSPACE</small></span></a>
+      <div class="workspace-label">我的工作区</div>
+      <nav>
+        <a class="nav-item active" href="#records-section"><span aria-hidden="true">▤</span>反馈收件箱<span id="nav-count" class="nav-count">0</span></a>
+        <a class="nav-item" href="#analysis-section"><span aria-hidden="true">✳</span>分析工作区</a>
+        <a class="nav-item" href="#history-section"><span aria-hidden="true">◷</span>分析历史</a>
+      </nav>
+      <div class="sidebar-bottom"><span class="local-avatar" aria-hidden="true">本</span><div><strong>本机用户</strong><small>单用户 · 本机存储</small></div></div>
+    </aside>
+
+    <div class="workspace">
+      <header class="topbar"><span class="breadcrumb">工作区 <span aria-hidden="true">/</span> <strong>反馈与洞察</strong></span><div class="connection"><span id="connection-dot" class="connection-dot"></span><span id="connection-status" role="status">正在连接本机服务</span><button id="refresh-state" class="icon-button" type="button" aria-label="重新读取工作台状态" title="重新读取状态">↻</button></div></header>
+      <main id="main" tabindex="-1">
+        <div id="mode-notice" class="mode-notice"><span id="mode-badge" class="badge">读取运行模式中</span><p id="mode-description">正在读取配置，确认后才可开始分析。</p></div>
+        <div id="page-message" class="message" role="status" hidden></div>
+        <section class="page-heading" aria-labelledby="product-name"><div><div class="eyebrow">从原始反馈，到有依据的改进</div><h1 id="product-name">反馈工作台</h1><p id="product-description">收集真实反馈，选择本轮记录，再检查分析与原文依据。</p></div><button id="add-record" class="button primary" type="button" disabled><span aria-hidden="true">＋</span> 添加反馈</button></section>
+        <div class="overview" aria-label="工作区概况"><div><span>全部反馈</span><strong id="record-count">—</strong></div><div><span>本轮已选</span><strong id="selection-count">0</strong></div><div><span>已完成分析</span><strong id="completed-count">—</strong></div><p><span class="privacy-mark" aria-hidden="true">⌂</span>单用户本机工作台<br><small>反馈与历史保存在本机；请仅由本机用户访问。</small></p></div>
+
+        <div class="work-grid">
+          <section id="records-section" class="panel records-panel" aria-labelledby="records-heading">
+            <div class="panel-heading"><div><span class="section-index">01 / COLLECT</span><h2 id="records-heading">反馈收件箱 <span id="list-count" class="count-label">0</span></h2></div><span class="subtle">原始记录，可随时编辑</span></div>
+            <div class="list-controls"><label class="search-field"><span class="sr-only">搜索反馈标题、内容或来源</span><span aria-hidden="true">⌕</span><input id="record-search" type="search" placeholder="搜索标题、内容或来源" autocomplete="off"></label><label class="filter-label"><span class="sr-only">按处理状态筛选</span><select id="record-filter"><option value="all">全部状态</option><option value="new">待处理</option><option value="reviewed">已审阅</option><option value="resolved">已解决</option></select></label></div>
+            <div class="selection-toolbar"><label class="checkbox-label"><input id="select-visible" type="checkbox" disabled><span>选择当前列表</span></label><button id="clear-selection" class="text-button" type="button" disabled>清空选择</button></div>
+            <p id="selection-hint" class="selection-hint">每轮最多选择 50 条反馈。分析不会自动修改原文。</p>
+            <div id="record-list" class="record-list" aria-label="反馈列表"><div class="empty-state"><span class="empty-symbol" aria-hidden="true">▤</span><h3>正在读取反馈</h3><p>连接后会显示本机保存的记录。</p></div></div>
+          </section>
+
+          <section id="analysis-section" class="panel analysis-panel" aria-labelledby="analysis-heading">
+            <div class="panel-heading"><div><span class="section-index">02 / UNDERSTAND</span><h2 id="analysis-heading">分析工作区</h2></div><span id="run-status" class="badge neutral">尚未开始</span></div>
+            <div class="analysis-action"><div><strong id="analysis-action-label">准备好本轮反馈</strong><p id="analysis-action-hint">在左侧选择要分析的记录。</p></div><button id="start-analysis" class="button primary" type="button" disabled><span aria-hidden="true">✳</span><span id="start-label">开始分析</span></button></div>
+            <p id="configuration-message" class="configuration-message" hidden></p>
+            <div id="run-view" hidden>
+              <div class="run-meta"><span id="run-time"></span><span id="run-mode" class="badge"></span><button id="show-active" class="text-button" type="button" hidden>回到正在进行的分析</button><button id="cancel-analysis" class="button small danger-outline" type="button" hidden>取消本次分析</button></div>
+              <div id="run-error" class="message error" role="alert" hidden></div>
+              <div id="run-progress" class="progress-line" role="status" hidden><span class="spinner" aria-hidden="true"></span><span id="progress-text">正在准备分析…</span></div>
+              <section class="result-section" aria-labelledby="result-heading"><div class="section-title"><h3 id="result-heading">分析结果</h3><span id="result-note" class="subtle"></span></div><div id="result-text" class="result-text" tabindex="0"></div></section>
+              <details id="activity-details" class="detail-block"><summary>执行活动 <span id="activity-count">0</span></summary><ol id="activity-list" class="activity-list"></ol><p id="activity-empty" class="detail-empty">此处显示分析进度与工具实际活动。</p></details>
+              <details id="evidence-details" class="detail-block" open><summary><span id="evidence-heading">本轮提交记录</span><span id="evidence-count">0</span></summary><p id="evidence-note" class="detail-empty">结果中的观点需要与原文一起审阅。</p><div id="evidence-list" class="evidence-list"></div></details>
+            </div>
+            <div id="analysis-empty" class="empty-state analysis-empty"><span class="empty-symbol accent" aria-hidden="true">✳</span><h3>让改进建议有据可查</h3><p>添加反馈并选择记录。这里会显示处理进度、工具读取记录和最终结果。</p><div class="steps"><span>1. 收集原文</span><span aria-hidden="true">→</span><span>2. 选择分析</span><span aria-hidden="true">→</span><span>3. 核对依据</span></div></div>
+          </section>
+        </div>
+
+        <section id="history-section" class="panel history-panel" aria-labelledby="history-heading"><div class="panel-heading"><div><span class="section-index">03 / REVISIT</span><h2 id="history-heading">分析历史 <span id="history-count" class="count-label">0</span></h2></div><p class="subtle">刷新后可继续查看同一次分析。</p></div><div id="history-list" class="history-list"><p class="history-empty">暂无分析记录。完成第一轮后，可在这里回看结果与原始依据。</p></div></section>
+        <footer class="workspace-footer"><span>你的反馈，你来判断。分析结果供审阅，不会自动执行改进。</span><span id="last-synced">尚未同步</span></footer>
+      </main>
+    </div>
+
+    <dialog id="record-dialog" aria-labelledby="record-dialog-title" aria-describedby="record-dialog-description"><form id="record-form"><div class="dialog-heading"><div><span class="section-index">原始业务记录</span><h2 id="record-dialog-title">添加反馈</h2></div><button id="close-record-dialog" class="icon-button" type="button" aria-label="关闭反馈表单">×</button></div><p id="record-dialog-description" class="dialog-description">保留用户原话与来源，让后续分析可以核对。</p><label class="form-field">标题 <span class="required">必填</span><input id="record-title" name="title" type="text" maxlength="160" required placeholder="例如：批量导出时出现错误" autocomplete="off"></label><label class="form-field">反馈原文 <span class="required">必填</span><textarea id="record-content" name="content" rows="7" maxlength="6000" required placeholder="粘贴或输入收到的真实反馈，不必先替用户总结。"></textarea><span class="field-help">请只录入你有权处理的内容，避免添加无关的敏感信息。</span></label><div class="form-grid"><label class="form-field">来源 <span class="optional">选填</span><input id="record-source" name="source" type="text" maxlength="200" placeholder="例如：用户访谈 / 客服记录" autocomplete="off"></label><label id="record-status-field" class="form-field" hidden>处理状态<select id="record-status" name="status"><option value="new">待处理</option><option value="reviewed">已审阅</option><option value="resolved">已解决</option></select></label></div><p id="record-form-error" class="message error" role="alert" hidden></p><div class="dialog-actions"><button id="cancel-record-edit" class="button secondary" type="button">取消</button><button id="save-record" class="button primary" type="submit">保存反馈</button></div></form></dialog>
+
+    <dialog id="delete-dialog" class="compact-dialog" aria-labelledby="delete-title" aria-describedby="delete-description"><h2 id="delete-title">删除这条反馈？</h2><p id="delete-description">记录会从收件箱移除，引用它的历史分析和输入快照也会一并删除。此操作不能撤销。</p><p id="delete-record-title" class="delete-record-title"></p><p id="delete-error" class="message error" role="alert" hidden></p><div class="dialog-actions"><button id="cancel-delete" class="button secondary" type="button">保留反馈</button><button id="confirm-delete" class="button danger" type="button">删除反馈</button></div></dialog>
+    <noscript><p class="noscript">请启用 JavaScript 以管理反馈并查看分析进度。本页面需要连接随产品启动的本机服务。</p></noscript>
+  </body>
+</html>

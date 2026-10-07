@@ -1,0 +1,360 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+        A20100000000000000000001 /* SpeechAudioCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20100000000000000000002 /* SpeechAudioCache.swift */; };
+        A20100000000000000000003 /* SpeechSegmentsPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20100000000000000000004 /* SpeechSegmentsPanel.swift */; };
+		A11000000000000000000005 /* DemoConnectionRoot.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11000000000000000000006 /* DemoConnectionRoot.swift */; };
+		A11000000000000000000003 /* DemoScopeDigest.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11000000000000000000004 /* DemoScopeDigest.swift */; };
+		A11000000000000000000001 /* DemoSessionScope.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11000000000000000000002 /* DemoSessionScope.swift */; };
+		A10500000000000000000001 /* ContinuousSpeechRun.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10500000000000000000002 /* ContinuousSpeechRun.swift */; };
+		A10500000000000000000003 /* CustomFunctionExamples.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10500000000000000000004 /* CustomFunctionExamples.swift */; };
+		A10500000000000000000005 /* DemoConnectionSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10500000000000000000006 /* DemoConnectionSettings.swift */; };
+		A10500000000000000000007 /* DemoConnectionRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10500000000000000000008 /* DemoConnectionRuntime.swift */; };
+		A10500000000000000000009 /* DemoConnectionPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10500000000000000000010 /* DemoConnectionPanel.swift */; };
+		A10500000000000000000011 /* DemoSessionOpener.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10500000000000000000012 /* DemoSessionOpener.swift */; };
+		DEAB7F1337EEBAFE118530FE /* AudioPlayerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3A367E3C2F75D2AC3D50644 /* AudioPlayerController.swift */; };
+		26E3D40C428526DC74AA25F7 /* AudioRecorderController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C68F3CA353AF2C24EE14689F /* AudioRecorderController.swift */; };
+		9378C3A7FFE86849A6DB56ED /* ChatScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = E633851BDDFA2A25DF5CCD24 /* ChatScreen.swift */; };
+		886CD936D092C16026D3BBA3 /* DeveloperLogin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457304492585D113022C1F1E /* DeveloperLogin.swift */; };
+		1F264E58627B66B0EC088656 /* ImageDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CF34873FFEE8307D587C80F /* ImageDraft.swift */; };
+		FECC9BB1A386C54E16DBBFCD /* InputDeliveryPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B83C1168B8839EB9F2F742B /* InputDeliveryPanel.swift */; };
+		394F326A1B3E2DB85EE5C738 /* MediaArtifactPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3914699968083B1F3F4BD19 /* MediaArtifactPreview.swift */; };
+		96A9CB1896215F873BA54220 /* OrderAssistantApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D672E1BB9712D6EA7067E40 /* OrderAssistantApp.swift */; };
+		18DCF40FCFD8697473F8B45C /* OrderRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 732E661B2256D5A42FE3E44A /* OrderRepository.swift */; };
+		2A58DEEA5C3BBE8E52E8A10D /* PhotoAttachment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C1145340787F7F9B7385011 /* PhotoAttachment.swift */; };
+		4066E42E928AFB3E17BD4F25 /* PlaybackLifecycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153D488D78C9A6371AE9EB7A /* PlaybackLifecycle.swift */; };
+		73725693E8C1A0B142B5C37A /* RecoveredImages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673491C8E50D9CF785038547 /* RecoveredImages.swift */; };
+		4CDCFEF69E3D084DE96BC502 /* SampleMediaFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98775295E9696F57186FA2FD /* SampleMediaFile.swift */; };
+		6E18230307E3378C4DEEA6EC /* SpeechInputPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB33402D82DA397BBC75077A /* SpeechInputPolicy.swift */; };
+		CF8A260B1A957D0F69B90F4E /* SystemMediaExamples.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6A2B04BA17174A5302EEF7 /* SystemMediaExamples.swift */; };
+		3984802B65126E2B86EB47D1 /* TansrCore in Frameworks */ = {isa = PBXBuildFile; productRef = 9C71F5423BEE1F72DAFF097D /* TansrCore */; };
+		28DADA4D48BF2129B14F3843 /* TansrClient in Frameworks */ = {isa = PBXBuildFile; productRef = CC9FA9A70E9AADA7A3F937E5 /* TansrClient */; };
+		44E454C73F80F4EC488EA652 /* TansrUI in Frameworks */ = {isa = PBXBuildFile; productRef = B94F0CC8791FDDA881121169 /* TansrUI */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+        A20100000000000000000002 /* SpeechAudioCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechAudioCache.swift; sourceTree = "<group>"; };
+        A20100000000000000000004 /* SpeechSegmentsPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechSegmentsPanel.swift; sourceTree = "<group>"; };
+		A11000000000000000000006 /* DemoConnectionRoot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoConnectionRoot.swift; sourceTree = "<group>"; };
+		A11000000000000000000004 /* DemoScopeDigest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoScopeDigest.swift; sourceTree = "<group>"; };
+		A11000000000000000000002 /* DemoSessionScope.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoSessionScope.swift; sourceTree = "<group>"; };
+		A10500000000000000000002 /* ContinuousSpeechRun.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContinuousSpeechRun.swift; sourceTree = "<group>"; };
+		A10500000000000000000004 /* CustomFunctionExamples.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomFunctionExamples.swift; sourceTree = "<group>"; };
+		A10500000000000000000006 /* DemoConnectionSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoConnectionSettings.swift; sourceTree = "<group>"; };
+		A10500000000000000000008 /* DemoConnectionRuntime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoConnectionRuntime.swift; sourceTree = "<group>"; };
+		A10500000000000000000010 /* DemoConnectionPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoConnectionPanel.swift; sourceTree = "<group>"; };
+		A10500000000000000000012 /* DemoSessionOpener.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoSessionOpener.swift; sourceTree = "<group>"; };
+		E3A367E3C2F75D2AC3D50644 /* AudioPlayerController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayerController.swift; sourceTree = "<group>"; };
+		C68F3CA353AF2C24EE14689F /* AudioRecorderController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecorderController.swift; sourceTree = "<group>"; };
+		E633851BDDFA2A25DF5CCD24 /* ChatScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatScreen.swift; sourceTree = "<group>"; };
+		457304492585D113022C1F1E /* DeveloperLogin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeveloperLogin.swift; sourceTree = "<group>"; };
+		6CF34873FFEE8307D587C80F /* ImageDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageDraft.swift; sourceTree = "<group>"; };
+		9B83C1168B8839EB9F2F742B /* InputDeliveryPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputDeliveryPanel.swift; sourceTree = "<group>"; };
+		C3914699968083B1F3F4BD19 /* MediaArtifactPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaArtifactPreview.swift; sourceTree = "<group>"; };
+		4D672E1BB9712D6EA7067E40 /* OrderAssistantApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderAssistantApp.swift; sourceTree = "<group>"; };
+		732E661B2256D5A42FE3E44A /* OrderRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderRepository.swift; sourceTree = "<group>"; };
+		7C1145340787F7F9B7385011 /* PhotoAttachment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoAttachment.swift; sourceTree = "<group>"; };
+		153D488D78C9A6371AE9EB7A /* PlaybackLifecycle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackLifecycle.swift; sourceTree = "<group>"; };
+		673491C8E50D9CF785038547 /* RecoveredImages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveredImages.swift; sourceTree = "<group>"; };
+		98775295E9696F57186FA2FD /* SampleMediaFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleMediaFile.swift; sourceTree = "<group>"; };
+		EB33402D82DA397BBC75077A /* SpeechInputPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechInputPolicy.swift; sourceTree = "<group>"; };
+		DA6A2B04BA17174A5302EEF7 /* SystemMediaExamples.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemMediaExamples.swift; sourceTree = "<group>"; };
+		0903CD5D118B89609467CF91 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D408CF13FBEC8C0AA727E730 /* TansrOrderAssistant.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TansrOrderAssistant.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		47AFE728798CF3630069B5A7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3984802B65126E2B86EB47D1 /* TansrCore in Frameworks */,
+				28DADA4D48BF2129B14F3843 /* TansrClient in Frameworks */,
+				44E454C73F80F4EC488EA652 /* TansrUI in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		3021034247249DAEC6759898 /* Root */ = {
+			isa = PBXGroup;
+			children = (
+				B024E302E6B6AAADDB03978A /* OrderAssistant Sources */,
+				0903CD5D118B89609467CF91 /* Info.plist */,
+				4E0FEA4F8DAF432E35826B4B /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		B024E302E6B6AAADDB03978A /* OrderAssistant Sources */ = {
+			isa = PBXGroup;
+			children = (
+				E3A367E3C2F75D2AC3D50644 /* AudioPlayerController.swift */,
+				C68F3CA353AF2C24EE14689F /* AudioRecorderController.swift */,
+				E633851BDDFA2A25DF5CCD24 /* ChatScreen.swift */,
+				457304492585D113022C1F1E /* DeveloperLogin.swift */,
+				6CF34873FFEE8307D587C80F /* ImageDraft.swift */,
+				9B83C1168B8839EB9F2F742B /* InputDeliveryPanel.swift */,
+				C3914699968083B1F3F4BD19 /* MediaArtifactPreview.swift */,
+				4D672E1BB9712D6EA7067E40 /* OrderAssistantApp.swift */,
+				732E661B2256D5A42FE3E44A /* OrderRepository.swift */,
+				7C1145340787F7F9B7385011 /* PhotoAttachment.swift */,
+				153D488D78C9A6371AE9EB7A /* PlaybackLifecycle.swift */,
+				673491C8E50D9CF785038547 /* RecoveredImages.swift */,
+				98775295E9696F57186FA2FD /* SampleMediaFile.swift */,
+				EB33402D82DA397BBC75077A /* SpeechInputPolicy.swift */,
+				DA6A2B04BA17174A5302EEF7 /* SystemMediaExamples.swift */,
+                A10500000000000000000002 /* ContinuousSpeechRun.swift */,
+                A20100000000000000000002 /* SpeechAudioCache.swift */,
+                A20100000000000000000004 /* SpeechSegmentsPanel.swift */,
+				A10500000000000000000004 /* CustomFunctionExamples.swift */,
+				A10500000000000000000006 /* DemoConnectionSettings.swift */,
+				A10500000000000000000008 /* DemoConnectionRuntime.swift */,
+				A10500000000000000000010 /* DemoConnectionPanel.swift */,
+				A11000000000000000000002 /* DemoSessionScope.swift */,
+				A11000000000000000000004 /* DemoScopeDigest.swift */,
+				A11000000000000000000006 /* DemoConnectionRoot.swift */,
+				A10500000000000000000012 /* DemoSessionOpener.swift */,
+			);
+			name = "OrderAssistant Sources";
+			path = ../Sources/OrderAssistant;
+			sourceTree = "<group>";
+		};
+		4E0FEA4F8DAF432E35826B4B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D408CF13FBEC8C0AA727E730 /* TansrOrderAssistant.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		75DF4440D37480A0A0626BDC /* OrderAssistant */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 295C68BB1CA76C9E091B9844 /* Build configuration list for PBXNativeTarget OrderAssistant */;
+			buildPhases = (
+				92EA6E7938BB4AAAB302DBB3 /* Sources */,
+				47AFE728798CF3630069B5A7 /* Frameworks */,
+				854EA7A3123A0AED3D66B853 /* Resources */,
+			);
+			buildRules = ();
+			dependencies = ();
+			name = OrderAssistant;
+			packageProductDependencies = (
+				9C71F5423BEE1F72DAFF097D /* TansrCore */,
+				CC9FA9A70E9AADA7A3F937E5 /* TansrClient */,
+				B94F0CC8791FDDA881121169 /* TansrUI */,
+			);
+			productName = TansrOrderAssistant;
+			productReference = D408CF13FBEC8C0AA727E730 /* TansrOrderAssistant.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		67659A35579539AD4019C377 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					75DF4440D37480A0A0626BDC = { CreatedOnToolsVersion = 15.0; };
+				};
+			};
+			buildConfigurationList = 91BFB17D53AC6E4CB4EF50CB /* Build configuration list for PBXProject OrderAssistant */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (en, "zh-Hans", Base);
+			mainGroup = 3021034247249DAEC6759898 /* Root */;
+			packageReferences = (
+				EC2A62368123265122F9FB22 /* XCLocalSwiftPackageReference ../SDK/tansr-sdk */,
+			);
+			productRefGroup = 4E0FEA4F8DAF432E35826B4B /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				75DF4440D37480A0A0626BDC /* OrderAssistant */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		854EA7A3123A0AED3D66B853 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = ();
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		92EA6E7938BB4AAAB302DBB3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DEAB7F1337EEBAFE118530FE /* AudioPlayerController.swift in Sources */,
+				26E3D40C428526DC74AA25F7 /* AudioRecorderController.swift in Sources */,
+				9378C3A7FFE86849A6DB56ED /* ChatScreen.swift in Sources */,
+				886CD936D092C16026D3BBA3 /* DeveloperLogin.swift in Sources */,
+				1F264E58627B66B0EC088656 /* ImageDraft.swift in Sources */,
+				FECC9BB1A386C54E16DBBFCD /* InputDeliveryPanel.swift in Sources */,
+				394F326A1B3E2DB85EE5C738 /* MediaArtifactPreview.swift in Sources */,
+				96A9CB1896215F873BA54220 /* OrderAssistantApp.swift in Sources */,
+				18DCF40FCFD8697473F8B45C /* OrderRepository.swift in Sources */,
+				2A58DEEA5C3BBE8E52E8A10D /* PhotoAttachment.swift in Sources */,
+				4066E42E928AFB3E17BD4F25 /* PlaybackLifecycle.swift in Sources */,
+				73725693E8C1A0B142B5C37A /* RecoveredImages.swift in Sources */,
+				4CDCFEF69E3D084DE96BC502 /* SampleMediaFile.swift in Sources */,
+				6E18230307E3378C4DEEA6EC /* SpeechInputPolicy.swift in Sources */,
+				CF8A260B1A957D0F69B90F4E /* SystemMediaExamples.swift in Sources */,
+                A10500000000000000000001 /* ContinuousSpeechRun.swift in Sources */,
+                A20100000000000000000001 /* SpeechAudioCache.swift in Sources */,
+                A20100000000000000000003 /* SpeechSegmentsPanel.swift in Sources */,
+				A10500000000000000000003 /* CustomFunctionExamples.swift in Sources */,
+				A10500000000000000000005 /* DemoConnectionSettings.swift in Sources */,
+				A10500000000000000000007 /* DemoConnectionRuntime.swift in Sources */,
+				A10500000000000000000009 /* DemoConnectionPanel.swift in Sources */,
+				A11000000000000000000001 /* DemoSessionScope.swift in Sources */,
+				A11000000000000000000003 /* DemoScopeDigest.swift in Sources */,
+				A11000000000000000000005 /* DemoConnectionRoot.swift in Sources */,
+				A10500000000000000000011 /* DemoSessionOpener.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		5D50CAD00AC23D3A20A485F0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				ENABLE_TESTABILITY = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = ("DEBUG=1", "$(inherited)");
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		521ABE2CFC0798CCBEDA7A6D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		C8FD10CC9FDBBDFE57AD00CE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				"CODE_SIGNING_ALLOWED[sdk=iphonesimulator*]" = NO;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 3;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks");
+				MARKETING_VERSION = 0.2.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tansr.demo.ios;
+				PRODUCT_NAME = TansrOrderAssistant;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		5C8D2FC42B051B6E5F4BCAA8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				"CODE_SIGNING_ALLOWED[sdk=iphonesimulator*]" = NO;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 3;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks");
+				MARKETING_VERSION = 0.2.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tansr.demo.ios;
+				PRODUCT_NAME = TansrOrderAssistant;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		91BFB17D53AC6E4CB4EF50CB /* Build configuration list for project */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5D50CAD00AC23D3A20A485F0 /* Debug */,
+				521ABE2CFC0798CCBEDA7A6D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		295C68BB1CA76C9E091B9844 /* Build configuration list for target */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C8FD10CC9FDBBDFE57AD00CE /* Debug */,
+				5C8D2FC42B051B6E5F4BCAA8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		EC2A62368123265122F9FB22 /* XCLocalSwiftPackageReference ../SDK/tansr-sdk */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../SDK/tansr-sdk;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		9C71F5423BEE1F72DAFF097D /* TansrCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EC2A62368123265122F9FB22 /* XCLocalSwiftPackageReference ../SDK/tansr-sdk */;
+			productName = TansrCore;
+		};
+		CC9FA9A70E9AADA7A3F937E5 /* TansrClient */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EC2A62368123265122F9FB22 /* XCLocalSwiftPackageReference ../SDK/tansr-sdk */;
+			productName = TansrClient;
+		};
+		B94F0CC8791FDDA881121169 /* TansrUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EC2A62368123265122F9FB22 /* XCLocalSwiftPackageReference ../SDK/tansr-sdk */;
+			productName = TansrUI;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 67659A35579539AD4019C377 /* Project object */;
+}

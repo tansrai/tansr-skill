@@ -1,6 +1,11 @@
 import { createSession, defineTool } from '@tansr/sdk';
 import { readFile } from 'node:fs/promises';
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+
+// 示例 CLI 从自身工程开始发现配置；嵌入方仍可自行传入合法 SDK 来源与 cwd。
+export function managedFeedbackSource() {
+  return { model: 'main', cwd: fileURLToPath(new URL('.', import.meta.url)) };
+}
 
 // Reuse this function in your own Node.js service or Electron main process.
 export async function runFeedback(source, write = text => process.stdout.write(text)) {
@@ -54,7 +59,8 @@ export async function runFeedback(source, write = text => process.stdout.write(t
         break;
       }
     }
-    // Use committed history for final text; streamed blocks can be retracted.
+    // 轮终事件先于轮泵收口；等待历史快照就位，流式块也可能已撤回。
+    await session.idle();
     const answer = session.messages().filter(message => message.role === 'assistant').at(-1);
     output = answer?.blocks.filter(block => block.t === 'text').map(block => block.text).join('\n') ?? '';
     if (!completed || !reads || !output.trim()) throw new Error('未完成真实的读取与输出；请使用支持工具调用的模型重试。');
@@ -84,7 +90,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   try {
     const key = process.env.MODEL_API_KEY;
     if (!key || key.startsWith('REPLACE_')) throw new Error('请在本机 .env 中填写 MODEL_API_KEY，并在 .tansr/settings.json 中设置服务地址与模型 ID。');
-    await runFeedback({ model: 'main' });
+    await runFeedback(managedFeedbackSource());
   } catch (error) {
     // Do not print SDK causes, request objects or credentials in a shared terminal log.
     const message = error instanceof Error ? error.message : '';

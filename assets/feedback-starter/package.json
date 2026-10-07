@@ -5,5 +5,5 @@
   "type": "module",
   "engines": { "node": ">=22.19.0" },
   "scripts": { "start": "node --env-file=.env agent.mjs", "test": "node test.mjs" },
-  "dependencies": { "@tansr/sdk": "0.17.0" }
+  "dependencies": { "@tansr/sdk": "0.18.1" }
 }

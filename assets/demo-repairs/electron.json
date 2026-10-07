@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "electron-failed-tool-text",
+  "issue": "TPB-01 E1-RENDER-01: failed business tool resultText was omitted from the error card",
+  "source": {
+    "url": "https://download.tansr.com/demo/electron/electron.zip",
+    "sha256": "345cff2d2c3d370f25eba2801d8f1cba6e2cde3960e361ea4f32e09ff634cb42",
+    "nestedArchive": "electron-demo.zip",
+    "nestedSha256": "2e188aeb98476797259b76cf6a6a187f4a7104ad6bf10a1505777060118f920c",
+    "archiveTarget": "electron-demo/renderer/renderer.js",
+    "demoVersion": "0.1.1",
+    "sdkVersion": "0.17.0",
+    "license": "MIT",
+    "licenseFile": "ELECTRON-LICENSE.txt",
+    "copyright": "Copyright (c) 2026 Tansr (tansr.com)",
+    "verifiedOn": "2026-10-07"
+  },
+  "target": "renderer/renderer.js",
+  "before": {
+    "sha256": "8f26595c7b49edb4a9bd226eda7b266d44e393d1fefd70513cdfce40af32ee3c",
+    "bytes": 66829
+  },
+  "after": {
+    "sha256": "7420d69182342e9be7cc4648161e5f3fd56316281b76a001123f2f7758fbbbac",
+    "bytes": 67296
+  },
+  "replacement": {
+    "before": "  if (part.status === 'failed') {\n    card.append(el('pre', '', `${part.errorType ?? 'error'}: ${part.errorMessage ?? ''}`));\n  }\n",
+    "after": "  if (part.status === 'failed') {\n    // tool.failed 的结构化消息优先；业务失败的 tool.completed(isError) 由 resultText 保留原因。\n    // 仅展示 SDK 的非空文本字段，不序列化原始 result/error 对象；el 恒通过 textContent 落 DOM。\n    const message = [part.errorMessage, part.resultText].find(value => typeof value === 'string' && value.trim() !== '');\n    const type = typeof part.errorType === 'string' && part.errorType.trim() !== '' ? part.errorType : 'error';\n    card.append(el('pre', '', message === undefined ? type : `${type}: ${message}`));\n  }\n"
+  },
+  "scope": "Consumer renderer text repair only. Does not upgrade dependencies, modify locks, publish the original ZIP, install packages, or certify GUI/media playback. Keep the original Demo LICENSE."
+}

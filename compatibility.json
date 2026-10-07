@@ -50,7 +50,14 @@
     "platform": "windows-x64",
     "version": "0.10.2",
     "status": "isolated_install_version_help_and_empty_configuration_diagnostics_passed",
-    "notVerified": ["TUI", "live model", "active task cancellation", "macOS", "Linux", "SEA"],
+    "notVerified": [
+      "TUI",
+      "live model",
+      "active task cancellation",
+      "macOS",
+      "Linux",
+      "SEA"
+    ],
     "evidence": "archive/TPB-01-two-step-product/stage1/native-cli/report.json"
   },
   "templates": [
@@ -195,7 +202,36 @@
         "permission/question bridges",
         "store and lifecycle"
       ],
-      "status": "public-combo-frozen-install-tests-51-typecheck-build-and-hidden-lifecycle-passed; GUI-live-platform-and-upgrade-unverified",
+      "status": "public_sdk017_consumer_with_verified_renderer_repair: tests53_typecheck_build_gui14_restore3_recording3_ttsPlayback1_passed; published_original_zip_unchanged",
+      "consumerRepair": {
+        "issue": "Failed business tool cards omit resultText when errorMessage is absent",
+        "scope": "Renderer text fallback only; published SDK and original ZIP unchanged",
+        "publicDemoSdk": "0.17.0",
+        "patchedConsumerTests": 53,
+        "typecheck": "passed",
+        "build": "passed",
+        "gui": {
+          "status": "passed",
+          "platform": "Windows Electron 44.1.0",
+          "journeys": 14,
+          "restoreChecks": 3,
+          "scope": "Original app main/preload/renderer through official automation; synthetic providers and files; no OS file-picker or live-model claim",
+          "screenshotRun": "TPB-01-electron-closure-run-C8CmK3",
+          "evidence": "archive/TPB-01-two-step-product/stage1-closure/electron/TPB-01-electron-closure-run-C8CmK3-journeys-report.json",
+          "restoreEvidence": "archive/TPB-01-two-step-product/stage1-closure/electron/TPB-01-electron-closure-run-C8CmK3-restore-report.json",
+          "recordingPositive": "passed_with_Chromium_virtual_microphone; original_PCM_WAV_capture_and_IPC; no_ambient_recording",
+          "recordingChecks": 3,
+          "recordingEvidence": "archive/TPB-01-two-step-product/stage1-closure/electron/recording-acceptance-report.json",
+          "ttsPlayback": "passed_original_audio_play_time_advance_ended_without_media_error",
+          "ttsPlaybackChecks": 1,
+          "ttsPlaybackEvidence": "archive/TPB-01-two-step-product/stage1-closure/electron/tts-acceptance-report.json"
+        },
+        "publishedZipUpdated": false,
+        "evidence": "archive/TPB-01-two-step-product/stage1-closure/electron/fix-result.json",
+        "preparation": "scripts/prepare-demo.mjs",
+        "preparationManifest": "assets/demo-repairs/electron.json",
+        "preparationEvidence": "archive/TPB-01-two-step-product/stage1-closure/review/prepare-demo-public-receipt.json"
+      },
       "evidence": "archive/TPB-01-two-step-product/stage1/platform-electron/consumer-report.json"
     },
     {
@@ -231,7 +267,13 @@
         "checkpoints": 8,
         "scope": "real loopback TCP and official SDK/Serve; synthetic model and identities; session/SSE/tool results/permissions/cancel/reconnect/store restart/ownership/resource close",
         "realPlatformRequests": 0,
-        "notVerified": ["device UI", "mobile foreground/background", "recording and media playback", "SDK 0.5.0 /api pairing", "iOS and Harmony pairing"],
+        "notVerified": [
+          "device UI",
+          "mobile foreground/background",
+          "recording and media playback",
+          "SDK 0.5.0 /api pairing",
+          "iOS and Harmony pairing"
+        ],
         "evidence": "archive/TPB-01-two-step-product/stage1/serve-pairing/attempt-20261007T143237530Z/consumer-receipt.json"
       }
     },
@@ -249,19 +291,68 @@
         "ios": 16,
         "macOS": 13
       },
-      "status": "public_sdk030_demo_swift_release_and_unsigned_simulator_app_build_passed; five_synthetic_XCTests_passed; eight_apple_steps_exit0; UI_serve_pairing_device_and_signing_unverified",
+      "status": "public_sdk030_repaired_consumer: builds_and_tests_passed; serve015_tcp_pairing_three_tests_thirteen_checkpoints_passed; original_eight_UI_journeys_and_video_passed_across_documented_revisions; positive_microphone_recording_pending",
       "hostPreparation": "assets/ios-app-host/prepare.mjs",
-      "hostPreparationEvidence": "archive/TPB-01-two-step-product/stage1/ios-host-receipt.json",
+      "hostPreparationEvidence": "archive/TPB-01-two-step-product/stage1-closure/review/ios-prepare-r14-final-public-receipt.json",
+      "hostPreparationDeliveryEvidence": "archive/TPB-01-two-step-product/stage1-closure/review/ios-prepare-r14-delivery.json",
+      "historicalHostPreparationEvidence": "archive/TPB-01-two-step-product/stage1/ios-host-receipt.json",
+      "consumerRepairManifest": "assets/ios-app-host/demo-repairs.json",
+      "nativeAcceptance": {
+        "runtime": "isolated iOS Simulator on arm64 Mac; public SDK 0.3.0",
+        "originalJourneyIds": 8,
+        "originalJourneyStatus": "passed_original_assertion_scope_across_revisions; earlier_failed_reports_retained; not_a_single_eight_test_rerun",
+        "additionalVideoPlayback": "passed_original_AVPlayer_completion_replay_background_close",
+        "recordingPositive": "pending_explicit_microphone_capture_authorization; denial_path_passed",
+        "repairs": ["paused_segment_label", "media_sheet_history_refresh", "bounded_history_scroll_viewport"],
+        "publishedZipUpdated": false,
+        "scope": "Original public App and binary SDK; synthetic model/media, original system photo picker; no real-model, physical-device, signing or private SDK2 full-gate claim",
+        "evidence": "archive/TPB-01-two-step-product/stage1-closure/ios/final-journey-matrix.md",
+        "cleanup": "owned_simulator_shutdown_and_own_tunnel_closed; original_fourteen_simulators_unchanged"
+      },
+      "controlledServePairing": {
+        "sdk": "0.3.0",
+        "serve": "0.15.0",
+        "protocol": "legacy /v2 readwrite",
+        "status": "passed",
+        "tests": 3,
+        "checkpoints": 13,
+        "scope": "Real TCP; public SDK/Serve; synthetic identities, model and media; successful original tools, denial without mutation, isolation, cancel, reconnect, recovery, image bytes, TTS/ASR and explicit media errors",
+        "realPlatformRequests": 0,
+        "notVerified": [
+          "simulator UI",
+          "foreground/background UI",
+          "system photo selection",
+          "recording and playback UI"
+        ],
+        "evidence": "archive/TPB-01-two-step-product/stage1-closure/ios/20261007T145200Z/revision-03/verified-pair-result.json"
+      },
       "acceptance": {
         "checkedAt": "2026-10-07",
+        "evidenceStage": "historical_initial_public_package_build; current_UI_results_are_in_nativeAcceptance",
         "macOSSwiftReleaseBuild": "passed",
         "unsignedSimulatorAppBuild": "passed",
-        "syntheticXCTest": { "executed": 5, "passed": 5, "failed": 0 },
-        "appleSteps": { "executed": 8, "allExitCodesZero": true },
-        "environment": { "xcode": "26.6 (17F113)", "swift": "6.3.3", "architecture": "arm64", "swiftLanguageMode": "5" },
+        "syntheticXCTest": {
+          "executed": 5,
+          "passed": 5,
+          "failed": 0
+        },
+        "appleSteps": {
+          "executed": 8,
+          "allExitCodesZero": true
+        },
+        "environment": {
+          "xcode": "26.6 (17F113)",
+          "swift": "6.3.3",
+          "architecture": "arm64",
+          "swiftLanguageMode": "5"
+        },
         "inputTreeUnchanged": true,
         "warnings": "Existing public Demo Swift 6 concurrency migration warnings retained",
-        "notVerified": ["simulator UI", "Serve 0.15.0 pairing", "device interaction", "signing"],
+        "notVerified": [
+          "simulator UI",
+          "device interaction",
+          "signing"
+        ],
         "scope": "Public SDK/Demo consumption and adapted App host; not the private SDK full test pool"
       },
       "evidence": "archive/TPB-01-two-step-product/stage1/ios-apple-review/20261007T135234Z/address-192.168.0.2/verified-result.json"

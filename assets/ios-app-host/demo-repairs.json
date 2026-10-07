@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "id": "ios-public-demo-consumer-repairs",
+  "source": "https://download.tansr.com/demo/ios/ios-demo.zip",
+  "sourceZipSha256": "a33431aa41e4a945931de2c52de24d76e65163fe57a2b1292e844f7efb9056e1",
+  "sdk": "0.3.0; original XCFrameworks unchanged",
+  "license": "MIT; preserve the public Demo root LICENSE, Copyright (c) 2026 Tansr (tansr.com)",
+  "normalizeLineEndings": "CRLF-to-LF",
+  "scope": "Three public Swift files only: paused speech label; sheet-owned cold-history refresh without parent refresh competition; fixed 240-point history-image viewport. Original cancellation/generation guards and preview cap retained. Exact output hashes include UTF-8 CRLF-to-LF normalization. SDK artifacts, locks and licenses unchanged.",
+  "files": [
+    {
+      "path": "Sources/OrderAssistant/ChatScreen.swift",
+      "before": {
+        "bytes": 54561,
+        "sha256": "3aeb58b3dece082cd6092d9a405e58d70ebb6dee1daf81b82aee1c244424ca1b"
+      },
+      "after": {
+        "bytes": 54014,
+        "sha256": "2845af95d89bf121f5e3deb4d678fe5a7f0d292542ba1cdc6dee63efb395710f"
+      },
+      "replacements": [
+        {
+          "before": "                    .toolbar { Button(\"关闭 / Close\") { detail = nil } }\n                }\n            }\n            .sheet(isPresented:",
+          "after": "                    .toolbar { Button(\"关闭 / Close\") { detail = nil } }\n                }\n                .task(id: \"\\(session.sessionId)-\\(observer.connectionState)-\\(observer.view.status)\") {\n                    if selected == .context || selected == .media { await refreshContext() }\n                }\n            }\n            .sheet(isPresented:"
+        },
+        {
+          "before": "            .task(id: \"\\(observer.connectionState)-\\(observer.view.status)\") { await refreshContext() }",
+          "after": "            .task(id: \"\\(session.sessionId)-\\(observer.connectionState)-\\(observer.view.status)-\\(detail?.id ?? \"none\")\") {\n                // A presented detail sheet owns its refresh and cancellation lifetime.\n                if detail == nil { await refreshContext() }\n            }"
+        },
+        {
+          "before": "                }.frame(maxHeight: 240)\n            }\n        }\n    }\n\n    private func mediaAllowed",
+          "after": "                // The outer sheet already scrolls. A definite viewport avoids\n                // recursive lazy-height negotiation while the disclosure expands.\n                }.frame(height: 240)\n            }\n        }\n    }\n\n    private func mediaAllowed"
+        }
+      ]
+    },
+    {
+      "path": "Sources/OrderAssistant/ContinuousSpeechRun.swift",
+      "before": {
+        "bytes": 12216,
+        "sha256": "032118144d32a473b4138d378bd93620ba2c2eba0d7f91144bc5c9365e7b2bd7"
+      },
+      "after": {
+        "bytes": 12161,
+        "sha256": "0fa7c0751bf9429631dadf91b6c39316be1763504a608420c5d923dd5ff94394"
+      },
+      "replacements": [
+        {
+          "before": "\n}\n\n/// One current segment",
+          "after": "\n    /// Pausing keeps the playback state and cached audio; only its presentation changes.\n    func label(isPaused: Bool) -> String {\n        isPaused && self == .playing ? \"已暂停 / Paused\" : label\n    }\n}\n\n/// One current segment"
+        }
+      ]
+    },
+    {
+      "path": "Sources/OrderAssistant/SpeechSegmentsPanel.swift",
+      "before": {
+        "bytes": 8967,
+        "sha256": "944f0b7fc7c4e0aafa50948ced86943a1064656c19967afa0428c31d65e98c68"
+      },
+      "after": {
+        "bytes": 8845,
+        "sha256": "cd6489115f45a189fc4c8fd4fcf36bdaadd6621883e2c5ef2bcf5d0ff768d81d"
+      },
+      "replacements": [
+        {
+          "before": "Text(run.displayState(segment.id).label)",
+          "after": "Text(run.displayState(segment.id).label(isPaused: run.paused))"
+        }
+      ]
+    }
+  ]
+}

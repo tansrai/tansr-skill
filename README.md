@@ -38,8 +38,8 @@ pnpm build
 
 根检查负责生成器、诊断和内容一致性。Web 工程另外执行自己的 `npm test`、`npm run typecheck`、`npm run lint`、`npm run build`；Node 样例按其 README 验证。构建通过不代表真实平台、浏览器和原生设备全部验收。
 
-发行版本、公开 Demo 差异与运行状态见 [compatibility.json](compatibility.json) 和 [平台接入](references/platforms.md)。当前桌面与原生资料不等于本轮运行已验证；WorkBuddy 的正式包格式和加载规则仍需实际宿主核验。
+发行版本、公开 Demo 差异与逐平台运行状态见 [compatibility.json](compatibility.json) 和 [平台接入](references/platforms.md)。Electron 的原界面、恢复与合成媒体已验；移动端按各自回执区分构建、服务联验和界面验收。WorkBuddy 的正式包格式和加载规则仍需实际宿主核验。
 
-iPhone App 的已有宿主已整理为[公开 Demo 准备资产](assets/ios-app-host/README.md)，消费正式 SDK 0.3.0 和原 SwiftUI 示例，准备脚本验证公开文件后只新增 App 工程。Apple 编译、模拟器与签名结果分别记录，不能用 Windows 的目录准备检查替代。
+iPhone App 的已有宿主已整理为[公开 Demo 准备资产](assets/ios-app-host/README.md)，消费正式 SDK 0.3.0 和原 SwiftUI 示例。准备脚本验证公开文件后新增 App 工程，并应用清单中固定摘要的 Demo 修正；不改 SDK、锁文件或用户已有工程。Apple 编译、模拟器与签名结果分别记录，不能用 Windows 的目录准备检查替代。
 
 逐项实施、证据与剩余工作统一记录在 [实施方案](doc/PLAN-01-Skill生态与两步产品构建实施方案.md)。本 Skill 的 Apache-2.0 及 [NOTICE](NOTICE) 保留原始来源；SDK、CLI 等独立产品许可按对应发行物核对。

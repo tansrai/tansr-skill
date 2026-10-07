@@ -24,8 +24,10 @@
     "SPM local package ../.. -> ../SDK/tansr-sdk; same three products.",
     "Remove DemoServeAuth references; use the public Demo developer-login App entrypoint.",
     "Remove old UI-test target, source/configuration references and shared-scheme test entries; no test pass is claimed.",
-    "Preserve original App Info.plist, product, bundle ID, iOS minimum and Swift language version."
+    "Preserve original App Info.plist, product, bundle ID, iOS minimum and Swift language version.",
+    "After verifying the complete fresh public Demo, apply the three exact Swift consumer file repairs in demo-repairs.json: paused speech labels, sheet-owned cold-history refresh and fixed image preview viewport. Original public hashes, SDK artifacts and locks stay pinned."
   ],
+  "consumerRepairManifest": "demo-repairs.json",
   "hostFiles": [
     {
       "path": "OrderAssistant.xcodeproj/project.pbxproj",
@@ -56,5 +58,5 @@
       "bytes": 1074
     }
   ],
-  "verificationBoundary": "Windows preparation only; Apple compilation, simulator UI and device signing remain unverified for this adapted host."
+  "verificationBoundary": "This offline preparation command performs no Apple build, simulator interaction or signing. Separate compiled and native UI evidence for the exact consumer repairs is recorded in the Skill compatibility.json; successful preparation alone does not assert platform acceptance. Device signing remains outside this helper."
 }

@@ -1,0 +1,15 @@
+Tansr Harmony public Demo source notice
+
+Source: https://download.tansr.com/demo/harmony/harmony-demo.zip
+Archive SHA256: 47971ff28f285f9179e9218b934b625d88401b78ec1a63b8baa4505b159e1011
+Original repaired path: harmony-demo/entry/src/main/ets/model/DemoController.ets
+
+The public archive contains no LICENSE or NOTICE file. Its original README.md
+states: "授权范围按双方已有约定，本包不新增开源许可证。"
+Authorization remains subject to the existing agreement described by that
+README. This notice does not assign an open-source license to the Demo or SDK.
+The Skill's Apache-2.0 license does not replace those upstream terms.
+
+The bundled repair removes only the background onStopVideo call from the
+public Demo controller. Preserve the original README, distribution metadata,
+dependency locks, and bundled HAR. No SDK implementation is included here.

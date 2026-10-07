@@ -8,7 +8,7 @@ import { spawnSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 
 const scriptUrl = new URL('../scripts/prepare-demo.mjs', import.meta.url);
-const repairs = Object.fromEntries(await Promise.all(['electron', 'android'].map(async demo => [
+const repairs = Object.fromEntries(await Promise.all(['electron', 'android', 'harmony'].map(async demo => [
   demo, JSON.parse(await readFile(new URL(`../assets/demo-repairs/${demo}.json`, import.meta.url), 'utf8')),
 ])));
 const digest = bytes => ({ sha256: createHash('sha256').update(bytes).digest('hex'), bytes: Buffer.byteLength(bytes) });
@@ -38,7 +38,9 @@ async function fixture(t, demoName = 'electron') {
   const replacements = repair.replacements ?? [repair.replacement];
   let before = demoName === 'electron'
     ? `// Synthetic test renderer\nfunction render(part, card, el) {\n${repair.replacement.before}  return card;\n}\n`
-    : '// Synthetic Android source\r\nimport android.os.Bundle\r\nimport androidx.compose.foundation.layout.padding\r\nimport androidx.lifecycle.Lifecycle\r\nimport androidx.lifecycle.LifecycleEventObserver\r\n        super.onCreate(savedInstanceState)\r\n                Surface(modifier = Modifier.fillMaxSize()) {\r\n                    Column {\r\n';
+    : demoName === 'harmony'
+      ? `// Synthetic controller\nclass Controller {\n  loadMedia() { this.onStopVideo?.(); }\n  closeMedia() { this.onStopVideo?.(); }\n  async background() {\n    ${repair.replacement.before}\n    await this.player.background(); this.emit();\n  }\n}\n`
+      : '// Synthetic Android source\r\nimport android.os.Bundle\r\nimport androidx.compose.foundation.layout.padding\r\nimport androidx.lifecycle.Lifecycle\r\nimport androidx.lifecycle.LifecycleEventObserver\r\n        super.onCreate(savedInstanceState)\r\n                Surface(modifier = Modifier.fillMaxSize()) {\r\n                    Column {\r\n';
   let after = before;
   for (const replacement of replacements) {
     if (!after.includes(replacement.before)) {
@@ -726,4 +728,102 @@ syncBuiltinESMExports();
   delete after[relative(f.demo, temporary).split(sep).join('/')];
   assert.deepEqual(after, before);
   await assert.rejects(lstat(f.added.file), { code: 'ENOENT' });
+});
+
+test('Harmony exact repair changes only background stop and is byte/metadata idempotent', async t => {
+  const f = await fixture(t, 'harmony');
+  const before = await snapshot(f.demo);
+  const result = f.run();
+  assert.equal(result.status, 0, result.stderr);
+  const receipt = JSON.parse(result.stdout);
+  assert.equal(receipt.demo, 'harmony');
+  assert.equal(receipt.status, 'prepared');
+  assert.equal(receipt.afterSha256, digest(f.after).sha256);
+  const text = await readFile(f.file, 'utf8');
+  assert.equal(text, f.after);
+  assert.ok(text.includes('loadMedia() { this.onStopVideo?.(); }'));
+  assert.ok(text.includes('closeMedia() { this.onStopVideo?.(); }'));
+  assert.ok(text.includes('await this.player.background(); this.emit();'));
+  assert.equal(text.split('this.onStopVideo?.();').length - 1, 2);
+  const after = await snapshot(f.demo);
+  assert.deepEqual(Object.keys(after), Object.keys(before));
+  assert.deepEqual(Object.keys(after).filter(path => after[path] !== before[path]), [repairs.harmony.target]);
+  const identity = await lstat(f.file);
+  const repeated = f.run();
+  assert.equal(repeated.status, 0, repeated.stderr);
+  assert.equal(JSON.parse(repeated.stdout).status, 'already-prepared');
+  assert.equal(JSON.parse(repeated.stdout).changed, false);
+  assertIdentity(await lstat(f.file), identity);
+  assert.deepEqual(await snapshot(f.demo), after);
+});
+
+test('Harmony unknown, edited, and line-ending-converted sources are refused without writes', async t => {
+  const f = await fixture(t, 'harmony');
+  for (const text of ['Unknown controller\n', `${f.before}// User change\n`, `${f.after}// User change\n`, f.before.replaceAll('\n', '\r\n')]) {
+    await writeFile(f.file, text);
+    const before = await snapshot(f.demo), identity = await lstat(f.file), directory = await lstat(dirname(f.file));
+    const result = f.run();
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /Unknown or user-modified Harmony source/);
+    assert.deepEqual(await snapshot(f.demo), before);
+    assertIdentity(await lstat(f.file), identity);
+    assertIdentity(await lstat(dirname(f.file)), directory);
+  }
+});
+
+for (const location of ['ancestor', 'demo-root', 'source-directory']) {
+  test(`Harmony linked ${location} is refused before source mutation`, async t => {
+    const f = await fixture(t, 'harmony');
+    const alias = join(f.root, 'linked-harmony');
+    const target = location === 'ancestor' ? join(alias, basename(f.demo)) : alias;
+    const linked = location === 'source-directory' ? join(target, dirname(repairs.harmony.target)) : alias;
+    const destination = location === 'ancestor' ? f.root : location === 'source-directory' ? dirname(f.file) : f.demo;
+    if (location === 'source-directory') await mkdir(dirname(linked), { recursive: true });
+    await symlink(destination, linked, process.platform === 'win32' ? 'junction' : 'dir');
+    try {
+      const before = await snapshot(f.demo);
+      const result = f.run(['harmony', target]);
+      assert.equal(result.status, 1);
+      assert.match(result.stderr, /link|junction|redirected/);
+      assert.deepEqual(await snapshot(f.demo), before);
+    } finally { await unlink(linked); }
+  });
+}
+
+test('Harmony hard-linked original or repaired controller is refused without changing either name', async t => {
+  const f = await fixture(t, 'harmony');
+  const alias = join(f.root, 'kept-controller.ets');
+  for (const text of [f.before, f.after]) {
+    await writeFile(f.file, text);
+    await link(f.file, alias);
+    try {
+      const before = await snapshot(f.demo);
+      const result = f.run();
+      assert.equal(result.status, 1);
+      assert.match(result.stderr, /regular, unlinked/);
+      assert.deepEqual(await snapshot(f.demo), before);
+      assert.equal(await readFile(alias, 'utf8'), text);
+    } finally { await unlink(alias); }
+  }
+});
+
+test('Harmony refuses foreign targets, creation/upgrades, ambiguous patches and wrong output hashes before writes', async t => {
+  const f = await fixture(t, 'harmony');
+  for (const kind of ['escape', 'foreign-platform', 'create', 'upgrade', 'missing-anchor', 'ambiguous-anchor', 'wrong-output']) {
+    const manifest = JSON.parse(JSON.stringify(f.manifest));
+    if (kind === 'escape') manifest.target = '../user-draft.txt';
+    if (kind === 'foreign-platform') manifest.target = repairs.electron.target;
+    if (kind === 'create') { manifest.before = null; manifest.content = f.after; }
+    if (kind === 'upgrade') manifest.upgrades = [JSON.parse(JSON.stringify(manifest)), JSON.parse(JSON.stringify(manifest))];
+    if (kind === 'missing-anchor') manifest.replacement.before = 'Not in the controller';
+    if (kind === 'ambiguous-anchor') manifest.replacement.before = 'this.onStopVideo?.();';
+    if (kind === 'wrong-output') manifest.after.sha256 = '0'.repeat(64);
+    await writeFile(f.manifestPath, JSON.stringify(manifest));
+    const before = await snapshot(f.demo), directory = await lstat(dirname(f.file));
+    const result = f.run();
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /Invalid bundled Harmony|exactly one repair location|verified output/);
+    assert.deepEqual(await snapshot(f.demo), before);
+    assertIdentity(await lstat(dirname(f.file)), directory);
+  }
 });

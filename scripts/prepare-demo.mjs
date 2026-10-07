@@ -75,20 +75,21 @@ function validFingerprint(value) {
 }
 
 /** Only these bundled repairs are selectable; no custom patch/manifest CLI input.
- * @param {'electron' | 'android'} demo
+ * @param {'electron' | 'android' | 'harmony'} demo
  */
 async function loadRepair(demo) {
   const expected = demo === 'electron'
     ? { id: 'electron-failed-tool-text', targets: ['renderer/renderer.js'], label: 'Electron' }
-    : { id: 'android-public-demo-repairs', targets: [
+    : demo === 'android' ? { id: 'android-public-demo-repairs', targets: [
       'sample/src/main/kotlin/com/tansr/sdk/sample/OrderAssistantActivity.kt',
       'sample/src/main/kotlin/com/tansr/sdk/sample/DemoMediaPreview.kt',
       'sample/src/main/kotlin/com/tansr/sdk/sample/DemoHistoryImages.kt',
-    ], label: 'Android' };
+    ], label: 'Android' }
+      : { id: 'harmony-background-video-pause', targets: ['entry/src/main/ets/model/DemoController.ets'], label: 'Harmony' };
   const manifestUrl = new URL(`../assets/demo-repairs/${demo}.json`, import.meta.url);
   /** @type {Repair} */
   const repair = JSON.parse(await readFile(manifestUrl, 'utf8'));
-  const files = demo === 'electron' ? [repair] : repair.files;
+  const files = demo === 'android' ? repair.files : [repair];
   if (repair.schemaVersion !== 1 || repair.id !== expected.id
     || !Array.isArray(files) || files.length !== expected.targets.length
     || files.some((file, index) => file?.target !== expected.targets[index])) {
@@ -137,12 +138,13 @@ async function loadRepair(demo) {
  * @param {{demo: string, target: string}} options
  */
 export async function prepareDemo({ demo, target }) {
-  if (demo !== 'electron' && demo !== 'android') throw new Error('Only the verified electron and android Demo repairs are available.');
+  if (demo !== 'electron' && demo !== 'android' && demo !== 'harmony') throw new Error('Only the verified electron, android and harmony Demo repairs are available.');
   if (typeof target !== 'string' || !isAbsolute(target)) throw new Error('Demo target must be an absolute directory.');
   const root = resolve(target);
   await assertUnlinkedPath(root);
   if (!(await lstat(root)).isDirectory()) throw new Error('Demo target must be a directory.');
   const repair = await loadRepair(demo);
+  const sourceLabel = demo === 'electron' ? 'renderer' : demo === 'android' ? 'Android source' : 'Harmony source';
   /** @type {PreparedFile[]} */
   const entries = [];
   // Validate every input and compute every output before creating even a temporary file.
@@ -155,7 +157,7 @@ export async function prepareDemo({ demo, target }) {
     if (original && !alreadyPrepared) {
       const input = fileRepair.inputs.find(input => beforeSha256 === input.before.sha256 && original.bytes.length === input.before.bytes);
       if (!input) {
-        throw new Error(`Unknown or user-modified ${demo === 'electron' ? 'renderer' : 'Android source'}; no files written. Keep user changes and review compatibility.`);
+        throw new Error(`Unknown or user-modified ${sourceLabel}; no files written. Keep user changes and review compatibility.`);
       }
       let text = original.bytes.toString('utf8');
       for (const replacement of input.replacements) {
@@ -165,14 +167,14 @@ export async function prepareDemo({ demo, target }) {
       }
       result = Buffer.from(text, 'utf8');
       if (result.length !== fileRepair.after.bytes || sha256(result) !== fileRepair.after.sha256) {
-        throw new Error(`Prepared ${demo === 'electron' ? 'renderer' : 'Android source'} does not match the verified output; no files written.`);
+        throw new Error(`Prepared ${sourceLabel} does not match the verified output; no files written.`);
       }
     }
     entries.push({ file, original, beforeSha256, result, receipt: {
       target: file, beforeSha256, afterSha256: fileRepair.after.sha256,
     } });
   }
-  const receipt = demo === 'electron'
+  const receipt = demo !== 'android'
     ? { demo, repair: repair.id, ...entries[0].receipt }
     : { demo, repair: repair.id, files: entries.map(entry => ({ ...entry.receipt, changed: entry.result !== null })) };
   if (entries.every(entry => entry.result === null)) return { ...receipt, status: 'already-prepared', changed: false };
@@ -293,10 +295,10 @@ export async function prepareDemo({ demo, target }) {
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const args = process.argv.slice(2);
   if (args.length === 1 && args[0] === '--help') {
-    console.log('Usage: node scripts/prepare-demo.mjs <electron|android> <absolute-extracted-demo-directory>\nOffline; only the selected verified repair set. Keep the Demo closed. All inputs and outputs are checked before writes; unknown content or linked paths are refused.');
+    console.log('Usage: node scripts/prepare-demo.mjs <electron|android|harmony> <absolute-extracted-demo-directory>\nOffline; only the selected verified repair set. Keep the Demo closed. All inputs and outputs are checked before writes; unknown content or linked paths are refused.');
   } else {
     try {
-      if (args.length !== 2) throw new Error('Usage: node scripts/prepare-demo.mjs <electron|android> <absolute-extracted-demo-directory>');
+      if (args.length !== 2) throw new Error('Usage: node scripts/prepare-demo.mjs <electron|android|harmony> <absolute-extracted-demo-directory>');
       console.log(JSON.stringify(await prepareDemo({ demo: args[0], target: args[1] }), null, 2));
     } catch (error) {
       console.error(error instanceof Error ? error.message : 'Demo preparation failed.');

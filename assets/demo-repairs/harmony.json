@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "harmony-background-video-pause",
+  "issue": "TPB-01 P05: DemoController.background stops video after the existing Index lifecycle has paused it, leaving Preparing on return",
+  "source": {
+    "url": "https://download.tansr.com/demo/harmony/harmony-demo.zip",
+    "sha256": "47971ff28f285f9179e9218b934b625d88401b78ec1a63b8baa4505b159e1011",
+    "archiveTarget": "harmony-demo/entry/src/main/ets/model/DemoController.ets",
+    "sdkVersion": "0.1.0 bundled release HAR; not public OHPM",
+    "license": "No new open-source license; public README refers to the existing agreement",
+    "licenseFilePresentInPublicArchive": false,
+    "noticeFile": "HARMONY-SOURCE-NOTICE.txt",
+    "noticeSha256": "a10d2a9bb6f1afe36dd060b7659ca1a19af2ad905e600c4954ee897616e0602f",
+    "originalReadmeSha256": "bccc5063fc472b0eb80df5befa1a6b4f6733ff855200d052361814e7ef32289a",
+    "verifiedOn": "2026-10-08"
+  },
+  "target": "entry/src/main/ets/model/DemoController.ets",
+  "before": {
+    "bytes": 59482,
+    "sha256": "eb1b5748b06dce6bcc6cc137966885b2e0c4a53584347d4638baab70c06b5e38"
+  },
+  "after": {
+    "bytes": 59460,
+    "sha256": "485f0b0dc8ff72d98ade56b14af42660d1f755225807575435a9f96b87dd5caf"
+  },
+  "replacement": {
+    "before": "this.speechPaused = true; this.onStopVideo?.(); this.artifactCancel.cancel();",
+    "after": "this.speechPaused = true; this.artifactCancel.cancel();"
+  },
+  "scope": "Exactly one existing public Demo source file and one matched background statement; preserve original encoding/line endings. Existing native Index pause, explicit load/close/audio transitions, cancellation, audio background handling and session flow are unchanged. Does not change SDK/HAR, protocol, dependencies, locks, credentials, published ZIP or distribution terms. Exact original or exact repaired file only; unknown user changes and linked paths are refused. Offline preparation does not launch the App or certify native UI."
+}

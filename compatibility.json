@@ -387,7 +387,31 @@
       "protocol": "public HAR legacy /v2; local SDK2/UAPI not same artifact",
       "minApi": 20,
       "targetApi": 22,
-      "status": "public_bundled_HAR_install_build_lint_passed; isolated_API22_App_and_test_HAP_installed; actual_22_unique_Hypium_cases_covered_across_original_21_pass_1_error_and_unchanged_UI_retest_pass; full_App_business_and_media_journeys_pending",
+      "status": "public_bundled_HAR_build_lint_and_22_unique_Hypium_cases_passed_across_documented_retests; six_original_App_flows_including_core64_and_separate_video24_verified; video_background_P05_repair_native_retest_passed; positive_microphone_pending",
+      "nativeAcceptance": {
+        "runtime": "API22 native HarmonyOS emulator; isolated bundle; original public HAR 0.1.0",
+        "hypium": "22_unique_cases_covered_across_21_pass_1_UI_error_and_unchanged_UI_retest_pass; original_error_retained",
+        "core": "64_unique_original_steps_passed_via_13_step_READ_prefix_and_51_step_same_session_continuation; intermediate_failed_runs_excluded",
+        "coreScope": "actual_allow_and_deny_tool_requests_results; unchanged_refund_order; actual_cancel; foreground_background_and_signin_recovery_without_message_model_resend",
+        "coreEvidence": "archive/TPB-01-two-step-product/stage1-closure/shared-host/harmony-ui-crosschecks/harmony-core-service-crosschecks.json",
+        "coreReview": "archive/TPB-01-two-step-product/stage1-closure/review/harmony-native-final-review.md",
+        "media": "five_original_media_image_flow_scopes_verified: image_artifact_TTS_playback_limit_preview_disabled_capabilities_failure_and_system_picker_image_text_history; separate_video24_passed_across_original_prefix_and_repaired_suffix",
+        "mediaEvidence": "archive/TPB-01-two-step-product/stage1-closure/shared-host/harmony-ui-crosschecks/harmony-media-service-crosschecks.json",
+        "videoFinding": "archive/TPB-01-two-step-product/stage1-closure/review/harmony-video-background-p05-review.md",
+        "videoRepairEvidence": "archive/TPB-01-two-step-product/stage1-closure/harmony/p05-video-background/final-regression-receipt.json",
+        "uiEvidence": "archive/TPB-01-two-step-product/stage1-closure/harmony/native-journey-outcome-final.json",
+        "recordingPositive": "pending_explicit_microphone_capture_authorization",
+        "resourceCleanup": "owned_emulator_processes_exited_and_device_offline; virtual_disk_preserved",
+        "resourceCleanupEvidence": "archive/TPB-01-two-step-product/stage1-closure/harmony/native-emulator-stop-settled.json",
+        "scope": "controlled synthetic model/media and public App; unknown earlier Allow and TTS operations excluded; no private SDK2, live-provider or signed-publication claim"
+      },
+      "consumerRepair": {
+        "scope": "Remove only the background onStopVideo that overwrites original Index pause; explicit load, close and audio switches keep stop; original HAR and published ZIP unchanged",
+        "preparation": "scripts/prepare-demo.mjs",
+        "preparationManifest": "assets/demo-repairs/harmony.json",
+        "preparationEvidence": "archive/TPB-01-two-step-product/stage1-closure/review/prepare-demo-harmony-public-receipt.json",
+        "nativeRetest": "original_steps18_to24_passed; paused_position3s_retained_after_Home_return;_close_removes_Video; same_session_and_no_new_VideoGen"
+      },
       "evidence": "archive/TPB-01-two-step-product/stage1/platform-harmony/result.json"
     }
   ],

@@ -2,17 +2,18 @@
 
 帮助用户在熟悉的编程助手中，把产品想法做成可运行的 AI 应用，为已有项目接入 Tansr，并继续修改、验证与排错。
 
-TPB-01 第一阶段 Skill 集已完成验收。入口为 [SKILL.md](SKILL.md)，不需要自行挑选多组内部技能。第二阶段候选 `@tansr/skill@0.1.0` 已公开发布，源码位于本 MIT 开源仓；Windows、macOS、Linux 主线 CI，以及公开 npm 下载、npx 安装和生成 Web 示例的离线运行已通过。Codex/WorkBuddy 完整宿主加载与新需求产品闭环仍待验；第二阶段尚未完整收口。
+TPB-01 第一阶段 Skill 集已完成验收。入口为 [SKILL.md](SKILL.md)，不需要自行挑选多组内部技能。第二阶段多助手候选 `@tansr/skill@0.1.1` 已公开发布至 `next`，源码位于本 MIT 开源仓；Windows、macOS、Linux 主线 CI，以及匿名 npm 下载、全新缓存 npx 安装和生成工程文件核对已通过。真实助手完整加载与新需求产品闭环仍待验；第二阶段尚未完整收口。
 
 试用候选（Node.js ≥22.19，在目标项目目录执行）：
 
 ```sh
-npx --yes @tansr/skill@0.1.0 install --host codex --scope project --yes
+npx --yes @tansr/skill@0.1.1 hosts
+npx --yes @tansr/skill@0.1.1 install --host codex --scope project --yes
 ```
 
-候选使用合同见 [安装说明](INSTALL.md)，实际助手接入见 [assistant-setup.md](references/assistant-setup.md)。本次发布显式指定 `next`，但 registry 同时返回 `latest=0.1.0`，删除该标签返回403；标签现状不作为完整宿主验收通过的证明。发布事实及剩余项见 [第二阶段回执](doc/S2-实施回执.md)。
+候选使用合同见 [安装说明](INSTALL.md)，实际助手接入见 [assistant-setup.md](references/assistant-setup.md)。安装说明与包内兼容清单保留构建时快照；本次公开回读已确认 `next=0.1.1`，`latest` 仍为历史 `0.1.0`，请使用上面的精确版本。首次发行额外latest标签与删除403仍单独留证，标签现状不作为完整宿主验收通过的证明。发布事实及剩余项见 [第二阶段回执](doc/S2-实施回执.md)。
 
-多助手扩展候选 `0.1.1` 提供 13 个目录配置，覆盖通用目录、Codex、WorkBuddy、Claude Code、Cursor、TRAE、Qoder、ZCode、Kimi Code、MiniMax Code CLI 与千问 Qwen Code 的已核实入口及地区/CLI差异。另 5 个入口提供手动导入或待核实说明，不假报安装成功。精确路径与状态可运行 `hosts --json` 查看；请先核对 npm 已发行版本，再使用安装说明中的 `@0.1.1` 命令。目录安装验收不等于全部助手实际加载验收。
+多助手扩展候选 `0.1.1` 提供 13 个目录配置，覆盖通用目录、Codex、WorkBuddy、Claude Code、Cursor、TRAE、Qoder、ZCode、Kimi Code、MiniMax Code CLI 与千问 Qwen Code 的已核实入口及地区/CLI差异。另 5 个入口提供手动导入或待核实说明，不假报安装成功。精确路径与状态可运行 `hosts --json` 查看。目录安装验收不等于全部助手实际加载验收。
 
 ## 开始一个产品
 

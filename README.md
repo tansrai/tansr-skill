@@ -2,7 +2,15 @@
 
 帮助用户在熟悉的编程助手中，把产品想法做成可运行的 AI 应用，为已有项目接入 Tansr，并继续修改、验证与排错。
 
-TPB-01 第一阶段 Skill 集已完成验收。入口为 [SKILL.md](SKILL.md)，不需要自行挑选多组内部技能。第二阶段安装器正在实现和验收，尚未公开发布；候选使用合同见 [安装说明](INSTALL.md)，实际助手接入见 [assistant-setup.md](references/assistant-setup.md)。
+TPB-01 第一阶段 Skill 集已完成验收。入口为 [SKILL.md](SKILL.md)，不需要自行挑选多组内部技能。第二阶段候选 `@tansr/skill@0.1.0` 已公开发布，源码位于本 MIT 开源仓；Windows、macOS、Linux 主线 CI，以及公开 npm 下载、npx 安装和生成 Web 示例的离线运行已通过。Codex/WorkBuddy 完整宿主加载与新需求产品闭环仍待验；第二阶段尚未完整收口。
+
+试用候选（Node.js ≥22.19，在目标项目目录执行）：
+
+```sh
+npx --yes @tansr/skill@0.1.0 install --host codex --scope project --yes
+```
+
+候选使用合同见 [安装说明](INSTALL.md)，实际助手接入见 [assistant-setup.md](references/assistant-setup.md)。本次发布显式指定 `next`，但 registry 同时返回 `latest=0.1.0`，删除该标签返回403；标签现状不作为完整宿主验收通过的证明。发布事实及剩余项见 [第二阶段回执](doc/S2-实施回执.md)。
 
 ## 开始一个产品
 

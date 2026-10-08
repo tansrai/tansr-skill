@@ -9,9 +9,10 @@
   "scripts": {
     "test": "node --test test/*.test.mjs",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint scripts test",
-    "build": "node scripts/check-skill.mjs",
-    "check:content": "node scripts/check-skill.mjs"
+    "lint": "eslint scripts installer test",
+    "build": "node scripts/check-skill.mjs && node scripts/build-installer.mjs",
+    "check:content": "node scripts/check-skill.mjs",
+    "check:package": "node scripts/check-installer-package.mjs"
   },
   "devDependencies": {
     "@types/node": "26.1.1",

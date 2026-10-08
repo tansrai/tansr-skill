@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "packageName": "@tansr/skill",
+  "binName": "tansr-skill",
+  "version": "0.1.0",
+  "skillVersion": "0.1.0",
+  "templateBaselines": [
+    { "id": "web", "version": "0.1.0" },
+    { "id": "node", "version": "1.0.0" }
+  ],
+  "runtimeBaselines": [
+    { "id": "sdk", "name": "@tansr/sdk", "version": "0.18.1" },
+    { "id": "serve", "name": "@tansr/serve", "version": "0.15.0" }
+  ],
+  "node": ">=22.19",
+  "license": "Apache-2.0",
+  "candidateTag": "next",
+  "stableTag": "latest",
+  "homepage": "https://tansr.com/",
+  "repository": "https://github.com/cpple/tansr-skill",
+  "status": "candidate"
+}

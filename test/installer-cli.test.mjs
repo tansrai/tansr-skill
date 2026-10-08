@@ -87,11 +87,12 @@ const actions = ['install', 'preview', 'status', 'update', 'rollback', 'uninstal
 const selector = ['--host', 'codex', '--scope', 'project'];
 
 async function fixture(t) {
-  const root = await mkdtemp(join(tmpdir(), 'tansr-installer-cli-'));
+  const parent = await realpath(tmpdir());
+  const root = await mkdtemp(join(parent, 'tansr-installer-cli-'));
   t.diagnostic(`Isolated CLI fixture: ${root}`);
   t.after(async () => {
     const location = resolve(root);
-    const within = relative(resolve(tmpdir()), location);
+    const within = relative(parent, location);
     assert.ok(within.startsWith('tansr-installer-cli-') && !within.includes(sep));
     await rm(location, { recursive: true, force: true });
     t.diagnostic(`CLI fixture cleanup complete: ${location}`);
@@ -552,7 +553,7 @@ test('executable invocation through filesystem aliases returns help, version and
       links.push(caseAlias);
       entries.push(join(caseAlias, 'installer', 'cli.mjs'));
       t.diagnostic('Windows npm uses command shims; POSIX npm-style file symlink route runs on macOS/Linux. Directory junction alias is exercised here.');
-      t.diagnostic('Windows also executes a junction whose stored target uses a different path spelling; the fixture root is not canonicalized.');
+      t.diagnostic('Windows also executes a junction whose stored target uses a different path spelling; the executable alias is passed unchanged.');
     }
     for (const entry of entries) {
       for (const [args, expectedCode, expectedAction] of [

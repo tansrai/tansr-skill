@@ -2,12 +2,12 @@
 
 帮助用户在熟悉的编程助手中，把产品想法做成可运行的 AI 应用，为已有项目接入 Tansr，并继续修改、验证与排错。
 
-TPB-01 第一阶段 Skill 集已完成验收。入口为 [SKILL.md](SKILL.md)，不需要自行挑选多组内部技能。第二阶段公开候选 `0.1.2` 已修复备份误发现，并完成本轮五处旧状态迁移；随后真实宿主验收发现 WorkBuddy 5.7.6 用户目录与旧官方文档不同。修正候选 `@tansr/skill@0.1.3` 将 WorkBuddy 与 CodeBuddy 分开：项目共用 `.codebuddy/skills`，默认用户目录分别为 `.workbuddy/skills` 与 `.codebuddy/skills`。第二阶段尚未完整收口，待新版发行及实际用户入口复验。
+TPB-01 第一阶段 Skill 集已完成验收。入口为 [SKILL.md](SKILL.md)，不需要自行挑选多组内部技能。第二阶段 `@tansr/skill@0.1.3` 已发布至 `next`，通过三系统 CI 和公开包安装、卸载核验。该版保留备份误发现修复，并按 WorkBuddy 5.7.6 实际实现区分目录：项目共用 `.codebuddy/skills`，WorkBuddy / CodeBuddy 默认用户目录分别为 `.workbuddy/skills` / `.codebuddy/skills`。正确 WorkBuddy 用户目录已安装并核对71文件，客户端实际加载仍待确认；`latest` 暂为0.1.0，第二阶段尚未完整收口。
 
 试用候选（Node.js ≥22.19，在目标项目目录执行）：
 
 ```sh
-# 0.1.3 修正候选发布后使用
+# 已公开的 0.1.3 修正候选
 npx --yes @tansr/skill@0.1.3 hosts
 npx --yes @tansr/skill@0.1.3 install --host codex --scope project --yes
 ```
@@ -51,7 +51,7 @@ pnpm check:package
 
 根检查负责生成器、诊断、内容一致性和安装器。构建产物为 `dist/npm`，包门核对真实 npm tarball 及解包后的内容；具体候选发行顺序见 [发行与维护](doc/S2-发行与维护.md)。Web 工程另外执行自己的 `npm test`、`npm run typecheck`、`npm run lint`、`npm run build`；Node 样例按其 README 验证。构建通过不代表真实平台、浏览器和原生设备全部验收。
 
-发行版本、公开 Demo 差异与逐平台运行状态见 [compatibility.json](compatibility.json) 和 [平台接入](references/platforms.md)。Electron 的原界面、恢复与合成媒体已验；移动端按各自回执区分构建、服务联验和界面验收。公开 0.1.1 的 Codex 项目/用户加载和新需求产品流程、WorkBuddy 项目调用已有证据；WorkBuddy 用户发现被项目备份干扰，待修复后复验，不能以落盘成功代签。
+发行版本、公开 Demo 差异与逐平台运行状态见 [compatibility.json](compatibility.json) 和 [平台接入](references/platforms.md)。Electron 的原界面、恢复与合成媒体已验；移动端按各自回执区分构建、服务联验和界面验收。公开 0.1.1 的 Codex 项目/用户加载和新需求产品流程、WorkBuddy 项目调用已有证据；WorkBuddy 的项目备份误发现和用户目录配置均已修正，仍须客户端从正确用户目录实际读取，不能以落盘成功代签。
 
 复用已核的 Electron、Android 或鸿蒙公开 Demo，可先使用本仓的 `scripts/prepare-demo.mjs` 离线准备工具；支持 `electron`、`android`、`harmony` 三种平台参数。它仅对清单中固定原件应用修正，保留 SDK/锁文件，拒绝覆盖用户修改；不安装依赖、不调用模型。完整命令、来源及各修正的原生验收边界见[平台接入](references/platforms.md)。
 

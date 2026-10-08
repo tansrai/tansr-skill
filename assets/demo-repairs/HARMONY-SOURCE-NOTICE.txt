@@ -8,7 +8,8 @@ The public archive contains no LICENSE or NOTICE file. Its original README.md
 states: "授权范围按双方已有约定，本包不新增开源许可证。"
 Authorization remains subject to the existing agreement described by that
 README. This notice does not assign an open-source license to the Demo or SDK.
-The Skill's Apache-2.0 license does not replace those upstream terms.
+The Skill's MIT license and retained Apache-2.0 terms for adapted material
+do not replace those upstream terms.
 
 The bundled repair removes only the background onStopVideo call from the
 public Demo controller. Preserve the original README, distribution metadata,

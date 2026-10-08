@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, writeFile, mkdir, readdir, rm, symlink, unlink } from 'node:fs/promises';
+import { mkdtemp, readFile, writeFile, mkdir, readdir, realpath, rm, symlink, unlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve, relative } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -8,10 +8,11 @@ import { createProject } from '../scripts/create-project.mjs';
 import { inspectProject } from '../scripts/doctor.mjs';
 
 async function fixture(t) {
-  const root = await mkdtemp(join(tmpdir(), 'tansr-tpb-01-'));
+  const temp = await realpath(tmpdir());
+  const root = await mkdtemp(join(temp, 'tansr-tpb-01-'));
   t.after(async () => {
     const checked = resolve(root);
-    assert.ok(relative(resolve(tmpdir()), checked).startsWith('tansr-tpb-01-'));
+    assert.ok(relative(temp, checked).startsWith('tansr-tpb-01-'));
     await rm(checked, { recursive: true, force: true });
   });
   return root;

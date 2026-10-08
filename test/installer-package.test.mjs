@@ -5,11 +5,11 @@ import { tmpdir } from 'node:os';
 import { join, dirname, relative, sep } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { gzipSync } from 'node:zlib';
-import { buildInstaller, PAYLOAD_FILES, INSTALLER_FILES, repositoryRoot, BUILD_RECEIPT, payloadSourcePath } from '../scripts/build-installer.mjs';
-import { checkInstallerPackage, auditTarball, readTarball } from '../scripts/check-installer-package.mjs';
+import { buildInstaller, PAYLOAD_FILES, INSTALLER_FILES, repositoryRoot, BUILD_RECEIPT, payloadSourcePath, validateRelease } from '../scripts/build-installer.mjs';
+import { checkInstallerPackage, auditTarball, readTarball, validatePackedContent } from '../scripts/check-installer-package.mjs';
 
 const release = { schemaVersion: 1, packageName: '@tansr/skill', binName: 'tansr-skill', version: '0.1.0',
-  node: '>=22.19', license: 'Apache-2.0', homepage: 'https://tansr.com/', repository: 'https://github.com/cpple/tansr-skill',
+  node: '>=22.19', license: 'MIT', homepage: 'https://tansr.com/', repository: 'https://github.com/tansrai/tansr-skill',
   skillVersion: '0.1.0', templateBaselines: [{ id: 'node', version: '1.0.0' }, { id: 'web', version: '0.1.0' }],
   runtimeBaselines: [{ id: 'serve', name: '@tansr/serve', version: '0.15.0' }, { id: 'sdk', name: '@tansr/sdk', version: '0.18.1' }] };
 
@@ -92,6 +92,48 @@ test('explicit tracked package builds, real npm pack preserves every payload byt
   assert.equal(second.manifestSha256, built.manifestSha256);
   const packedAgain = await checkInstallerPackage(f);
   assert.equal(packedAgain.integrity, result.integrity);
+});
+
+test('MIT public package preserves both license layers and rejects metadata or attribution drift', async t => {
+  const workspace = JSON.parse(await readFile(join(repositoryRoot, 'package.json'), 'utf8'));
+  const actualRelease = validateRelease(JSON.parse(await readFile(join(repositoryRoot, 'release.json'), 'utf8')));
+  assert.equal(workspace.license, 'MIT');
+  assert.equal(workspace.repository.url, actualRelease.repository);
+  assert.throws(() => validateRelease({ ...release, license: 'Apache-2.0' }), /Invalid public release/);
+  assert.throws(() => validateRelease({ ...release, repository: 'https://github.com/cpple/tansr-skill' }), /Invalid public release/);
+  const f = await fixture(t);
+  await buildInstaller({ sourceRoot: f.root });
+  const packed = await checkInstallerPackage(f);
+  assert.equal(packed.npmExtractionVerified, true);
+  assert.equal(packed.payloadFiles, 71);
+  assert.equal(packed.packageFiles, 84);
+  const files = readTarball(await readFile(packed.tarball));
+  const pkg = JSON.parse(files.get('package.json').bytes);
+  assert.equal(pkg.license, 'MIT');
+  assert.deepEqual(pkg.repository, { type: 'git', url: 'https://github.com/tansrai/tansr-skill' });
+  for (const path of ['LICENSE', 'NOTICE', 'LICENSES/Apache-2.0.txt']) {
+    const original = await readFile(join(repositoryRoot, path));
+    assert.ok(files.get(path).bytes.equals(original), path);
+    assert.ok(files.get(`skill/${path}`).bytes.equals(original), `skill/${path}`);
+  }
+  assert.match(files.get('LICENSE').bytes.toString('utf8'), /^MIT License/);
+  assert.match(files.get('LICENSES/Apache-2.0.txt').bytes.toString('utf8'), /Apache License/);
+  for (const change of [{ license: 'Apache-2.0' }, { repository: { type: 'git', url: 'https://github.com/cpple/tansr-skill' } }]) {
+    const hostile = new Map(files);
+    hostile.set('package.json', { ...files.get('package.json'), bytes: Buffer.from(JSON.stringify({ ...pkg, ...change })) });
+    assert.throws(() => validatePackedContent(hostile), /metadata mismatch/);
+  }
+  const missingLicense = new Map(files);
+  missingLicense.delete('LICENSES/Apache-2.0.txt');
+  assert.throws(() => validatePackedContent(missingLicense), /Missing packaged file: LICENSES/);
+  const changedNotice = new Map(files);
+  changedNotice.set('NOTICE', { ...files.get('NOTICE'), bytes: Buffer.from('lost attribution') });
+  assert.throws(() => validatePackedContent(changedNotice), /Root and payload license\/notice differ/);
+  const compatibilityPath = join(f.root, 'compatibility.json');
+  const compatibility = JSON.parse(await readFile(compatibilityPath, 'utf8'));
+  compatibility.skill.license = 'Apache-2.0';
+  await writeFile(compatibilityPath, JSON.stringify(compatibility));
+  await assert.rejects(buildInstaller({ sourceRoot: f.root }), /skill license differs/);
 });
 
 test('untracked required source and broken packaged reference fail before creating dist', async t => {

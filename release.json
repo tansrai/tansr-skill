@@ -13,10 +13,10 @@
     { "id": "serve", "name": "@tansr/serve", "version": "0.15.0" }
   ],
   "node": ">=22.19",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "candidateTag": "next",
   "stableTag": "latest",
   "homepage": "https://tansr.com/",
-  "repository": "https://github.com/cpple/tansr-skill",
+  "repository": "https://github.com/tansrai/tansr-skill",
   "status": "candidate"
 }

@@ -2,9 +2,9 @@
 
 本仓服务于“安装 Tansr Skill → 向编程助手描述需求 → 构建 AI 产品”。先读 `doc/PLAN-01-Skill生态与两步产品构建实施方案.md`，按原编号推进并登记证据，不把 Skill 的说明文字当作实际验证结果。
 
-- 主目录保持本地主线；开发在 `J:/tansr/worktrees/` 隔离树，沿用工作区版本化工程纪律。当前没有远端，不自行宣称已推送。
+- 主目录保持 main，公开仓库为 `tansrai/tansr-skill`；开发在 `J:/tansr/worktrees/` 隔离树，沿用工作区版本化工程纪律。仅推送主线，按需 CI 与 npm 发布分别留证。
 - `SKILL.md` 是面向助手的单一入口；详细知识按需进入 `references/`；可运行工程放 `assets/`；确定性开发辅助放 `scripts/`。
 - 依赖正式分发的 SDK/Serve，不 import 私有内核或其他仓源码，不实现第二套协议、计费与权限判断。兼容信息以实际发行包和 `compatibility.json` 为准。
 - 已有项目保留用户修改、技术栈和锁文件。模板、离线演示、真实调用与发布分别验收；模型密钥不进聊天、日志或客户端。
 - 变更先局部验证，再冻结候选执行根 `package.json` 所列门；不增加仅匹配文字的“行为测试”。真实浏览器、目标助手、原生设备缺失时准确标待验。
-- 本仓 Apache-2.0 来源说明保留；引用的运行时包有独立许可。提交格式 `type(scope): summary (TPB-01)`。
+- Tansr 自有代码与原创贡献采用根 `LICENSE` 中的 MIT；既有入口及参考资料的 Apache 来源适配义务与 `NOTICE` 保留，完整旧许可在 `LICENSES/Apache-2.0.txt`。随包 Demo 资产和独立运行时包沿用各自许可，不将第三方内容改标 MIT。提交格式 `type(scope): summary (TPB-01)`。

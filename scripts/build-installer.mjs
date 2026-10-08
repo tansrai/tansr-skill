@@ -12,7 +12,7 @@ export const INSTALLER_FILES = Object.freeze(['installer/cli.mjs', 'installer/en
 // Publication is opt-in per file. A tracked file added under assets does not
 // silently become public merely because it is in a template directory.
 export const PAYLOAD_FILES = Object.freeze([
-  'SKILL.md', 'LICENSE', 'NOTICE', 'compatibility.json', 'agents/openai.yaml',
+  'SKILL.md', 'LICENSE', 'LICENSES/Apache-2.0.txt', 'NOTICE', 'compatibility.json', 'agents/openai.yaml',
   'assets/demo-repairs/ANDROID-LICENSE.txt', 'assets/demo-repairs/ELECTRON-LICENSE.txt',
   'assets/demo-repairs/HARMONY-SOURCE-NOTICE.txt', 'assets/demo-repairs/android.json',
   'assets/demo-repairs/electron.json', 'assets/demo-repairs/harmony.json',
@@ -110,8 +110,8 @@ export function validateRelease(input) {
   const release = /** @type {Release} */ (input);
   if (!release || release.schemaVersion !== 1 || release.packageName !== '@tansr/skill'
     || release.binName !== 'tansr-skill' || !/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(release.version)
-    || release.node !== '>=22.19' || release.license !== 'Apache-2.0'
-    || release.homepage !== 'https://tansr.com/' || release.repository !== 'https://github.com/cpple/tansr-skill'
+    || release.node !== '>=22.19' || release.license !== 'MIT'
+    || release.homepage !== 'https://tansr.com/' || release.repository !== 'https://github.com/tansrai/tansr-skill'
     || typeof release.skillVersion !== 'string' || !Array.isArray(release.templateBaselines) || !Array.isArray(release.runtimeBaselines)) {
     throw new Error('Invalid public release configuration.');
   }
@@ -129,6 +129,9 @@ export function checkReleaseBaselines(release, files, prefix = '') {
     return JSON.parse(file.bytes.toString('utf8'));
   }
   const compatibility = json('compatibility.json');
+  if (release.license !== compatibility.skill?.license) {
+    throw new Error('Release skill license differs from compatibility.json.');
+  }
   if (release.skillVersion !== compatibility.skill?.version || !Array.isArray(compatibility.templates)) {
     throw new Error('Release skill version differs from compatibility.json.');
   }
@@ -302,8 +305,7 @@ export async function buildInstaller(options = {}) {
   cli.mode = 0o755;
   files.set('release.json', releaseFile);
   files.set('README.md', await source('INSTALL.md'));
-  files.set('LICENSE', await source('LICENSE'));
-  files.set('NOTICE', await source('NOTICE'));
+  for (const path of ['LICENSE', 'NOTICE', 'LICENSES/Apache-2.0.txt']) files.set(path, await source(path));
   for (const [path, content] of payload) files.set(`skill/${payloadSourcePath(path)}`, content);
   const manifest = { schemaVersion: 1, name: 'tansr', version: release.version, files: inventory(payload).map(entry => {
     const source = payloadSourcePath(entry.path);

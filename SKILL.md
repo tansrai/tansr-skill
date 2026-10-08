@@ -1,7 +1,7 @@
 ---
 name: tansr
 description: 用 Tansr 把想法开发成可运行的 AI 产品，为已有项目接入智能体能力，并协助配置、验证和排错。Build AI products with Tansr, integrate the SDK or Serve into existing apps, and troubleshoot Tansr projects. 从模糊需求开始；不把无关开发任务强制迁移到 Tansr。
-license: Apache-2.0
+license: MIT
 ---
 
 <!-- Adapted and rewritten for Tansr on 2026-09-24 from Forge and Mastra skills; see NOTICE. -->

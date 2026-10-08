@@ -99,6 +99,7 @@ export function validatePackedContent(files) {
   const pkg = JSON.parse(required('package.json').bytes.toString('utf8'));
   if (pkg.name !== release.packageName || pkg.version !== release.version || pkg.private === true || pkg.type !== 'module'
     || pkg.license !== release.license || pkg.engines?.node !== release.node
+    || pkg.homepage !== release.homepage || pkg.repository?.type !== 'git' || pkg.repository?.url !== release.repository
     || pkg.bin?.[release.binName] !== 'installer/cli.mjs' || Object.keys(pkg.bin).length !== 1
     || pkg.publishConfig?.access !== 'public' || !Array.isArray(pkg.files)) throw new Error('Packaged npm metadata mismatch.');
   // Even an empty scripts/dependency table is unnecessary in this zero-runtime-dependency installer.
@@ -113,7 +114,7 @@ export function validatePackedContent(files) {
   const manifest = JSON.parse(required('manifest.json').bytes.toString('utf8'));
   if (manifest.schemaVersion !== 1 || manifest.name !== 'tansr' || manifest.version !== release.version
     || !Array.isArray(manifest.files) || manifest.files.length !== PAYLOAD_FILES.length) throw new Error('Invalid payload manifest.');
-  const expected = new Set(['package.json', 'release.json', 'README.md', 'LICENSE', 'NOTICE', 'manifest.json', ...INSTALLER_FILES]);
+  const expected = new Set(['package.json', 'release.json', 'README.md', 'LICENSE', 'NOTICE', 'LICENSES/Apache-2.0.txt', 'manifest.json', ...INSTALLER_FILES]);
   const payloadPaths = new Set(PAYLOAD_FILES);
   const physicalPaths = new Set();
   for (const entry of manifest.files) {
@@ -131,6 +132,9 @@ export function validatePackedContent(files) {
       throw new Error(`Payload integrity mismatch: ${entry.path}`);
     }
     expected.add(path);
+  }
+  for (const path of ['LICENSE', 'NOTICE', 'LICENSES/Apache-2.0.txt']) {
+    if (!required(path).bytes.equals(required(`skill/${path}`).bytes)) throw new Error(`Root and payload license/notice differ: ${path}`);
   }
   if (files.size !== expected.size || [...files.keys()].some(path => !expected.has(path))) throw new Error('Unexpected packaged content.');
   const declared = new Set(pkg.files);

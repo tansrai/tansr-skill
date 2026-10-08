@@ -1,3 +1,25 @@
+Tansr Skill — licensing and attribution
+Current project: https://github.com/tansrai/tansr-skill
+
+Tansr original contributions
+Copyright (c) 2026 Tansr contributors
+
+The MIT label on this Tansr distribution, including SKILL.md, applies to
+Tansr's own implementation and original contributions: installer code,
+development tools, tests, and new original modifications. Those contributions
+are licensed under the MIT License in the root LICENSE file. This grant
+covers only material for which Tansr holds the relevant rights.
+
+Upstream-derived adapted material in the existing entrypoint (SKILL.md) and
+references/ retains its Apache-2.0 terms. Redistribution of that material
+must retain the applicable license, attribution, and modification notices.
+The root MIT License does not replace those conditions or relicense
+third-party material under MIT.
+
+The complete former root Apache-2.0 LICENSE, including its existing attribution,
+is preserved without changes in LICENSES/Apache-2.0.txt. The source revisions
+and adaptation notice below remain part of this distribution.
+
 Tansr skill adaptation — 2026-09-24
 
 The task routing, application-building workflow and version-grounded
@@ -20,11 +42,19 @@ commands, APIs and prerequisites; added Tansr product-use, SDK, Serve,
 mobile, billing and troubleshooting guidance. No upstream telemetry,
 automatic deployment, or unrelated skill dependency is carried over.
 The modified entrypoint and references are newly composed adaptations,
-not unmodified copies of the original skills. See LICENSE for Apache-2.0.
+not unmodified copies of the original skills. See LICENSES/Apache-2.0.txt
+for the retained Apache-2.0 license.
 
 The feedback-starter adapts the user's existing local feedback-agent
 example. Runtime packages are dependencies installed separately, with
 their own licenses. Tansr CLI binaries and credentials are not bundled.
+
+Bundled demo-derived assets, patches, and notices retain their own existing
+licenses and source terms, including the LICENSE and provenance files under
+assets/ios-app-host/ and the platform license/source notices under
+assets/demo-repairs/. The root MIT License does not replace those terms.
+SDK, Serve, CLI, and other independently distributed runtime packages retain
+the licenses supplied with their respective releases.
 
 Tansr technical facts were checked against its official public website,
 documentation, npm metadata and published type declarations on 2026-09-24.

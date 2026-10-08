@@ -1,10 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, writeFile, rm, readFile, readdir } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, rm, readFile, readdir, symlink, unlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve, relative, sep } from 'node:path';
 import { Writable } from 'node:stream';
 import { spawnSync } from 'node:child_process';
+import { pathToFileURL } from 'node:url';
 import { runCli, parseArguments, supportsNode } from '../installer/cli.mjs';
 
 const release = {
@@ -354,4 +355,73 @@ test('executable help and JSON argument failures run in a package without an eng
   assert.equal(invalid.status, 2, invalid.stderr);
   assert.equal(JSON.parse(invalid.stdout).error.code, 'INVALID_ARGUMENT');
   assert.deepEqual(await readdir(f.project), []);
+});
+
+test('executable invocation through filesystem aliases returns help, version and JSON errors', async t => {
+  const f = await fixture(t);
+  const installer = join(f.packageRoot, 'installer');
+  await mkdir(installer);
+  const executable = join(installer, 'cli.mjs');
+  await writeFile(executable, await readFile(new URL('../installer/cli.mjs', import.meta.url)));
+  const alias = join(f.root, 'package alias');
+  const links = [];
+  try {
+    await symlink(f.packageRoot, alias, process.platform === 'win32' ? 'junction' : 'dir');
+    links.push(alias);
+    const entries = [join(alias, 'installer', 'cli.mjs')];
+    if (process.platform !== 'win32') {
+      const bin = join(f.root, 'node_modules', '.bin');
+      await mkdir(bin, { recursive: true });
+      const linkedBin = join(bin, 'tansr-skill');
+      await symlink(relative(bin, executable), linkedBin, 'file');
+      links.push(linkedBin);
+      entries.push(linkedBin);
+    } else {
+      t.diagnostic('Windows npm uses command shims; POSIX npm-style file symlink route runs on macOS/Linux. Directory junction alias is exercised here.');
+    }
+    for (const entry of entries) {
+      for (const [args, expectedCode, expectedAction] of [
+        [['--help', '--json'], 0, 'help'],
+        [['--version', '--json'], 0, 'version'],
+        [['--home', f.home, '--json'], 2, 'arguments'],
+      ]) {
+        const child = spawnSync(process.execPath, [entry, ...args], { encoding: 'utf8', timeout: 10000, cwd: f.project });
+        assert.equal(child.error, undefined, `${entry}: ${child.error?.message}`);
+        assert.equal(child.signal, null);
+        assert.equal(child.status, expectedCode, child.stderr);
+        assert.notEqual(child.stdout.trim(), '', `CLI must execute when started through ${entry}`);
+        const result = JSON.parse(child.stdout);
+        assert.equal(result.action, expectedAction);
+        assert.equal(result.exitCode, expectedCode);
+        assert.equal(child.stderr, '');
+      }
+    }
+    assert.deepEqual(await readdir(f.project), []);
+    assert.deepEqual(await readdir(f.home), []);
+  } finally {
+    for (const link of links.reverse()) await unlink(link);
+  }
+});
+
+test('importing the CLI through an alias never starts it or fails for a nonexistent argv entry', async t => {
+  const f = await fixture(t);
+  const installer = join(f.packageRoot, 'installer');
+  await mkdir(installer);
+  await writeFile(join(installer, 'cli.mjs'), await readFile(new URL('../installer/cli.mjs', import.meta.url)));
+  const alias = join(f.root, 'import alias');
+  await symlink(f.packageRoot, alias, process.platform === 'win32' ? 'junction' : 'dir');
+  try {
+    const moduleUrl = pathToFileURL(join(alias, 'installer', 'cli.mjs')).href;
+    const wrapper = join(f.root, 'consumer.mjs');
+    for (const missingArgv of [false, true]) {
+      await writeFile(wrapper, `${missingArgv ? `process.argv[1] = ${JSON.stringify(join(f.root, 'nonexistent-entry.mjs'))};\n` : ''}`
+        + `const cli = await import(${JSON.stringify(moduleUrl)});\nprocess.stdout.write(JSON.stringify({ imported: typeof cli.runCli }));\n`);
+      const child = spawnSync(process.execPath, [wrapper], { encoding: 'utf8', timeout: 10000, cwd: f.project });
+      assert.equal(child.error, undefined);
+      assert.equal(child.signal, null);
+      assert.equal(child.status, 0, child.stderr);
+      assert.deepEqual(JSON.parse(child.stdout), { imported: 'function' });
+      assert.equal(child.stderr, '');
+    }
+  } finally { await unlink(alias); }
 });

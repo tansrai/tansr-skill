@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // @ts-check
-import { readFile } from 'node:fs/promises';
+import { readFile, realpath } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -269,4 +269,15 @@ export async function runCli(argv = process.argv.slice(2), context = {}) {
   }
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) process.exitCode = await runCli();
+async function isCliEntryPoint() {
+  if (!process.argv[1]) return false;
+  const entry = path.resolve(process.argv[1]);
+  if (import.meta.url === pathToFileURL(entry).href) return true;
+  // Node normally canonicalizes its main module, while argv retains npm's
+  // symlink or an OS directory alias such as macOS /var -> /private/var.
+  // Only executable identity is resolved here; target validation is unchanged.
+  try { return import.meta.url === pathToFileURL(await realpath(entry)).href; }
+  catch { return false; } // Importing from an embedding process need not have a resolvable argv[1].
+}
+
+if (await isCliEntryPoint()) process.exitCode = await runCli();

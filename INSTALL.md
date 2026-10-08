@@ -83,6 +83,6 @@ npx --yes @tansr/skill@latest uninstall --host codex --scope project --yes
 
 模板保留锁文件、`.env.example`、`.tansr` 和 `.gitignore` 等必要配置。真实密钥由应用的服务端安全配置持有，不应填入聊天、Skill 安装记录或客户端代码。
 
-本 Skill 使用 Apache-2.0，来源见随包 LICENSE 与 NOTICE。应用运行依赖的 SDK、Serve 与各平台产物分别使用其自身许可和已验版本。
+Tansr 自有安装器、工具、测试及原创贡献采用 MIT，见随包 [LICENSE](LICENSE)。入口和参考资料中既有的 Apache 来源适配内容继续保留相应义务，完整许可见 [LICENSES/Apache-2.0.txt](LICENSES/Apache-2.0.txt)，具体来源与许可范围见 [NOTICE](NOTICE)。随包 Demo 资产及独立发行的 SDK、Serve、CLI 与各平台产物沿用各自许可；根 MIT 许可不改变第三方内容的许可。
 
 [Tansr 官网](https://tansr.com/) · [开发文档](https://docs.tansr.com/)

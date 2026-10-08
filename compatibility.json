@@ -5,7 +5,7 @@
     "name": "tansr",
     "version": "0.1.0",
     "status": "stage1-accepted-local-candidate",
-    "license": "Apache-2.0",
+    "license": "MIT",
     "publishedInstaller": {
       "packageName": "@tansr/skill",
       "version": "0.1.0",

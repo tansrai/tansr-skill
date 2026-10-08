@@ -45,4 +45,6 @@ pnpm check:package
 
 iPhone App 的已有宿主已整理为[公开 Demo 准备资产](assets/ios-app-host/README.md)，消费正式 SDK 0.3.0 和原 SwiftUI 示例。准备脚本验证公开文件后新增 App 工程，并应用清单中固定摘要的 Demo 修正；不改 SDK、锁文件或用户已有工程。Apple 编译、模拟器与签名结果分别记录，不能用 Windows 的目录准备检查替代。
 
-逐项实施、证据与剩余工作统一记录在 [实施方案](doc/PLAN-01-Skill生态与两步产品构建实施方案.md)。本 Skill 的 Apache-2.0 及 [NOTICE](NOTICE) 保留原始来源；SDK、CLI 等独立产品许可按对应发行物核对。
+逐项实施、证据与剩余工作统一记录在 [实施方案](doc/PLAN-01-Skill生态与两步产品构建实施方案.md)。
+
+Tansr 自有安装器、开发工具、测试及原创贡献采用 [MIT](LICENSE)，项目位于 [tansrai/tansr-skill](https://github.com/tansrai/tansr-skill)。既有 `SKILL.md` 与参考资料中的 Apache 来源适配内容继续保留其许可义务，完整许可见 [Apache-2.0](LICENSES/Apache-2.0.txt)，来源、修订和范围见 [NOTICE](NOTICE)。随包 Demo 资产及 SDK、Serve、CLI 等独立发行物沿用各自许可，不因根许可变更而重新许可。

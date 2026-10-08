@@ -7,6 +7,7 @@ import { mkdir, open, rename, unlink, rmdir } from 'node:fs/promises';
 import { InstallerError, asInstallerError, isFsError } from './errors.mjs';
 import { resolvePaths, validateDirectoryChain, validateRelative, readRegular, maybeStat, assertNode, scanTree, portableKey, directoryIdentity } from './paths.mjs';
 import { loadManifest, validateManifest, verifyPayload } from './manifest.mjs';
+import { inspectLayout, prepareLayout } from './migration.mjs';
 
 /** @typedef {import('./manifest.mjs').FileEntry} FileEntry */
 /** @typedef {{id:string,version:string,name?:string}} Baseline */
@@ -17,8 +18,8 @@ import { loadManifest, validateManifest, verifyPayload } from './manifest.mjs';
 /** @typedef {{schemaVersion:1,txId:string,targetPath:string,action:string,phase:'prepared'|'applying'|'committed',beforeRecord:InstallRecord|null,afterRecord:InstallRecord,operations:Operation[],createdDirectories:CreatedDirectory[]}} Journal */
 /** @typedef {{targetPath:string,payloadRoot?:string,manifest?:unknown,metadata?:Metadata,_onStep?:(step:string,detail:Record<string,unknown>)=>void|Promise<void>}} Options */
 /** @typedef {{path:string,reason:string}} Preserved */
-/** @typedef {{target:string,parent:string,state:string}} Paths */
-/** @typedef {{schemaVersion:1,action:string,ok:boolean,exitCode:number,status:string,targetPath:string,statePath:string,version:string|null,filesInstalled:boolean,staticStructureValid:boolean,changes:{added:string[],updated:string[],removed:string[]},preserved:Preserved[],warnings:string[],recoveryRequired:boolean}} Result */
+/** @typedef {Awaited<ReturnType<typeof resolvePaths>>} Paths */
+/** @typedef {{schemaVersion:1,action:string,ok:boolean,exitCode:number,status:string,targetPath:string,statePath:string,legacyStatePath:string,stateLayout:'legacy'|'outside-skills-v2',migrationRequired:boolean,version:string|null,filesInstalled:boolean,staticStructureValid:boolean,changes:{added:string[],updated:string[],removed:string[]},preserved:Preserved[],warnings:string[],recoveryRequired:boolean}} Result */
 const ownerName = 'tansr-installer';
 const processStartedAt = new Date(Date.now() - process.uptime() * 1000).toISOString();
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
@@ -65,12 +66,15 @@ async function readState(paths) {
   return {record: await maybeStat(recordPath) ? validateRecord(await json(recordPath)) : null, journal: Boolean(await maybeStat(path.join(paths.state,'journal.json')))};
 }
 /** @param {Paths} paths */
-async function ensureState(paths) {
-  if (await maybeStat(paths.state)) { await readState(paths); return; }
-  await validateDirectoryChain(paths.parent,true);
-  // mkdir is exclusive on every platform. rename-over-empty-directory would adopt an unknown state directory on POSIX.
-  try{await mkdir(paths.state,{mode:0o700});}catch(error){if(!isFsError(error,'EEXIST'))throw error;await readState(paths);return;}
-  await writeJson(path.join(paths.state,'owner.json'),{schemaVersion:1,name:ownerName,targetPath:paths.target,id:randomUUID()});
+async function readLayoutState(paths){
+  const layout=await inspectLayout(paths);
+  if(layout.kind==='pending')return{record:null,journal:true,layout};
+  const state=await readState(layout.kind==='legacy'?{...paths,state:paths.legacyState}:paths);return{...state,layout};
+}
+/** @param {Result} value @param {Awaited<ReturnType<typeof inspectLayout>>} layout @returns {Result} */
+function describeLayout(value,layout){
+  if(layout.kind==='legacy'||layout.kind==='pending')return{...value,stateLayout:'legacy',migrationRequired:true,warnings:[...value.warnings,'Legacy installer state must move outside the host skills directory. Run a confirmed mutation, or recover for an interrupted transaction.']};
+  return value;
 }
 /** @param {number} pid */
 function processAlive(pid) { try { process.kill(pid,0); return true; } catch (error) { if (isFsError(error,'ESRCH')) return false; return true; } }
@@ -110,13 +114,15 @@ async function acquireLock(paths,recover,onClaim) {
 }
 /** @param {Paths} paths @param {boolean} recover @param {()=>Promise<Result>} operation @param {Options} [options] */
 async function locked(paths,recover,operation,options) {
-  await ensureState(paths); const release = await acquireLock(paths,recover,options?()=>step(options,'recovery-claimed',{}):undefined);
+  await prepareLayout(paths,recover,{writeJson,acquireLock,validateLegacy,step:async(name,detail)=>{if(options)await step(options,name,detail);}});
+  await readState(paths);await validateDirectoryChain(paths.parent,true);
+  const release = await acquireLock(paths,recover,options?()=>step(options,'recovery-claimed',{}):undefined);
   try { return await operation(); } catch (error) { throw asInstallerError(error); } finally { await release(); }
 }
 /** @param {Paths} paths @param {string} action @param {string} state @param {InstallRecord|null} record @param {Operation[]} [ops] @param {Preserved[]} [preserved] @returns {Result} */
 function result(paths,action,state,record,ops=[],preserved=[]) {
   const verified=Boolean(record?.version)&&record?.complete===true&&preserved.length===0&&['installed','up-to-date','rolled-back','commit-recovered'].includes(state);
-  return {schemaVersion:1,action,ok:preserved.length===0,exitCode:preserved.length ? 2 : 0,status:state,targetPath:paths.target,statePath:paths.state,version:record?.version ?? null,filesInstalled:verified,staticStructureValid:verified,changes:{added:ops.filter(o=>!o.before&&o.after).map(o=>o.path),updated:ops.filter(o=>o.before&&o.after).map(o=>o.path),removed:ops.filter(o=>o.before&&!o.after).map(o=>o.path)},preserved,warnings:preserved.length?['User changes or unknown files were preserved; this is not a complete replacement/removal.']:[],recoveryRequired:false};
+  return {schemaVersion:1,action,ok:preserved.length===0,exitCode:preserved.length ? 2 : 0,status:state,targetPath:paths.target,statePath:paths.state,legacyStatePath:paths.legacyState,stateLayout:'outside-skills-v2',migrationRequired:false,version:record?.version ?? null,filesInstalled:verified,staticStructureValid:verified,changes:{added:ops.filter(o=>!o.before&&o.after).map(o=>o.path),updated:ops.filter(o=>o.before&&o.after).map(o=>o.path),removed:ops.filter(o=>o.before&&!o.after).map(o=>o.path)},preserved,warnings:preserved.length?['User changes or unknown files were preserved; this is not a complete replacement/removal.']:[],recoveryRequired:false};
 }
 /** @param {string} root @param {FileEntry} entry */
 async function matches(root,entry) {
@@ -155,16 +161,16 @@ async function payload(options) {
 }
 /** @param {Options} options */
 export async function preview(options) {
-  const paths=await resolvePaths(options.targetPath), bundle=await payload(options),state=await readState(paths);
+  const paths=await resolvePaths(options.targetPath), bundle=await payload(options),state=await readLayoutState(paths);
   if(state.journal) throw new InstallerError('RECOVERY_REQUIRED','An unfinished transaction requires recover',{statePath:paths.state},4);
-  const p=await plan(paths,state.record,bundle.manifest.files);return result(paths,'preview',p.preserved.length?'conflicts':'ready',state.record,p.operations,p.preserved);
+  const p=await plan(paths,state.record,bundle.manifest.files);return describeLayout(result(paths,'preview',p.preserved.length?'conflicts':'ready',state.record,p.operations,p.preserved),state.layout);
 }
 /** @param {Options} options */
 export async function status(options) {
-  const paths=await resolvePaths(options.targetPath),state=await readState(paths);
-  if(state.journal) return {...result(paths,'status','recovery-required',state.record),ok:false,exitCode:4,recoveryRequired:true};
-  if(!state.record) { if(await maybeStat(paths.target)) return {...result(paths,'status','unmanaged',null),ok:false,exitCode:2};return result(paths,'status','not-installed',null); }
-  const p=await plan(paths,state.record,state.record.managedFiles);if(!state.record.complete&&!p.preserved.length)p.preserved.push({path:'',reason:'incomplete-installation-record'});return result(paths,'status',p.preserved.length?'modified':state.record.version?'installed':'uninstalled',state.record,[],p.preserved);
+  const paths=await resolvePaths(options.targetPath),state=await readLayoutState(paths);
+  if(state.journal) return describeLayout({...result(paths,'status','recovery-required',state.record),ok:false,exitCode:4,recoveryRequired:true},state.layout);
+  if(!state.record) { if(await maybeStat(paths.target)) return describeLayout({...result(paths,'status','unmanaged',null),ok:false,exitCode:2},state.layout);return describeLayout(result(paths,'status','not-installed',null),state.layout); }
+  const p=await plan(paths,state.record,state.record.managedFiles);if(!state.record.complete&&!p.preserved.length)p.preserved.push({path:'',reason:'incomplete-installation-record'});return describeLayout(result(paths,'status',p.preserved.length?'modified':state.record.version?'installed':'uninstalled',state.record,[],p.preserved),state.layout);
 }
 /** @param {Options} options @param {string} name @param {Record<string,unknown>} detail */
 async function step(options,name,detail) { await options._onStep?.(name,detail); }
@@ -237,7 +243,7 @@ async function transact(paths,options,action,before,after,operations,preserved,s
 /** @param {Options} options @param {'install'|'update'} action */
 async function put(options,action) {
   const paths=await resolvePaths(options.targetPath),bundle=await payload(options),metadata=validateMetadata(options.metadata);
-  const initial=await readState(paths);if(!initial.journal&&!initial.record&&await maybeStat(paths.target))throw new InstallerError('TARGET_CONFLICT','Unregistered target already exists',{targetPath:paths.target});
+  const initial=await readLayoutState(paths);if(!initial.journal&&!initial.record&&await maybeStat(paths.target))throw new InstallerError('TARGET_CONFLICT','Unregistered target already exists',{targetPath:paths.target});
   return locked(paths,false,async()=>{
     const current=await readState(paths);if(current.journal)throw new InstallerError('RECOVERY_REQUIRED','Run recover before another mutation',{statePath:paths.state},4);
     if(action==='update'&&!current.record?.version)throw new InstallerError('NOT_INSTALLED','Cannot update before installation');
@@ -246,7 +252,7 @@ async function put(options,action) {
     if(!p.operations.length&&current.record?.version===bundle.manifest.version&&current.record.complete)return result(paths,action,p.preserved.length?'partial':'up-to-date',current.record,[],p.preserved);
     const record={schemaVersion:/** @type {const} */(1),name:/** @type {const} */('tansr'),version:bundle.manifest.version,managedFiles:p.managedFiles,metadata:{...current.record?.metadata,...metadata},complete:p.preserved.length===0,installedAt:new Date().toISOString(),lastTransactionId:null};
     return transact(paths,options,action,current.record,record,p.operations,p.preserved,bundle.root,true);
-  });
+  },options);
 }
 /** @param {Options} options */
 export async function install(options) {return put(options,'install');}
@@ -254,15 +260,15 @@ export async function install(options) {return put(options,'install');}
 export async function update(options) {return put(options,'update');}
 /** @param {Options} options */
 export async function uninstall(options) {
-  const paths=await resolvePaths(options.targetPath),initial=await readState(paths);
-  if(!initial.record&&!initial.journal) {if(await maybeStat(paths.target))throw new InstallerError('TARGET_CONFLICT','Unregistered target cannot be uninstalled');return result(paths,'uninstall','not-installed',null);}
+  const paths=await resolvePaths(options.targetPath),initial=await readLayoutState(paths);
+  if(!initial.record&&!initial.journal&&initial.layout.kind!=='legacy') {if(await maybeStat(paths.target))throw new InstallerError('TARGET_CONFLICT','Unregistered target cannot be uninstalled');return result(paths,'uninstall','not-installed',null);}
   return locked(paths,false,async()=>{const state=await readState(paths);if(state.journal)throw new InstallerError('RECOVERY_REQUIRED','Run recover first',{},4);const p=await plan(paths,state.record,[]);
     const record={schemaVersion:/** @type {const} */(1),name:/** @type {const} */('tansr'),version:null,managedFiles:p.managedFiles,metadata:state.record?.metadata??{},complete:p.preserved.length===0,installedAt:new Date().toISOString(),lastTransactionId:null};
     const answer=await transact(paths,options,'uninstall',state.record,record,p.operations,p.preserved,null);
     // Only empty directories can be removed, never recursively delete a skill root.
     if(await maybeStat(paths.target)){await scanTree(paths.target);const directories=new Set();for(const op of p.operations){const parts=op.path.split('/');parts.pop();while(parts.length){directories.add(parts.join('/'));parts.pop();}}for(const directory of [...directories].sort((a,b)=>b.length-a.length))try{await validateDirectoryChain(path.join(paths.target,directory));await rmdir(path.join(paths.target,directory));}catch(error){if(!isFsError(error,'ENOTEMPTY')&&!isFsError(error,'EEXIST')&&!isFsError(error,'ENOENT'))throw error;}try{await rmdir(paths.target);}catch(error){if(!isFsError(error,'ENOTEMPTY')&&!isFsError(error,'EEXIST'))throw error;}}
     return answer;
-  });
+  },options);
 }
 /** @param {unknown} raw @param {Paths} paths @returns {Journal} */
 function validateJournal(raw,paths) {
@@ -279,11 +285,37 @@ function validateJournal(raw,paths) {
 }
 /** @param {FileEntry|null} a @param {FileEntry|null} b */
 function sameEntry(a,b){return a===null||b===null?a===b:a.path===b.path&&a.bytes===b.bytes&&a.sha256===b.sha256&&a.mode===b.mode;}
+/** Prove ownership by transaction facts before reading or moving any payload. Unknown names are never adopted.
+ * @param {Paths} paths */
+async function validateLegacy(paths){
+  await readState(paths);const nodes=await scanTree(paths.state);
+  /** @type {Map<string,'file'|'directory'>} */const allowed=new Map([['owner.json','file'],['record.json','file'],['journal.json','file'],['lock.json','file'],['transactions','directory'],['recovery-claims','directory']]);
+  /** @type {Map<string,FileEntry>} */const payloads=new Map();
+  const transactions=[...nodes].filter(([p,kind])=>kind==='directory'&&/^transactions\/[^/]+$/.test(p));
+  for(const [root]of transactions){
+    const id=root.slice('transactions/'.length);if(!uuid.test(id))throw new InstallerError('STATE_CONFLICT','Unknown transaction directory is preserved',{path:root});
+    allowed.set(root,'directory');allowed.set(`${root}/transaction.json`,'file');allowed.set(`${root}/outcome.json`,'file');allowed.set(`${root}/stage`,'directory');allowed.set(`${root}/backup`,'directory');
+    if(nodes.get(`${root}/transaction.json`)!=='file')throw new InstallerError('STATE_CONFLICT','Unregistered transaction contents are preserved',{path:root});
+    const j=validateJournal(await json(path.join(paths.state,root,'transaction.json')),paths);if(j.txId!==id)throw new InstallerError('STATE_CORRUPT','Transaction directory differs from its journal',{path:root},4);
+    for(const op of j.operations)for(const [area,file]of /** @type {const} */([['backup',op.before],['stage',op.after]]))if(file){
+      const relative=`${root}/${area}/${file.path}`;allowed.set(relative,'file');payloads.set(relative,file);
+      const parts=relative.split('/');parts.pop();while(parts.length){allowed.set(parts.join('/'),'directory');parts.pop();}
+    }
+  }
+  for(const [relative,kind]of nodes){
+    if(/^recovery-claims\/[0-9a-f-]+-[0-9]+\.json$/.test(relative)&&kind==='file'){allowed.set(relative,'file');continue;}
+    if(allowed.get(relative)!==kind)throw new InstallerError('STATE_CONFLICT','Unknown installer state content is preserved',{path:relative});
+  }
+  if(nodes.has('journal.json')){const j=validateJournal(await json(path.join(paths.state,'journal.json')),paths);await verifyJournalCopy(paths,j);}
+  for(const [relative,file]of payloads)if(nodes.has(relative)){const actual=await readRegular(path.join(paths.state,relative));if(actual.sha256!==file.sha256||actual.bytes.length!==file.bytes||(process.platform!=='win32'&&file.mode!==undefined&&actual.mode!==file.mode))throw new InstallerError('MIGRATION_CONFLICT','Managed migration data was changed; it is preserved',{path:relative},4);}
+  for(const [relative]of nodes)if(relative.endsWith('/outcome.json')){const outcome=await json(path.join(paths.state,relative));if(outcome.status!=='rolled-back'||typeof outcome.at!=='string')throw new InstallerError('STATE_CORRUPT','Transaction outcome is invalid',{path:relative},4);}
+  return new Set(nodes.keys());
+}
 /** @param {Paths} paths @param {Journal} journal */
 async function verifyJournalCopy(paths,journal){const original=validateJournal(await json(path.join(transactionPaths(paths,journal).root,'transaction.json')),paths);if(original.txId!==journal.txId||JSON.stringify(original.operations)!==JSON.stringify(journal.operations)||JSON.stringify(original.beforeRecord)!==JSON.stringify(journal.beforeRecord)||JSON.stringify(original.afterRecord)!==JSON.stringify(journal.afterRecord))throw new InstallerError('STATE_CORRUPT','Active and archived transaction facts differ',{},4);}
 /** @param {Options} options */
 export async function recover(options) {
-  const paths=await resolvePaths(options.targetPath);if(!await maybeStat(paths.state))return result(paths,'recover','nothing-to-recover',null);
+  const paths=await resolvePaths(options.targetPath);if((await inspectLayout(paths)).kind==='empty')return result(paths,'recover','nothing-to-recover',null);
   return locked(paths,true,async()=>{const state=await readState(paths);if(!state.journal)return result(paths,'recover','nothing-to-recover',state.record);const j=validateJournal(await json(path.join(paths.state,'journal.json')),paths);await verifyJournalCopy(paths,j);if(!isDeepStrictEqual(state.record,j.beforeRecord)&&!isDeepStrictEqual(state.record,j.afterRecord))throw new InstallerError('STATE_CORRUPT','Journal does not belong to the current installation record',{},4);
     if(j.phase==='committed') {for(const op of j.operations){if(op.after?!await matches(paths.target,op.after):Boolean(await maybeStat(path.join(paths.target,op.path))))throw new InstallerError('RECOVERY_CONFLICT','Committed target changed; retain journal',{path:op.path},4);}if(j.afterRecord.complete)for(const file of j.afterRecord.managedFiles)if(!await matches(paths.target,file))throw new InstallerError('RECOVERY_CONFLICT','Unchanged managed file changed after commit',{path:file.path},4);await writeJson(path.join(paths.state,'record.json'),j.afterRecord);await writeJson(path.join(transactionPaths(paths,j).root,'transaction.json'),j);await unlink(path.join(paths.state,'journal.json'));return result(paths,'recover','commit-recovered',j.afterRecord,[],j.afterRecord.complete?[]:[{path:'',reason:'incomplete-installation-record'}]);}
     await rollbackPending(paths,j);return result(paths,'recover','recovered',j.beforeRecord);
@@ -291,7 +323,7 @@ export async function recover(options) {
 }
 /** Rollback refuses any changed operation path; unrelated unknown files remain untouched. @param {Options} options */
 export async function rollback(options) {
-  const paths=await resolvePaths(options.targetPath);await readState(paths);
+  const paths=await resolvePaths(options.targetPath);await readLayoutState(paths);
   return locked(paths,false,async()=>{const state=await readState(paths);if(state.journal)throw new InstallerError('RECOVERY_REQUIRED','Run recover first',{},4);if(!state.record?.lastTransactionId)throw new InstallerError('NO_ROLLBACK','There is no managed rollback point');
     const old=validateJournal(await json(path.join(paths.state,'transactions',state.record.lastTransactionId,'transaction.json')),paths);if(old.phase!=='committed'||old.txId!==state.record.lastTransactionId||!isDeepStrictEqual(old.afterRecord,state.record))throw new InstallerError('STATE_CORRUPT','Rollback point is not the current committed transaction',{},4);
     const tx=transactionPaths(paths,old);/** @type {Operation[]} */const reverse=[];
@@ -299,5 +331,5 @@ export async function rollback(options) {
     const record=old.beforeRecord?{...old.beforeRecord,managedFiles:[...old.beforeRecord.managedFiles]}:{schemaVersion:/** @type {const} */(1),name:/** @type {const} */('tansr'),version:null,managedFiles:[],metadata:{},complete:true,installedAt:new Date().toISOString(),lastTransactionId:null};
     for(const file of record.managedFiles)if(!reverse.some(o=>o.path===file.path)&&!sameEntry(file,state.record.managedFiles.find(f=>f.path===file.path)??null))throw new InstallerError('ROLLBACK_CONFLICT','Previous ownership cannot be restored without replacing a user-deleted or unregistered file',{path:file.path});
     const current=await plan(paths,state.record,state.record.managedFiles);if(current.preserved.length)record.complete=false;return transact(paths,options,'rollback',state.record,record,reverse,current.preserved,tx.backup);
-  });
+  },options);
 }

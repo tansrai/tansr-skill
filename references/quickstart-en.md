@@ -6,13 +6,15 @@ Install the skill into your coding assistant, then describe the product you want
 
 You need Node.js ≥22.19, npm and an existing assistant installation.
 
-**Release snapshot, 2026-10-08:** public version `0.1.0` supports the Codex and WorkBuddy installation targets. The registry also points `latest` at that version, an already recorded candidate-tag isolation issue; the tag does not prove full host acceptance. The multi-host `0.1.1` version is a candidate awaiting publication. **Use the commands below only after that exact version is published.** Check the [npm versions and tags](https://www.npmjs.com/package/@tansr/skill) first.
+**Release snapshot, 2026-10-08:** `0.1.1` was published as `next`. Its installer placed transaction backups inside the host Skill directory, allowing WorkBuddy to discover an uninstalled backup. The `0.1.2` candidate fixes state isolation and migrates owned legacy state. **Use the commands below only after that exact version is published.** Check the [npm versions and tags](https://www.npmjs.com/package/@tansr/skill); file installation and actual host loading are verified separately.
+
+Starting with 0.1.2, state, staging and backups live outside the host's `skills` directory. Confirmed management operations migrate owned legacy state while preserving its history; `status` and `preview` remain read-only. A metadata-only marker prevents old installers from recreating the faulty layout. Use 0.1.2 or newer for subsequent updates, recovery and removal. Reload your assistant after migration; never select a Skill entry under a transaction backup. User-edited Skill files are preserved and explicitly reported as a partial removal.
 
 ```sh
-# For use after the 0.1.1 candidate is published
-npx --yes @tansr/skill@0.1.1 hosts
-npx --yes @tansr/skill@0.1.1 preview --host codex --scope project
-npx --yes @tansr/skill@0.1.1 install --host codex --scope project --yes
+# For use after the 0.1.2 candidate is published
+npx --yes @tansr/skill@0.1.2 hosts
+npx --yes @tansr/skill@0.1.2 preview --host codex --scope project
+npx --yes @tansr/skill@0.1.2 install --host codex --scope project --yes
 ```
 
 Replace `codex` with one supported ID. These are directory installation contracts, not a claim that every assistant has passed actual loading tests.

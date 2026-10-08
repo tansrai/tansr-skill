@@ -50,10 +50,14 @@ export async function resolvePaths(targetPath) {
   const rawParts = targetPath.slice(path.parse(targetPath).root.length).split(path.sep).filter(Boolean); rawParts.forEach(validateSegment);
   const target = path.normalize(targetPath);
   if (path.basename(target) !== 'tansr') throw new InstallerError('INVALID_TARGET', 'The target must be an independent directory named tansr', { targetPath: target });
-  const parent = path.dirname(target), state = path.join(parent, '.tansr-installer-state');
+  const parent = path.dirname(target), stateParent = path.dirname(parent);
+  const key = createHash('sha256').update(process.platform === 'win32' ? target.toLowerCase() : target).digest('hex').slice(0,16);
+  const state = path.join(stateParent, `.tansr-installer-state-${key}`), legacyState = path.join(parent, '.tansr-installer-state');
+  if(stateParent===parent)throw new InstallerError('INVALID_TARGET','The target must have an ancestor outside its skill scan directory');
   await validateDirectoryChain(parent); const targetStat = await maybeStat(target); if (targetStat) assertNode(target, targetStat, true);
   const stateStat = await maybeStat(state); if (stateStat) assertNode(state, stateStat, true);
-  return { target, parent, state };
+  const legacyStat = await maybeStat(legacyState); if (legacyStat) assertNode(legacyState, legacyStat, true);
+  return { target, parent, state, stateParent, legacyState, stateLayout: /** @type {const} */ ('outside-skills-v2') };
 }
 /** Reads only a caller-approved managed file; never follows a symlink. @param {string} file */
 export async function readRegular(file) {

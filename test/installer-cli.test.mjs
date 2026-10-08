@@ -1,13 +1,82 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, writeFile, rm, readFile, readdir, symlink, unlink } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, rm, readFile, readdir, symlink, unlink, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join, resolve, relative, sep } from 'node:path';
+import { join, resolve, relative, sep, dirname } from 'node:path';
+import { createHash } from 'node:crypto';
 import { Writable } from 'node:stream';
 import { spawnSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 import { runCli, parseArguments, supportsNode } from '../installer/cli.mjs';
 import { listHosts, findHost } from '../installer/hosts.mjs';
+import { resolvePaths } from '../installer/paths.mjs';
+
+test('confirmation names active, transaction and legacy migration locations before any engine call', async t => {
+  const f = await fixture(t);
+  const locations = await resolvePaths(join(f.project, '.codebuddy', 'skills', 'tansr'));
+  const args = ['uninstall', '--host', 'workbuddy', '--scope', 'project'];
+  const denied = await invoke(f, [...args, '--json']);
+  assert.equal(denied.json.error.code, 'CONFIRMATION_REQUIRED');
+  assert.equal(denied.loads, 0);
+  for (const value of [locations.target, locations.state, locations.legacyState]) assert.ok(denied.json.error.message.includes(value));
+  const questions = [];
+  const prompted = await invoke(f, args, { isTTY: true, prompt: async question => { questions.push(question); return 'n'; } });
+  assert.equal(prompted.loads, 0);
+  assert.equal(questions.length, 1);
+  for (const value of [locations.target, locations.state, locations.legacyState]) assert.ok(questions[0].includes(value));
+  assert.deepEqual(await readdir(f.project), []);
+});
+
+test('CLI preserves migration diagnostics and does not turn status into a mutation', async t => {
+  const f = await fixture(t);
+  const target = join(f.project, '.codebuddy', 'skills', 'tansr');
+  const details = { stateLayout: 'legacy', migrationRequired: true, legacyStatePath: join(dirname(target), '.tansr-installer-state') };
+  const result = await invoke(f, ['status', '--host', 'workbuddy', '--scope', 'project', '--json'], {}, details);
+  assert.equal(result.exitCode, 0);
+  assert.deepEqual(result.calls.map(call => call.action), ['status']);
+  assert.equal(result.json.stateLayout, 'legacy');
+  assert.equal(result.json.migrationRequired, true);
+  assert.equal(result.json.legacyStatePath, details.legacyStatePath);
+  assert.equal(result.json.readiness.hostDiscovery, 'not-verified');
+  assert.equal(result.json.readiness.skillInvocation, 'not-verified');
+  assert.deepEqual(await readdir(f.project), []);
+});
+
+test('real installer CLI targeting WorkBuddy leaves no recursive backup Skill entry after uninstall', async t => {
+  const f = await fixture(t);
+  const executable = await copyExecutable(f);
+  for (const name of ['engine.mjs', 'paths.mjs', 'manifest.mjs', 'errors.mjs', 'migration.mjs']) {
+    await writeFile(join(f.packageRoot, 'installer', name), await readFile(new URL('../installer/' + name, import.meta.url)));
+  }
+  const bytes = Buffer.from('---\nname: tansr\ndescription: synthetic CLI discovery fixture\n---\n');
+  await writeFile(join(f.packageRoot, 'skill', 'SKILL.md'), bytes);
+  await writeFile(join(f.packageRoot, 'manifest.json'), JSON.stringify({ schemaVersion: 1, name: 'tansr', version: release.skillVersion, files: [
+    { path: 'SKILL.md', bytes: bytes.length, sha256: createHash('sha256').update(bytes).digest('hex') },
+  ] }));
+  const project = await realpath(f.project);
+  const skillsRoot = join(project, '.codebuddy', 'skills');
+  const options = ['--host', 'workbuddy', '--scope', 'project', '--project', project, '--yes', '--json'];
+  const run = action => {
+    const child = spawnSync(process.execPath, [executable, action, ...options], { cwd: project, encoding: 'utf8', timeout: 30000 });
+    assert.equal(child.error, undefined);
+    assert.equal(child.status, 0, child.stderr || child.stdout);
+    return JSON.parse(child.stdout);
+  };
+  const installed = run('install');
+  assert.equal(installed.readiness.filesInstalled, true);
+  assert.equal(installed.stateLayout, 'outside-skills-v2');
+  assert.equal(dirname(installed.statePath), dirname(skillsRoot));
+  assert.equal(installed.migrationRequired, false);
+  const discovered = async () => (await readdir(skillsRoot, { recursive: true })).filter(name => name.split(/[\\/]/).at(-1) === 'SKILL.md').map(name => name.replaceAll('\\', '/')).sort();
+  assert.deepEqual(await discovered(), ['tansr/SKILL.md']);
+  const removed = run('uninstall');
+  assert.equal(removed.status, 'uninstalled');
+  assert.deepEqual(await discovered(), []);
+  const marker = JSON.parse(await readFile(join(skillsRoot, '.tansr-installer-state', 'owner.json'), 'utf8'));
+  assert.equal(marker.name, 'tansr-installer-migrated');
+  assert.equal(run('status').status, 'uninstalled');
+});
+
 
 const release = {
   schemaVersion: 1, packageName: '@tansr/skill', binName: 'tansr-skill', version: '0.1.0', node: '>=22.19', skillVersion: '0.1.0',
@@ -19,7 +88,7 @@ const selector = ['--host', 'codex', '--scope', 'project'];
 
 async function fixture(t) {
   const root = await mkdtemp(join(tmpdir(), 'tansr-installer-cli-'));
-  t.diagnostic(`CLI fixture (controlled engine only): ${root}`);
+  t.diagnostic(`Isolated CLI fixture: ${root}`);
   t.after(async () => {
     const location = resolve(root);
     const within = relative(resolve(tmpdir()), location);
@@ -58,7 +127,7 @@ async function invoke(f, argv, overrides = {}, resultOverrides = {}) {
   const engine = Object.fromEntries(actions.map(action => [action, async options => {
     calls.push({ action, options });
     return { schemaVersion: 1, action, ok: true, exitCode: 0, status: action === 'preview' ? 'ready' : action === 'uninstall' ? 'uninstalled' : 'installed',
-      targetPath: options.targetPath, statePath: join(options.targetPath, '..', '.tansr-installer-state'), version: '0.1.0',
+      targetPath: options.targetPath, statePath: (await resolvePaths(options.targetPath)).state, version: '0.1.0',
       changes: { added: [], updated: [], removed: [] }, preserved: [], warnings: [], recoveryRequired: false, filesInstalled: action !== 'preview' && action !== 'uninstall', staticStructureValid: action !== 'preview' && action !== 'uninstall', ...resultOverrides };
   }]));
   const exitCode = await runCli(argv, {

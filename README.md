@@ -2,18 +2,19 @@
 
 帮助用户在熟悉的编程助手中，把产品想法做成可运行的 AI 应用，为已有项目接入 Tansr，并继续修改、验证与排错。
 
-TPB-01 第一阶段 Skill 集已完成验收。入口为 [SKILL.md](SKILL.md)，不需要自行挑选多组内部技能。第二阶段多助手候选 `@tansr/skill@0.1.1` 已公开发布至 `next`，源码位于本 MIT 开源仓；Windows、macOS、Linux 主线 CI，以及匿名 npm 下载、全新缓存 npx 安装和生成工程文件核对已通过。真实助手完整加载与新需求产品闭环仍待验；第二阶段尚未完整收口。
+TPB-01 第一阶段 Skill 集已完成验收。入口为 [SKILL.md](SKILL.md)，不需要自行挑选多组内部技能。第二阶段正在修复安装器的备份发现问题：公开候选 `0.1.1` 的更新/卸载备份仍在宿主技能扫描目录，WorkBuddy 会把它当作技能。修复候选为 `@tansr/skill@0.1.2`，状态与备份迁出扫描范围，并迁移受管的旧安装。第二阶段尚未完整收口。
 
 试用候选（Node.js ≥22.19，在目标项目目录执行）：
 
 ```sh
-npx --yes @tansr/skill@0.1.1 hosts
-npx --yes @tansr/skill@0.1.1 install --host codex --scope project --yes
+# 确认精确版本 0.1.2 已发布后使用
+npx --yes @tansr/skill@0.1.2 hosts
+npx --yes @tansr/skill@0.1.2 install --host codex --scope project --yes
 ```
 
-候选使用合同见 [安装说明](INSTALL.md)，实际助手接入见 [assistant-setup.md](references/assistant-setup.md)。安装说明与包内兼容清单保留构建时快照；本次公开回读已确认 `next=0.1.1`，`latest` 仍为历史 `0.1.0`，请使用上面的精确版本。首次发行额外latest标签与删除403仍单独留证，标签现状不作为完整宿主验收通过的证明。发布事实及剩余项见 [第二阶段回执](doc/S2-实施回执.md)。
+候选使用合同见 [安装说明](INSTALL.md)，实际助手接入见 [assistant-setup.md](references/assistant-setup.md)。安装说明与包内兼容清单保留构建时快照；先核对精确版本的实际发行回执，未发布时不要运行该版本命令。修复版验收完成前不提升 `latest`；历史包指纹和失败记录保留。发布事实及剩余项见 [第二阶段回执](doc/S2-实施回执.md)。
 
-多助手扩展候选 `0.1.1` 提供 13 个目录配置，覆盖通用目录、Codex、WorkBuddy、Claude Code、Cursor、TRAE、Qoder、ZCode、Kimi Code、MiniMax Code CLI 与千问 Qwen Code 的已核实入口及地区/CLI差异。另 5 个入口提供手动导入或待核实说明，不假报安装成功。精确路径与状态可运行 `hosts --json` 查看。目录安装验收不等于全部助手实际加载验收。
+安装器提供 13 个目录配置，覆盖通用目录、Codex、WorkBuddy、Claude Code、Cursor、TRAE、Qoder、ZCode、Kimi Code、MiniMax Code CLI 与千问 Qwen Code 的已核实入口及地区/CLI差异。另 5 个入口提供手动导入或待核实说明，不假报安装成功。精确路径与状态可运行 `hosts --json` 查看。目录安装验收不等于全部助手实际加载验收。
 
 ## 开始一个产品
 
@@ -50,7 +51,7 @@ pnpm check:package
 
 根检查负责生成器、诊断、内容一致性和安装器。构建产物为 `dist/npm`，包门核对真实 npm tarball 及解包后的内容；具体候选发行顺序见 [发行与维护](doc/S2-发行与维护.md)。Web 工程另外执行自己的 `npm test`、`npm run typecheck`、`npm run lint`、`npm run build`；Node 样例按其 README 验证。构建通过不代表真实平台、浏览器和原生设备全部验收。
 
-发行版本、公开 Demo 差异与逐平台运行状态见 [compatibility.json](compatibility.json) 和 [平台接入](references/platforms.md)。Electron 的原界面、恢复与合成媒体已验；移动端按各自回执区分构建、服务联验和界面验收。WorkBuddy 项目及兼容用户目录已有官方依据，实际加载仍需目标宿主核验。
+发行版本、公开 Demo 差异与逐平台运行状态见 [compatibility.json](compatibility.json) 和 [平台接入](references/platforms.md)。Electron 的原界面、恢复与合成媒体已验；移动端按各自回执区分构建、服务联验和界面验收。公开 0.1.1 的 Codex 项目/用户加载和新需求产品流程、WorkBuddy 项目调用已有证据；WorkBuddy 用户发现被项目备份干扰，待修复后复验，不能以落盘成功代签。
 
 复用已核的 Electron、Android 或鸿蒙公开 Demo，可先使用本仓的 `scripts/prepare-demo.mjs` 离线准备工具；支持 `electron`、`android`、`harmony` 三种平台参数。它仅对清单中固定原件应用修正，保留 SDK/锁文件，拒绝覆盖用户修改；不安装依赖、不调用模型。完整命令、来源及各修正的原生验收边界见[平台接入](references/platforms.md)。
 

@@ -9,9 +9,9 @@ import { buildInstaller, PAYLOAD_FILES, INSTALLER_FILES, repositoryRoot, BUILD_R
 import { checkInstallerPackage, auditTarball, readTarball, validatePackedContent } from '../scripts/check-installer-package.mjs';
 import { listHosts } from '../installer/hosts.mjs';
 
-const release = { schemaVersion: 1, packageName: '@tansr/skill', binName: 'tansr-skill', version: '0.1.1',
+const release = { schemaVersion: 1, packageName: '@tansr/skill', binName: 'tansr-skill', version: '0.1.2',
   node: '>=22.19', license: 'MIT', homepage: 'https://tansr.com/', repository: 'https://github.com/tansrai/tansr-skill',
-  skillVersion: '0.1.1', templateBaselines: [{ id: 'node', version: '1.0.0' }, { id: 'web', version: '0.1.0' }],
+  skillVersion: '0.1.2', templateBaselines: [{ id: 'node', version: '1.0.0' }, { id: 'web', version: '0.1.0' }],
   runtimeBaselines: [{ id: 'serve', name: '@tansr/serve', version: '0.15.0' }, { id: 'sdk', name: '@tansr/sdk', version: '0.18.1' }] };
 
 async function fixture(t) {
@@ -131,7 +131,7 @@ test('MIT public package preserves both license layers and rejects metadata or a
   const packed = await checkInstallerPackage(f);
   assert.equal(packed.npmExtractionVerified, true);
   assert.equal(packed.payloadFiles, 71);
-  assert.equal(packed.packageFiles, 84);
+  assert.equal(packed.packageFiles, 85);
   const files = readTarball(await readFile(packed.tarball));
   const pkg = JSON.parse(files.get('package.json').bytes);
   assert.equal(pkg.license, 'MIT');

@@ -7,7 +7,7 @@ import { listHosts, findHost, resolveHostTarget } from './hosts.mjs';
 
 /** @typedef {'install'|'preview'|'status'|'update'|'rollback'|'uninstall'|'recover'} Action */
 /** @typedef {{command: Action|'hosts'|'help'|'version', host?: string, scope?: string, project?: string, yes: boolean, json: boolean, dryRun: boolean}} Arguments */
-/** @typedef {{schemaVersion: number, action: string, ok: boolean, exitCode: number, status: string, targetPath: string, statePath: string, version?: string|null, changes: {added: string[], updated: string[], removed: string[]}, preserved: unknown[], warnings: unknown[], recoveryRequired: boolean, filesInstalled?: boolean|null, staticStructureValid?: boolean|null}} EngineResult */
+/** @typedef {{schemaVersion: number, action: string, ok: boolean, exitCode: number, status: string, targetPath: string, statePath: string, stateLayout?:string, legacyStatePath?:string, migrationRequired?:boolean, version?: string|null, changes: {added: string[], updated: string[], removed: string[]}, preserved: unknown[], warnings: unknown[], recoveryRequired: boolean, filesInstalled?: boolean|null, staticStructureValid?: boolean|null}} EngineResult */
 /** @typedef {import('./engine.mjs').Options} EngineOptions */
 /** @typedef {Record<Action, (options: EngineOptions) => Promise<EngineResult>>} Engine */
 /** @typedef {{host: string, scope: string, targetPath: string, loading: unknown}} HostTarget */
@@ -229,8 +229,11 @@ export async function runCli(argv = process.argv.slice(2), context = {}) {
     target = await resolveHostTarget({ host: parsed.host, scope: parsed.scope, ...(parsed.scope === 'project' ? { project: parsed.project ?? context.cwd ?? process.cwd() } : {}), ...(context.home === undefined ? {} : { home: context.home }) });
     const action = parsed.dryRun ? 'preview' : parsed.command;
     if (mutations.has(action) && !parsed.yes) {
-      if (!interactive) throw new CliError('CONFIRMATION_REQUIRED', `尚未授权更改目标 ${target.targetPath}；检查目标后添加 --yes / Changes require confirmation; review the target and add --yes.`);
-      const answer = (await ask(`将执行 / Action: ${action}\n宿主 / Host: ${target.host}\n范围 / Scope: ${target.scope}\n精确目标 / Exact target: ${target.targetPath}\n确认更改？ / Confirm changes? [y/N]: `)).trim().toLowerCase();
+      const { resolvePaths } = await import('./paths.mjs');
+      const locations = await resolvePaths(target.targetPath);
+      const writes = `技能目标 / Skill target: ${target.targetPath}\n事务与备份（技能扫描范围外） / State outside Skill discovery: ${locations.state}\n旧状态迁移与防回写标记 / Legacy migration and version guard: ${locations.legacyState}`;
+      if (!interactive) throw new CliError('CONFIRMATION_REQUIRED', `尚未授权更改 / Changes require confirmation:\n${writes}\n检查目标后添加 --yes / Review these locations and add --yes.`);
+      const answer = (await ask(`将执行 / Action: ${action}\n宿主 / Host: ${target.host}\n范围 / Scope: ${target.scope}\n${writes}\n确认更改？ / Confirm changes? [y/N]: `)).trim().toLowerCase();
       if (!['y', 'yes'].includes(answer)) throw new CliError('CANCELLED', '已取消，未执行更改 / Cancelled without changes.');
     }
     /** @type {EngineOptions} */
@@ -263,6 +266,8 @@ export async function runCli(argv = process.argv.slice(2), context = {}) {
     if (json) output.write(`${JSON.stringify(publicResult)}\n`);
     else {
       output.write(`Tansr Skill: ${publicResult.status}\n宿主 / Host: ${target.host}; 范围 / Scope: ${target.scope}\n目标 / Target: ${target.targetPath}\n`
+        + `事务与备份 / State: ${result.statePath}\n`
+        + (result.migrationRequired ? `旧状态待迁移 / Legacy state needs migration: ${result.legacyStatePath}\n请使用当前修复版执行同目标的更改命令；只读查询不会迁移 / Use this version for the next confirmed operation; read-only checks do not migrate.\n` : '')
         + `文件已安装 / Files installed: ${readiness.filesInstalled === null ? '未核实 / not verified' : readiness.filesInstalled}\n静态结构有效 / Static structure valid: ${readiness.staticStructureValid === null ? '未核实 / not verified' : readiness.staticStructureValid}\n`
         + '助手发现 / Host discovery: 待验 / not verified\n实际调用 / Skill invocation: 待验 / not verified\n'
         + `变更 / Changes: +${result.changes.added.length} ~${result.changes.updated.length} -${result.changes.removed.length}; 保留 / Preserved: ${result.preserved.length}\n`);

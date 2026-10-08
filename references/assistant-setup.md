@@ -2,13 +2,13 @@
 
 先选择你实际使用的编程助手或 Agent 产品，安装后向同一个助手描述需求。Skill 提供开发步骤与资源，应用运行使用 SDK / Serve，见[产品使用](use.md)。
 
-**发行快照（2026-10-08）：** 公开 `0.1.0` 仅提供 Codex、WorkBuddy 两个目标；当日 registry 的 `latest` 也指向它，候选标签隔离异常仍单独记录。本轮扩展为 `0.1.1` 待发行候选，本文的精确命令只在该版本实际发布后可用。[npm 版本与标签](https://www.npmjs.com/package/@tansr/skill)是发行事实源；文件安装、宿主发现和实际调用的状态分别看[兼容清单](../compatibility.json)。
+**发行快照（2026-10-08）：** `0.1.1` 已发布至 `next`，现发现其事务备份位于宿主技能扫描目录，WorkBuddy 可在卸载后继续发现备份。`0.1.2` 为修正状态隔离及旧安装迁移的候选；**下文精确命令在该版本实际发布后使用**。发行事实以 [npm 版本与标签](https://www.npmjs.com/package/@tansr/skill)为准；文件安装与助手实际加载分别核验。
 
 ## 选择目标并预览
 
 需要 Node.js ≥22.19 和 npm。初次 npx 下载需要网络，之后使用随包内容；安装器不安装宿主、模型或模板依赖，不调用模型。
 
-以下是 0.1.1 候选的原生目录合同。项目列相对所选项目，`~` 表示当前运行环境的用户主目录；每个目标都保留完整 `tansr/` 及其相对资源。表中路径有文档或官方源码依据，**不是实际加载通过表**。
+以下是 0.1.2 候选的原生目录合同。项目列相对所选项目，`~` 表示当前运行环境的用户主目录；每个目标都保留完整 `tansr/` 及其相对资源。表中路径有文档或官方源码依据，**不是实际加载通过表**。
 
 | 产品 / `--host` | `project` | `user` | 官方依据 |
 | --- | --- | --- | --- |
@@ -29,10 +29,10 @@
 一般选 `project`，跨项目使用时明确选 `user`。一次只处理所选位置。项目路径默认当前目录，也可用 `--project <绝对路径>`；用户范围不接受 `--project`。
 
 ```sh
-# 0.1.1 候选发布后使用；下面只选择 Claude Code 一个目标
-npx --yes @tansr/skill@0.1.1 hosts --json
-npx --yes @tansr/skill@0.1.1 preview --host claude --scope project --json
-npx --yes @tansr/skill@0.1.1 install --host claude-code --scope project --yes --json
+# 0.1.2 候选发布后使用；下面只选择 Claude Code 一个目标
+npx --yes @tansr/skill@0.1.2 hosts --json
+npx --yes @tansr/skill@0.1.2 preview --host claude --scope project --json
+npx --yes @tansr/skill@0.1.2 install --host claude-code --scope project --yes --json
 ```
 
 这里 `claude` 是 `claude-code` 的别名，预览与安装仍是同一目标。其他别名包括 `codebuddy` → `workbuddy`、`kimi-code` → `kimi`、`mcode` → `minimax`、`qwen` / `qianwen` → `qwen-code`、`agents` → `generic`；完整列表以当前包的 `hosts` 为准。
@@ -87,6 +87,8 @@ Kimi 的项目范围必须位于最近的 Git 根目录。在仓库子目录执�
 这些 ID 会给出手动指引并停止，不写入猜测目录，也不自动登录、上传、发布或审核技能。普通 Kimi、千问聊天端和 MiniMax 云端 Agent，同样不能直接继承各自 Code 产品的本地目录合同。
 
 ## 更新、恢复与卸载
+
+0.1.2 将状态、暂存和备份移到技能扫描树之外：`<宿主配置根>/.tansr-installer-state-<目标路径摘要>`。旧 `skills/.tansr-installer-state` 中只保留无技能内容的防回写标记，旧安装器不能再管理该目标。受管旧状态随确认后的管理操作迁移，`status`/`preview` 保持只读。中断时按同目标回执用修复版 `recover --yes`；不要手工删锁、删备份或从备份调用技能。用户自己修改过的入口仍会保留，并在回执中列明，不能把这种部分卸载说成完全移除。
 
 从已取得的同一精确包运行，保留原 `--host` / `--scope`：
 

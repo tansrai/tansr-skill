@@ -8,7 +8,7 @@ import { execFileSync } from 'node:child_process';
 export const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 export const BUILD_RECEIPT = '.tansr-package-build.json';
 export const INSTALLER_FILES = Object.freeze(['installer/cli.mjs', 'installer/engine.mjs', 'installer/errors.mjs',
-  'installer/hosts.mjs', 'installer/manifest.mjs', 'installer/paths.mjs']);
+  'installer/hosts.mjs', 'installer/manifest.mjs', 'installer/migration.mjs', 'installer/paths.mjs']);
 // Publication is opt-in per file. A tracked file added under assets does not
 // silently become public merely because it is in a template directory.
 export const PAYLOAD_FILES = Object.freeze([

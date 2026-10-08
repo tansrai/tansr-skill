@@ -9,9 +9,9 @@ import { buildInstaller, PAYLOAD_FILES, INSTALLER_FILES, repositoryRoot, BUILD_R
 import { checkInstallerPackage, auditTarball, readTarball, validatePackedContent } from '../scripts/check-installer-package.mjs';
 import { listHosts } from '../installer/hosts.mjs';
 
-const release = { schemaVersion: 1, packageName: '@tansr/skill', binName: 'tansr-skill', version: '0.1.2',
+const release = { schemaVersion: 1, packageName: '@tansr/skill', binName: 'tansr-skill', version: '0.1.3',
   node: '>=22.19', license: 'MIT', homepage: 'https://tansr.com/', repository: 'https://github.com/tansrai/tansr-skill',
-  skillVersion: '0.1.2', templateBaselines: [{ id: 'node', version: '1.0.0' }, { id: 'web', version: '0.1.0' }],
+  skillVersion: '0.1.3', templateBaselines: [{ id: 'node', version: '1.0.0' }, { id: 'web', version: '0.1.0' }],
   runtimeBaselines: [{ id: 'serve', name: '@tansr/serve', version: '0.15.0' }, { id: 'sdk', name: '@tansr/sdk', version: '0.18.1' }] };
 
 async function fixture(t) {
@@ -82,7 +82,7 @@ test('release candidate metadata records the current host registry without asser
     const declared = compatibility.hosts.find(item => item.id === host.id);
     assert.equal(declared.registry.packageVersion, currentRelease.version);
     for (const key of ['label', 'aliases', 'installation', 'scopes', 'directories', 'documentation', 'loading',
-      'projectRoot', 'userRootEnv', 'trimUserRootEnv', 'unsupportedUserProfileEnv', 'unsupportedUserConfigEnv', 'reason']) {
+      'projectRoot', 'userRootEnv', 'trimUserRootEnv', 'skipBlankUserRootEnv', 'unsupportedUserProfileEnv', 'unsupportedUserConfigEnv', 'unsupportedProjectConfigEnv', 'reason']) {
       assert.deepEqual(declared.registry[key], host[key], `${host.id}.${key}`);
     }
     assert.equal(declared.currentCandidateHostValidation.packageVersion, currentRelease.version);

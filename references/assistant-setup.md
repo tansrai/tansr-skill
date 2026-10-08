@@ -2,18 +2,19 @@
 
 先选择你实际使用的编程助手或 Agent 产品，安装后向同一个助手描述需求。Skill 提供开发步骤与资源，应用运行使用 SDK / Serve，见[产品使用](use.md)。
 
-**发行快照（2026-10-08）：** `0.1.1` 已发布至 `next`，现发现其事务备份位于宿主技能扫描目录，WorkBuddy 可在卸载后继续发现备份。`0.1.2` 为修正状态隔离及旧安装迁移的候选；**下文精确命令在该版本实际发布后使用**。发行事实以 [npm 版本与标签](https://www.npmjs.com/package/@tansr/skill)为准；文件安装与助手实际加载分别核验。
+**发行快照（2026-10-08）：** `0.1.2` 已发布至 `next` 并修复备份误发现；真实 WorkBuddy 5.7.6 的用户技能根为 `.workbuddy/skills`，与旧官方文档不同。`0.1.3` 为区分 WorkBuddy / CodeBuddy 目录的修正候选，**下文精确命令在该版本实际发布后使用**。实际发行以 [npm 版本与标签](https://www.npmjs.com/package/@tansr/skill)为准；宿主加载单独验收。
 
 ## 选择目标并预览
 
 需要 Node.js ≥22.19 和 npm。初次 npx 下载需要网络，之后使用随包内容；安装器不安装宿主、模型或模板依赖，不调用模型。
 
-以下是 0.1.2 候选的原生目录合同。项目列相对所选项目，`~` 表示当前运行环境的用户主目录；每个目标都保留完整 `tansr/` 及其相对资源。表中路径有文档或官方源码依据，**不是实际加载通过表**。
+以下是 0.1.3 候选的原生目录合同。项目列相对所选项目，`~` 表示当前运行环境的用户主目录；每个目标都保留完整 `tansr/` 及其相对资源。表中路径有文档或官方源码依据，**不是实际加载通过表**。
 
 | 产品 / `--host` | `project` | `user` | 官方依据 |
 | --- | --- | --- | --- |
 | Codex `codex` | `.agents/skills/tansr` | `~/.agents/skills/tansr` | [技能文档](https://learn.chatgpt.com/docs/build-skills) |
-| WorkBuddy / CodeBuddy `workbuddy` | `.codebuddy/skills/tansr` | `~/.codebuddy/skills/tansr` | [WorkBuddy 项目](https://www.codebuddy.cn/docs/workbuddy/From-Beginner-to-Expert-Guide/Function-Description/Project) |
+| WorkBuddy `workbuddy` | `.codebuddy/skills/tansr` | `~/.workbuddy/skills/tansr` | 本机 WorkBuddy 5.7.6 已安装程序的配置根与扫描实现；[官方项目文档](https://www.codebuddy.cn/docs/workbuddy/From-Beginner-to-Expert-Guide/Function-Description/Project)的旧用户路径与此版本有差异 |
+| CodeBuddy `codebuddy` | `.codebuddy/skills/tansr` | `~/.codebuddy/skills/tansr` | [CodeBuddy 目录](https://www.codebuddy.cn/docs/cli/codebuddy-dir)及本机捆绑 CLI 实现 |
 | Claude Code `claude-code` | `.claude/skills/tansr` | `~/.claude/skills/tansr` | [技能文档](https://code.claude.com/docs/en/skills) |
 | Cursor `cursor` | `.cursor/skills/tansr` | `~/.cursor/skills/tansr` | [技能文档](https://cursor.com/docs/skills) |
 | TRAE 国内版 `trae` | `.trae/skills/tansr` | `~/.trae-cn/skills/tansr` | [IDE Skills](https://docs.trae.cn/ide_skills) |
@@ -29,13 +30,13 @@
 一般选 `project`，跨项目使用时明确选 `user`。一次只处理所选位置。项目路径默认当前目录，也可用 `--project <绝对路径>`；用户范围不接受 `--project`。
 
 ```sh
-# 0.1.2 候选发布后使用；下面只选择 Claude Code 一个目标
-npx --yes @tansr/skill@0.1.2 hosts --json
-npx --yes @tansr/skill@0.1.2 preview --host claude --scope project --json
-npx --yes @tansr/skill@0.1.2 install --host claude-code --scope project --yes --json
+# 0.1.3 候选发布后使用；下面只选择 Claude Code 一个目标
+npx --yes @tansr/skill@0.1.3 hosts --json
+npx --yes @tansr/skill@0.1.3 preview --host claude --scope project --json
+npx --yes @tansr/skill@0.1.3 install --host claude-code --scope project --yes --json
 ```
 
-这里 `claude` 是 `claude-code` 的别名，预览与安装仍是同一目标。其他别名包括 `codebuddy` → `workbuddy`、`kimi-code` → `kimi`、`mcode` → `minimax`、`qwen` / `qianwen` → `qwen-code`、`agents` → `generic`；完整列表以当前包的 `hosts` 为准。
+这里 `claude` 是 `claude-code` 的别名，预览与安装仍是同一目标。其他别名包括 `kimi-code` → `kimi`、`mcode` → `minimax`、`qwen` / `qianwen` → `qwen-code`、`agents` → `generic`；完整列表以当前包的 `hosts` 为准。
 
 前一个 `--yes` 确认 npx 取得包，末尾 `--yes` 确认安装器更改目标。先核对预览的路径和冲突；`--json` 和非交互执行不会等待输入。维护者在候选发布前可用构建产物 `node dist/npm/installer/cli.mjs` 加同样参数验证，不把未构建源码当安装包。
 
@@ -45,8 +46,13 @@ npx --yes @tansr/skill@0.1.2 install --host claude-code --scope project --yes --
 
 Kimi 的项目范围必须位于最近的 Git 根目录。在仓库子目录执行会拒绝安装并提示根路径，请核对后用 `--project <Git根绝对路径>` 指定；安装器不会自动向父目录写入。没有 Git 标记时使用所选项目目录。
 
+WorkBuddy 与 CodeBuddy 从 0.1.3 起是两个独立 profile；项目范围共用 `.codebuddy/skills`，用户范围不同。旧版用 `--host workbuddy --scope user` 安装的 `.codebuddy` 内容可能仍被 CodeBuddy 使用，因此新版不自动搬移或删除：先预览并安装正确的 WorkBuddy 用户目标；如需移除旧位置，明确使用 `--host codebuddy --scope user` 预览/卸载，保留原受管备份。
+
+本机 WorkBuddy 5.7.6 的桌面项目技能列表与内置 CLI 的项目扫描实现也有差异。`.codebuddy/skills` 保留已通过的实际项目调用路径；桌面列表是否展示应分别核对，不能仅凭列表未出现断言运行入口不可用。用户范围 `.workbuddy/skills` 的修正依据配置根、列表扫描与子 CLI 环境传递三处实现。
+
 用户范围有以下边界：
 
+- WorkBuddy 用户根依次读取去除两端空白的 `WORKBUDDY_CONFIG_DIR`、`CODEBUDDY_CONFIG_DIR`，然后回退 `~/.workbuddy`；CodeBuddy 使用非空的 `CODEBUDDY_CONFIG_DIR`（非空路径原样保留），否则回退 `~/.codebuddy`。两者都追加 `skills/tansr`，相对配置根被明确拒绝。两者项目范围只支持默认 `.codebuddy`；自定义 `CODEBUDDY_PROJECT_CONFIG_DIR` 指向其他目录时明确拒绝，不猜目标，不修改宿主配置。
 - Codex 的通用用户根是 `~/.agents/skills`；`CODEX_HOME` 管状态与配置，不能据此把通用根迁进去。
 - Claude Code 的 `CLAUDE_CONFIG_DIR`、Qoder 的 `QODER_CONFIG_DIR` 若指向非默认配置根，当前安装器会拒绝用户范围。改选项目范围或按宿主官方导入步骤操作，不替用户改环境变量。
 - Kimi Code 使用 `KIMI_CODE_HOME/skills`，未设置时用表中默认根；这适用于当前 Kimi Code，不是旧归档 kimi-cli 的 `.kimi` 目录。

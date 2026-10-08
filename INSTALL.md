@@ -2,7 +2,7 @@
 
 让你熟悉的编程助手，帮你把想法做成 AI 产品：选择助手安装 Skill，再描述产品需求。Skill 提供开发指引、SDK / Serve 接入资料和起步工程；安装本身不创建账号、不调用模型、不部署应用。
 
-**发行快照（2026-10-08）：** `0.1.1` 已发布至 `next`，现发现其事务备份位于宿主技能扫描目录，WorkBuddy 可在卸载后继续发现备份。`0.1.2` 为修正状态隔离及旧安装迁移的候选；**下文精确命令在该版本实际发布后使用**。发行事实以 [npm 版本与标签](https://www.npmjs.com/package/@tansr/skill)为准；文件安装与助手实际加载分别核验。
+**发行快照（2026-10-08）：** `0.1.2` 已发布至 `next` 并修复备份误发现；真实 WorkBuddy 5.7.6 的用户技能根为 `.workbuddy/skills`，与旧官方文档不同。`0.1.3` 为区分 WorkBuddy / CodeBuddy 目录的修正候选，**下文精确命令在该版本实际发布后使用**。实际发行以 [npm 版本与标签](https://www.npmjs.com/package/@tansr/skill)为准；宿主加载单独验收。
 
 ## 第一步：选择一个助手并安装
 
@@ -11,22 +11,23 @@
 在准备开发产品的目录运行以下命令。以下以 Codex 为例，换助手时只替换 `--host`：
 
 ```sh
-# 0.1.2 候选发布后使用
-npx --yes @tansr/skill@0.1.2 hosts
-npx --yes @tansr/skill@0.1.2 preview --host codex --scope project
-npx --yes @tansr/skill@0.1.2 install --host codex --scope project --yes
+# 0.1.3 候选发布后使用
+npx --yes @tansr/skill@0.1.3 hosts
+npx --yes @tansr/skill@0.1.3 preview --host codex --scope project
+npx --yes @tansr/skill@0.1.3 install --host codex --scope project --yes
 ```
 
 也可把这段话交给编程助手：
 
-> 请在当前项目安装 Tansr Skill。先确认精确版本 0.1.2 已发布、Node.js 至少为 22.19，使用 `preview --host codex --scope project` 查看目标，再运行同版本的 `install --host codex --scope project --yes`。有冲突时保留已有内容。安装后在本助手中确认技能可见，并实际读取它的 SKILL.md，分别报告结果。
+> 请在当前项目安装 Tansr Skill。先确认精确版本 0.1.3 已发布、Node.js 至少为 22.19，使用 `preview --host codex --scope project` 查看目标，再运行同版本的 `install --host codex --scope project --yes`。有冲突时保留已有内容。安装后在本助手中确认技能可见，并实际读取它的 SKILL.md，分别报告结果。
 
-0.1.2 候选的目录安装选择如下；**支持写入目录不等于该助手已通过实际加载验收**。产品版本、启用状态和运行系统仍会影响发现结果。
+0.1.3 候选的目录安装选择如下；**支持写入目录不等于该助手已通过实际加载验收**。产品版本、启用状态和运行系统仍会影响发现结果。
 
 | 助手 / 产品 | `--host`（括号内为别名） | 可选范围 |
 | --- | --- | --- |
 | Codex | `codex` | `project` / `user` |
-| WorkBuddy / CodeBuddy | `workbuddy`（`codebuddy`） | `project` / `user` |
+| WorkBuddy | `workbuddy` | `project` / `user` |
+| CodeBuddy | `codebuddy` | `project` / `user` |
 | Claude Code | `claude-code`（`claude`） | `project` / `user` |
 | Cursor | `cursor` | `project` / `user` |
 | TRAE 国内版 / TraeCode | `trae`（`trae-cn`、`traecode`） | `project` / `user` |
@@ -42,8 +43,8 @@ npx --yes @tansr/skill@0.1.2 install --host codex --scope project --yes
 别名与正式 ID 指向同一目标，例如 `--host claude` 等同 `--host claude-code`。一般选项目范围；跨项目使用时明确选 `--scope user`。ZCode 目前只核实用户目录，例如：
 
 ```sh
-# 仅当你选择 ZCode；0.1.2 候选发布后使用
-npx --yes @tansr/skill@0.1.2 install --host zcode --scope user --yes
+# 仅当你选择 ZCode；0.1.3 候选发布后使用
+npx --yes @tansr/skill@0.1.3 install --host zcode --scope user --yes
 ```
 
 **一次只安装所选的一处。** `generic` 写入 `.agents/skills/tansr`，与 Codex 共用目标，也可能被其他已支持该约定的助手读取；它不是“自动安装到所有助手”。精确路径、重载和自定义配置根限制见[助手安装说明](https://github.com/tansrai/tansr-skill/blob/main/references/assistant-setup.md)；包内对应 `skill/references/assistant-setup.md`。
@@ -69,11 +70,11 @@ npx --yes @tansr/skill@0.1.2 install --host zcode --scope user --yes
 以下同样使用已发布的精确候选版本，并保留最初选择的宿主与范围：
 
 ```sh
-# 0.1.2 候选发布后使用
-npx --yes @tansr/skill@0.1.2 status --host codex --scope project
-npx --yes @tansr/skill@0.1.2 update --host codex --scope project --yes
-npx --yes @tansr/skill@0.1.2 rollback --host codex --scope project --yes
-npx --yes @tansr/skill@0.1.2 uninstall --host codex --scope project --yes
+# 0.1.3 候选发布后使用
+npx --yes @tansr/skill@0.1.3 status --host codex --scope project
+npx --yes @tansr/skill@0.1.3 update --host codex --scope project --yes
+npx --yes @tansr/skill@0.1.3 rollback --host codex --scope project --yes
+npx --yes @tansr/skill@0.1.3 uninstall --host codex --scope project --yes
 ```
 
 `status` 只检查文件，不证明助手已加载。`update` 使用当前命令取得的包内容；`rollback` 回退登记的前一版。卸载保留用户修改、未知文件、其他 Skill 和已创建的产品。上次进程中断时先看 `status`，仅按提示执行同目标的 `recover --yes`。

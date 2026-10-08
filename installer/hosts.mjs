@@ -5,7 +5,7 @@ import { dirname, isAbsolute, join, parse, resolve } from 'node:path';
 
 /** @typedef {'project'|'user'} Scope */
 /** @typedef {{discovery:string,explicitInvocation:string,automaticInvocation:string,verification:string}} Loading */
-/** @typedef {{id:string,label:string,aliases:string[],scopes:Scope[],installation:'directory'|'manual',directories:Partial<Record<Scope,string>>,documentation:string,loading:Loading,projectRoot?:'git',userRootEnv?:string[],trimUserRootEnv?:boolean,unsupportedUserProfileEnv?:string[],unsupportedUserConfigEnv?:string[],reason?:string}} Host */
+/** @typedef {{id:string,label:string,aliases:string[],scopes:Scope[],installation:'directory'|'manual',directories:Partial<Record<Scope,string>>,documentation:string,loading:Loading,projectRoot?:'git',userRootEnv?:string[],trimUserRootEnv?:boolean,skipBlankUserRootEnv?:boolean,unsupportedUserProfileEnv?:string[],unsupportedUserConfigEnv?:string[],unsupportedProjectConfigEnv?:string[],reason?:string}} Host */
 const verification = '文件安装不证明助手加载成功；请核对实际读取的 tansr/SKILL.md 路径 / File installation does not prove host loading; verify the actual Skill path read.';
 /** @param {string} discovery @param {string} explicitInvocation @returns {Loading} */
 const loading = (discovery, explicitInvocation) => ({ discovery, explicitInvocation, automaticInvocation: '向所选助手描述产品需求；是否自动选择由宿主及任务决定 / Describe your product; automatic selection depends on the host and task.', verification });
@@ -22,7 +22,8 @@ function manual(id, label, aliases, documentation, reason) {
 const hosts = [
   directory('generic', '通用 Agent Skills 目录', ['agents', 'universal', '通用'], '.agents/skills', '.agents/skills', 'https://agentskills.io/integrate-skills', loading('与 Codex 共用同一物理目录，更新、回退、卸载影响所有读取它的助手；请确认宿主支持通用目录 / Shared with Codex; updates, rollback and removal affect every consumer of this path.', '按所用助手的技能入口调用 / Use your host Skill entry.')),
   directory('codex', 'Codex', [], '.agents/skills', '.agents/skills', 'https://learn.chatgpt.com/docs/build-skills', loading('自动检测变化；未出现时重启。与 generic 共用物理目录，更新、回退、卸载影响同目录所有消费者 / Restart if missing. The generic profile shares this location and all management actions.', '在 CLI/IDE 使用 /skills 或 $tansr / Use /skills or $tansr.')),
-  directory('workbuddy', 'WorkBuddy / CodeBuddy', ['codebuddy'], '.codebuddy/skills', '.codebuddy/skills', 'https://www.codebuddy.cn/docs/workbuddy/From-Beginner-to-Expert-Guide/Function-Description/Project', loading('打开目标项目，检查技能启用状态；用户目录同时兼容 CodeBuddy / Open the project and check Skill activation; the user root is shared with CodeBuddy.', '在技能选择器选择 Tansr，或明确提及 Tansr Skill / Select Tansr or explicitly request it.')),
+  directory('workbuddy', 'WorkBuddy', [], '.codebuddy/skills', '.workbuddy/skills', 'https://www.codebuddy.cn/docs/workbuddy/From-Beginner-to-Expert-Guide/Function-Description/Project', loading('桌面用户技能默认从 ~/.workbuddy/skills 读取，可在技能列表核对启用状态；项目 .codebuddy/skills 沿用已验证的运行入口，需核对实际读取的 SKILL.md 路径，未保证出现在桌面技能列表。发现后是否选用由宿主决定 / Desktop user Skills use ~/.workbuddy/skills. The project .codebuddy/skills path follows the verified runtime entry; verify the actual SKILL.md read, as desktop listing is not guaranteed. Discovery does not prove selection.', '在技能选择器选择 Tansr，或明确提及 Tansr Skill / Select Tansr or explicitly request it.'), { userRootEnv: ['WORKBUDDY_CONFIG_DIR', 'CODEBUDDY_CONFIG_DIR'], trimUserRootEnv: true, unsupportedProjectConfigEnv: ['CODEBUDDY_PROJECT_CONFIG_DIR'] }),
+  directory('codebuddy', 'CodeBuddy', [], '.codebuddy/skills', '.codebuddy/skills', 'https://www.codebuddy.cn/docs/cli/codebuddy-dir', loading('默认用户与项目技能分别从 ~/.codebuddy/skills 和 .codebuddy/skills 读取；与 WorkBuddy 桌面的默认用户目录不同，请核对技能列表实际路径 / Default user and project Skills use ~/.codebuddy/skills and .codebuddy/skills; WorkBuddy desktop has a separate default user root. Verify the actual listed path.', '在 CodeBuddy 的技能入口选择 Tansr，或明确要求使用 Tansr Skill / Select Tansr in CodeBuddy or explicitly request it.'), { userRootEnv: ['CODEBUDDY_CONFIG_DIR'], skipBlankUserRootEnv: true, unsupportedProjectConfigEnv: ['CODEBUDDY_PROJECT_CONFIG_DIR'] }),
   directory('claude-code', 'Claude Code', ['claude'], '.claude/skills', '.claude/skills', 'https://code.claude.com/docs/en/skills', loading('使用 /reload-skills；旧版不支持时重新启动 / Use /reload-skills, or restart older versions.', '/tansr'), { unsupportedUserConfigEnv: ['CLAUDE_CONFIG_DIR'] }),
   directory('cursor', 'Cursor', [], '.cursor/skills', '.cursor/skills', 'https://cursor.com/docs/context/skills', loading('重新打开 Cursor，检查 Agent 的技能列表；不会开启云端同步 / Reopen Cursor and inspect Agent Skills; no cloud sync is enabled.', '/tansr 或 @ 选择技能 / /tansr or @ Skill selection.')),
   directory('trae', 'TRAE 国内版 / TraeCode', ['trae-cn', 'traecode'], '.trae/skills', '.trae-cn/skills', 'https://docs.trae.cn/ide_skills', loading('在设置的技能与命令中检查并启用；不代改通用目录导入开关 / Check Skills and Commands; generic-directory import settings remain under your control.', '在技能入口选择，或明确要求使用 Tansr Skill / Select the Skill or explicitly request it.')),
@@ -77,6 +78,7 @@ export async function resolveHostTarget(options) {
     let overridden = false;
     for (const key of host.userRootEnv ?? []) {
       const value = host.trimUserRootEnv ? env[key]?.trim() : env[key];
+      if (host.skipBlankUserRootEnv && !value?.trim()) continue;
       if (value) { input = value; directory = 'skills'; overridden = true; break; }
     }
     if (!overridden && host.unsupportedUserProfileEnv?.some(key => env[key] !== undefined && env[key] !== '')) throw fail('host_custom_profile_unsupported', `${host.label}: 命名用户 profile 需要显式绝对配置根（${host.userRootEnv?.[0]}），或选择项目范围 / Specify the named profile data root, or choose project scope.`);
@@ -84,6 +86,15 @@ export async function resolveHostTarget(options) {
   if (!isAbsolute(input)) throw fail('project_path_relative', '安装范围及配置根必须使用绝对路径 / Installation and config roots must be absolute.');
   const base = resolve(input);
   if (base === parse(base).root) throw fail('filesystem_root_forbidden', '请选择具体项目目录或用户级范围，不在文件系统根目录安装。');
+  if (scope === 'project') {
+    for (const key of host.unsupportedProjectConfigEnv ?? []) {
+      const value = env[key]?.trim();
+      if (!value) continue;
+      const actual = resolve(base, value), expected = resolve(base, directory, '..');
+      const same = process.platform === 'win32' ? actual.toLowerCase() === expected.toLowerCase() : actual === expected;
+      if (!same) throw fail('host_custom_configuration_unsupported', `${host.label}: ${key} 指向自定义项目配置根；当前适配只支持所选项目的 .codebuddy 目录。请按宿主文档导入 / This profile supports the selected project's default .codebuddy root; custom project roots require host-specific import. ${host.documentation}`);
+    }
+  }
   if (scope === 'project' && host.projectRoot === 'git') {
     for (let current = base; ; current = dirname(current)) {
       let markerExists = false;

@@ -3,20 +3,20 @@
   "task": "TPB-01",
   "skill": {
     "name": "tansr",
-    "version": "0.1.2",
-    "status": "stage2-installer-state-migration-candidate",
+    "version": "0.1.3",
+    "status": "stage2-workbuddy-runtime-directory-candidate",
     "license": "MIT",
     "publishedInstaller": {
       "packageName": "@tansr/skill",
-      "version": "0.1.2",
-      "status": "not-published-stage2-state-migration-candidate",
-      "snapshotAt": "2026-10-08T06:47:24.684Z",
+      "version": "0.1.3",
+      "status": "not-published-stage2-workbuddy-runtime-directory-candidate",
+      "snapshotAt": "2026-10-08T07:39:46.594Z",
       "publicationStateIsBuildSnapshot": true,
       "currentRegistry": "https://registry.npmjs.org/@tansr%2fskill",
       "candidateTag": "next",
       "stableTag": "latest",
       "registryDownloadVerified": false,
-      "packagedHostValidation": "pending-state-migration-regression",
+      "packagedHostValidation": "pending-correct-workbuddy-user-root",
       "releaseSource": "release.json"
     }
   },
@@ -156,7 +156,7 @@
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.2",
+        "packageVersion": "0.1.3",
         "label": "Codex",
         "aliases": [],
         "installation": "directory",
@@ -178,7 +178,7 @@
         }
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.2",
+        "packageVersion": "0.1.3",
         "project": "not_tested",
         "user": "not_tested",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -186,7 +186,7 @@
     },
     {
       "id": "workbuddy",
-      "documentationStatus": "project-and-compatible-user-directories-documented; runtime-loading-not-tested",
+      "documentationStatus": "official-documentation-and-Windows-5.7.6-runtime-diverge; user-root-corrected-from-runtime",
       "systems": {
         "windows": "2026-10-08 官方 Windows 指南确认 Windows 10+ x64；ARM64 需按具体版本另核；本轮未实测宿主",
         "macos": "macOS 12+；Intel X64、M 系列 ARM64，文档事实，本轮未实测",
@@ -202,7 +202,9 @@
           "$CWD/.codebuddy/skills"
         ],
         "userDirectories": [
-          "$HOME/.codebuddy/skills"
+          "$WORKBUDDY_CONFIG_DIR/skills (trimmed when set)",
+          "$CODEBUDDY_CONFIG_DIR/skills (trimmed fallback)",
+          "$HOME/.workbuddy/skills (default)"
         ],
         "format": {
           "file": "SKILL.md",
@@ -214,9 +216,9 @@
         },
         "explicit": "官方描述在对话框选择已安装技能；未确认 /skill-name、$skill-name 语法。",
         "automatic": "自定义技能可由自然语言意图触发；项目页已定义项目技能目录及兼容用户配置，实际发现和触发尚未实测。",
-        "reload": "UI 导入会自动配置；外部文件变化的热重载/重启规则未知。",
+        "reload": "After external install, inspect the installed Skill in the picker; restart if missing. User-scope invocation remains pending.",
         "import": "技能面板上传本地包并导入，随后可启用/关闭/卸载。",
-        "conflicts": "官方规定同名技能项目级优先于用户级；兼容用户目录可能同时被 CodeBuddy 消费，安装器不自动修改另一范围。",
+        "conflicts": "WorkBuddy 5.7.6 and CodeBuddy share project .codebuddy/skills, but default user roots are different. Never move the other root automatically.",
         "sourceIds": [
           "WB-SKILLS",
           "WB-TASK",
@@ -226,7 +228,7 @@
       },
       "actualDiscovery": "not_tested",
       "actualInvocation": "not_tested",
-      "installationAdapter": "stage2-local-candidate-project-and-compatible-user",
+      "installationAdapter": "stage2-workbuddy-native-config-root",
       "packagedHostValidation": {
         "project": "not_tested",
         "user": "not_tested",
@@ -240,15 +242,98 @@
           "https://www.codebuddy.cn/docs/workbuddy/From-Beginner-to-Expert-Guide/Function-Description/Skills-Market",
           "https://www.codebuddy.cn/docs/workbuddy/From-Beginner-to-Expert-Guide/Installation-Win-Guide"
         ],
-        "evidence": "archive/TPB-01-two-step-product/stage2/host-workbuddy/REPORT.md"
+        "evidence": "archive/TPB-01-two-step-product/stage2/host-workbuddy/REPORT.md",
+        "runtimeEvidence": "archive/TPB-01-two-step-product/stage2/closure-20261008/workbuddy-user-discovery/local-loader/"
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.2",
-        "label": "WorkBuddy / CodeBuddy",
-        "aliases": [
-          "codebuddy"
+        "packageVersion": "0.1.3",
+        "label": "WorkBuddy",
+        "aliases": [],
+        "installation": "directory",
+        "scopes": [
+          "project",
+          "user"
         ],
+        "directories": {
+          "project": ".codebuddy/skills",
+          "user": ".workbuddy/skills"
+        },
+        "documentation": "https://www.codebuddy.cn/docs/workbuddy/From-Beginner-to-Expert-Guide/Function-Description/Project",
+        "readiness": "directory-contract-or-manual-guidance-only; host-loading-not-verified",
+        "loading": {
+          "discovery": "桌面用户技能默认从 ~/.workbuddy/skills 读取，可在技能列表核对启用状态；项目 .codebuddy/skills 沿用已验证的运行入口，需核对实际读取的 SKILL.md 路径，未保证出现在桌面技能列表。发现后是否选用由宿主决定 / Desktop user Skills use ~/.workbuddy/skills. The project .codebuddy/skills path follows the verified runtime entry; verify the actual SKILL.md read, as desktop listing is not guaranteed. Discovery does not prove selection.",
+          "explicitInvocation": "在技能选择器选择 Tansr，或明确提及 Tansr Skill / Select Tansr or explicitly request it.",
+          "automaticInvocation": "向所选助手描述产品需求；是否自动选择由宿主及任务决定 / Describe your product; automatic selection depends on the host and task.",
+          "verification": "文件安装不证明助手加载成功；请核对实际读取的 tansr/SKILL.md 路径 / File installation does not prove host loading; verify the actual Skill path read."
+        },
+        "userRootEnv": [
+          "WORKBUDDY_CONFIG_DIR",
+          "CODEBUDDY_CONFIG_DIR"
+        ],
+        "trimUserRootEnv": true,
+        "unsupportedProjectConfigEnv": [
+          "CODEBUDDY_PROJECT_CONFIG_DIR"
+        ]
+      },
+      "currentCandidateHostValidation": {
+        "packageVersion": "0.1.3",
+        "project": "not_tested",
+        "user": "not_tested",
+        "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
+      }
+    },
+    {
+      "id": "codebuddy",
+      "documentationStatus": "separate-CodeBuddy-default-profile-not-WorkBuddy-alias",
+      "systems": {
+        "windows": "Directory contract verified from bundled CLI; standalone CodeBuddy host not run",
+        "macos": "Directory profile only; standalone host not run",
+        "linux": "Directory profile only; standalone host not run"
+      },
+      "loading": {
+        "projectDirectories": [
+          "$CWD/.codebuddy/skills"
+        ],
+        "userDirectories": [
+          "$CODEBUDDY_CONFIG_DIR/skills (when nonblank)",
+          "$HOME/.codebuddy/skills (default)"
+        ],
+        "format": {
+          "file": "SKILL.md",
+          "frontmatterRequired": [
+            "name",
+            "description"
+          ],
+          "status": "项目页明确每技能独立目录含 SKILL.md；官方本地导入界面要求 Markdown 的 YAML 名称与描述。当前 Tansr 包的实际目录解析和资源读取待验；不套用市场发布字段要求。"
+        },
+        "explicit": "Select Tansr in the CodeBuddy Skill interface or request it by name; standalone host invocation not yet tested.",
+        "automatic": "Discovery and automatic selection are host decisions; not certified by directory installation.",
+        "reload": "After external install, inspect the installed Skill in the picker; restart if missing. User-scope invocation remains pending.",
+        "import": "技能面板上传本地包并导入，随后可启用/关闭/卸载。",
+        "conflicts": "Project scope shares .codebuddy/skills with WorkBuddy; user scope retains CodeBuddy .codebuddy. Existing files and settings are preserved.",
+        "sourceIds": []
+      },
+      "actualDiscovery": "not_tested",
+      "actualInvocation": "not_tested",
+      "installationAdapter": "stage2-codebuddy-compatible-user",
+      "packagedHostValidation": {
+        "project": "not_tested",
+        "user": "not_tested",
+        "scope": "Documentation-backed paths only; packed installer discovery, explicit invocation, automatic invocation and reload remain unverified."
+      },
+      "stage2Documentation": {
+        "checkedAt": "2026-10-08",
+        "sources": [
+          "https://www.codebuddy.cn/docs/cli/codebuddy-dir"
+        ],
+        "evidence": "archive/TPB-01-two-step-product/stage2/closure-20261008/workbuddy-user-discovery/local-loader/"
+      },
+      "registry": {
+        "source": "installer/hosts.mjs",
+        "packageVersion": "0.1.3",
+        "label": "CodeBuddy",
+        "aliases": [],
         "installation": "directory",
         "scopes": [
           "project",
@@ -258,17 +343,24 @@
           "project": ".codebuddy/skills",
           "user": ".codebuddy/skills"
         },
-        "documentation": "https://www.codebuddy.cn/docs/workbuddy/From-Beginner-to-Expert-Guide/Function-Description/Project",
+        "documentation": "https://www.codebuddy.cn/docs/cli/codebuddy-dir",
         "readiness": "directory-contract-or-manual-guidance-only; host-loading-not-verified",
         "loading": {
-          "discovery": "打开目标项目，检查技能启用状态；用户目录同时兼容 CodeBuddy / Open the project and check Skill activation; the user root is shared with CodeBuddy.",
-          "explicitInvocation": "在技能选择器选择 Tansr，或明确提及 Tansr Skill / Select Tansr or explicitly request it.",
+          "discovery": "默认用户与项目技能分别从 ~/.codebuddy/skills 和 .codebuddy/skills 读取；与 WorkBuddy 桌面的默认用户目录不同，请核对技能列表实际路径 / Default user and project Skills use ~/.codebuddy/skills and .codebuddy/skills; WorkBuddy desktop has a separate default user root. Verify the actual listed path.",
+          "explicitInvocation": "在 CodeBuddy 的技能入口选择 Tansr，或明确要求使用 Tansr Skill / Select Tansr in CodeBuddy or explicitly request it.",
           "automaticInvocation": "向所选助手描述产品需求；是否自动选择由宿主及任务决定 / Describe your product; automatic selection depends on the host and task.",
           "verification": "文件安装不证明助手加载成功；请核对实际读取的 tansr/SKILL.md 路径 / File installation does not prove host loading; verify the actual Skill path read."
-        }
+        },
+        "userRootEnv": [
+          "CODEBUDDY_CONFIG_DIR"
+        ],
+        "skipBlankUserRootEnv": true,
+        "unsupportedProjectConfigEnv": [
+          "CODEBUDDY_PROJECT_CONFIG_DIR"
+        ]
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.2",
+        "packageVersion": "0.1.3",
         "project": "not_tested",
         "user": "not_tested",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -288,7 +380,7 @@
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.2",
+        "packageVersion": "0.1.3",
         "label": "通用 Agent Skills 目录",
         "aliases": [
           "agents",
@@ -314,7 +406,7 @@
         }
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.2",
+        "packageVersion": "0.1.3",
         "project": "not_tested",
         "user": "not_tested",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -334,7 +426,7 @@
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.2",
+        "packageVersion": "0.1.3",
         "label": "Claude Code",
         "aliases": [
           "claude"
@@ -361,7 +453,7 @@
         }
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.2",
+        "packageVersion": "0.1.3",
         "project": "not_tested",
         "user": "not_tested",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -381,7 +473,7 @@
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.2",
+        "packageVersion": "0.1.3",
         "label": "Cursor",
         "aliases": [],
         "installation": "directory",
@@ -403,7 +495,7 @@
         }
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.2",
+        "packageVersion": "0.1.3",
         "project": "not_tested",
         "user": "not_tested",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -423,7 +515,7 @@
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.2",
+        "packageVersion": "0.1.3",
         "label": "TRAE 国内版 / TraeCode",
         "aliases": [
           "trae-cn",
@@ -448,7 +540,7 @@
         }
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.2",
+        "packageVersion": "0.1.3",
         "project": "not_tested",
         "user": "not_tested",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -468,7 +560,7 @@
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.2",
+        "packageVersion": "0.1.3",
         "label": "TraeCode CLI",
         "aliases": [
           "traecode-cli"
@@ -492,7 +584,7 @@
         }
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.2",
+        "packageVersion": "0.1.3",
         "project": "not_tested",
         "user": "not_tested",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -512,7 +604,7 @@
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.2",
+        "packageVersion": "0.1.3",
         "label": "Qoder 国际版 IDE / CLI",
         "aliases": [],
         "installation": "directory",
@@ -537,7 +629,7 @@
         }
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.2",
+        "packageVersion": "0.1.3",
         "project": "not_tested",
         "user": "not_tested",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -557,7 +649,7 @@
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.2",
+        "packageVersion": "0.1.3",
         "label": "Qoder 国内版 IDE",
         "aliases": [
           "lingma"
@@ -584,7 +676,7 @@
         }
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.2",
+        "packageVersion": "0.1.3",
         "project": "not_tested",
         "user": "not_tested",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -604,7 +696,7 @@
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.2",
+        "packageVersion": "0.1.3",
         "label": "ZCode Agent",
         "aliases": [],
         "installation": "directory",
@@ -624,7 +716,7 @@
         }
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.2",
+        "packageVersion": "0.1.3",
         "project": "not_applicable",
         "user": "not_tested",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -644,7 +736,7 @@
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.2",
+        "packageVersion": "0.1.3",
         "label": "Kimi Code",
         "aliases": [
           "kimi-code"
@@ -672,7 +764,7 @@
         "projectRoot": "git"
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.2",
+        "packageVersion": "0.1.3",
         "project": "not_tested",
         "user": "not_tested",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -692,7 +784,7 @@
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.2",
+        "packageVersion": "0.1.3",
         "label": "MiniMax Code CLI",
         "aliases": [
           "minimax-code",
@@ -725,7 +817,7 @@
         }
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.2",
+        "packageVersion": "0.1.3",
         "project": "not_tested",
         "user": "not_tested",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -745,7 +837,7 @@
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.2",
+        "packageVersion": "0.1.3",
         "label": "千问 Qwen Code",
         "aliases": [
           "qwen",
@@ -771,7 +863,7 @@
         }
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.2",
+        "packageVersion": "0.1.3",
         "project": "not_tested",
         "user": "not_tested",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -791,7 +883,7 @@
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.2",
+        "packageVersion": "0.1.3",
         "label": "飞书 aily SkillHub",
         "aliases": [
           "lark",
@@ -812,7 +904,7 @@
         }
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.2",
+        "packageVersion": "0.1.3",
         "project": "not_applicable",
         "user": "not_applicable",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -832,7 +924,7 @@
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.2",
+        "packageVersion": "0.1.3",
         "label": "腾讯元宝 Agent",
         "aliases": [
           "元宝"
@@ -851,7 +943,7 @@
         }
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.2",
+        "packageVersion": "0.1.3",
         "project": "not_applicable",
         "user": "not_applicable",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -871,7 +963,7 @@
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.2",
+        "packageVersion": "0.1.3",
         "label": "豆包 Agent",
         "aliases": [
           "豆包"
@@ -890,7 +982,7 @@
         }
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.2",
+        "packageVersion": "0.1.3",
         "project": "not_applicable",
         "user": "not_applicable",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -910,7 +1002,7 @@
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.2",
+        "packageVersion": "0.1.3",
         "label": "火山引擎 Agent",
         "aliases": [
           "volcano",
@@ -930,7 +1022,7 @@
         }
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.2",
+        "packageVersion": "0.1.3",
         "project": "not_applicable",
         "user": "not_applicable",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -950,7 +1042,7 @@
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.2",
+        "packageVersion": "0.1.3",
         "label": "TRAE 国际版",
         "aliases": [],
         "installation": "manual",
@@ -967,7 +1059,7 @@
         }
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.2",
+        "packageVersion": "0.1.3",
         "project": "not_applicable",
         "user": "not_applicable",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -1290,12 +1382,13 @@
   "hostRegistry": {
     "source": "installer/hosts.mjs",
     "checkedAt": "2026-10-08",
-    "candidatePackageVersion": "0.1.2",
+    "candidatePackageVersion": "0.1.3",
     "status": "directory-installation-contracts-and-manual-guidance; not-host-loading-certification",
     "directoryProfiles": [
       "generic",
       "codex",
       "workbuddy",
+      "codebuddy",
       "claude-code",
       "cursor",
       "trae",

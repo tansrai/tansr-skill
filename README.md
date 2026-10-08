@@ -2,19 +2,19 @@
 
 帮助用户在熟悉的编程助手中，把产品想法做成可运行的 AI 应用，为已有项目接入 Tansr，并继续修改、验证与排错。
 
-TPB-01 第一阶段 Skill 集已完成验收。入口为 [SKILL.md](SKILL.md)，不需要自行挑选多组内部技能。第二阶段修复候选 `@tansr/skill@0.1.2` 已发布至 `next`：状态与备份移至技能扫描范围外，并支持迁移受管的旧安装，修复 WorkBuddy 将卸载备份当作技能的问题。三系统 CI、公开 npx 消费及本轮五处旧状态迁移已通过；WorkBuddy 重载后用户级入口实证与最终 `latest` 提升仍待完成，第二阶段尚未完整收口。
+TPB-01 第一阶段 Skill 集已完成验收。入口为 [SKILL.md](SKILL.md)，不需要自行挑选多组内部技能。第二阶段公开候选 `0.1.2` 已修复备份误发现，并完成本轮五处旧状态迁移；随后真实宿主验收发现 WorkBuddy 5.7.6 用户目录与旧官方文档不同。修正候选 `@tansr/skill@0.1.3` 将 WorkBuddy 与 CodeBuddy 分开：项目共用 `.codebuddy/skills`，默认用户目录分别为 `.workbuddy/skills` 与 `.codebuddy/skills`。第二阶段尚未完整收口，待新版发行及实际用户入口复验。
 
 试用候选（Node.js ≥22.19，在目标项目目录执行）：
 
 ```sh
-# 已发布的 0.1.2 候选
-npx --yes @tansr/skill@0.1.2 hosts
-npx --yes @tansr/skill@0.1.2 install --host codex --scope project --yes
+# 0.1.3 修正候选发布后使用
+npx --yes @tansr/skill@0.1.3 hosts
+npx --yes @tansr/skill@0.1.3 install --host codex --scope project --yes
 ```
 
 候选使用合同见 [安装说明](INSTALL.md)，实际助手接入见 [assistant-setup.md](references/assistant-setup.md)。安装说明与包内兼容清单保留构建时快照；先核对精确版本的实际发行回执，未发布时不要运行该版本命令。修复版验收完成前不提升 `latest`；历史包指纹和失败记录保留。发布事实及剩余项见 [第二阶段回执](doc/S2-实施回执.md)。
 
-安装器提供 13 个目录配置，覆盖通用目录、Codex、WorkBuddy、Claude Code、Cursor、TRAE、Qoder、ZCode、Kimi Code、MiniMax Code CLI 与千问 Qwen Code 的已核实入口及地区/CLI差异。另 5 个入口提供手动导入或待核实说明，不假报安装成功。精确路径与状态可运行 `hosts --json` 查看。目录安装验收不等于全部助手实际加载验收。
+安装器提供 14 个目录配置，覆盖通用目录、Codex、WorkBuddy、CodeBuddy、Claude Code、Cursor、TRAE、Qoder、ZCode、Kimi Code、MiniMax Code CLI 与千问 Qwen Code 的已核实入口及地区/CLI差异。另 5 个入口提供手动导入或待核实说明，不假报安装成功。精确路径与状态可运行 `hosts --json` 查看。目录安装验收不等于全部助手实际加载验收。
 
 ## 开始一个产品
 

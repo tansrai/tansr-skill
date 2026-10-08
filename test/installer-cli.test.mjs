@@ -235,22 +235,29 @@ test('project override and explicit user scope are isolated', async t => {
   assert.equal(user.calls.length, 1);
 });
 
-test('WorkBuddy project and explicitly selected user scopes delegate through the host adapter', async t => {
+test('WorkBuddy and CodeBuddy delegate shared project and separate user scopes to one target only', async t => {
   const f = await fixture(t);
-  const supported = await invoke(f, ['preview', '--host', 'workbuddy', '--scope', 'project', '--json']);
-  assert.equal(supported.exitCode, 0);
-  assert.equal(supported.calls[0].options.targetPath, join(f.project, '.codebuddy', 'skills', 'tansr'));
-  const user = await invoke(f, ['install', '--host', 'workbuddy', '--scope', 'user', '--yes', '--json']);
-  assert.equal(user.exitCode, 0);
-  assert.equal(user.calls[0].options.targetPath, join(f.home, '.codebuddy', 'skills', 'tansr'));
-  assert.equal(user.calls.length, 1);
-  assert.equal(user.json.readiness.hostDiscovery, 'not-verified');
+  for (const [host,userRoot] of [['workbuddy','.workbuddy'],['codebuddy','.codebuddy']]) {
+    const supported = await invoke(f, ['preview', '--host', host, '--scope', 'project', '--json']);
+    assert.equal(supported.exitCode, 0);
+    assert.equal(supported.calls.length, 1);
+    assert.equal(supported.calls[0].options.targetPath, join(f.project, '.codebuddy', 'skills', 'tansr'));
+    const user = await invoke(f, ['install', '--host', host, '--scope', 'user', '--yes', '--json']);
+    assert.equal(user.exitCode, 0);
+    assert.equal(user.calls[0].options.targetPath, join(f.home, userRoot, 'skills', 'tansr'));
+    assert.equal(user.calls.length, 1);
+    assert.equal(user.calls[0].options.metadata.host, host);
+    assert.equal(user.json.host, host);
+    assert.equal(user.json.readiness.hostDiscovery, 'not-verified');
+  }
+  assert.deepEqual(await readdir(f.home), []);
 });
 
 test('registered new host IDs and aliases are canonicalized before a single engine delegation', async t => {
   const f = await fixture(t);
   for (const [input, canonical] of [
     ['generic', 'generic'], ['agents', 'generic'], ['universal', 'generic'],
+    ['workbuddy', 'workbuddy'], ['codebuddy', 'codebuddy'],
     ['claude-code', 'claude-code'], ['claude', 'claude-code'], ['cursor', 'cursor'],
     ['qwen', 'qwen-code'], ['qianwen', 'qwen-code'],
   ]) {

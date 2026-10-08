@@ -13,11 +13,43 @@ test('Codex resolves exactly one project or user scope and does not mix their ba
   await assert.rejects(resolveHostTarget({host:'codex',scope:'user',project,home}), {code:'project_scope_conflict'});
 });
 
-test('WorkBuddy uses its own documented project scope', async () => {
+test('WorkBuddy runtime and CodeBuddy have distinct user roots and the same project discovery root', async () => {
   const project = resolve('合成 WorkBuddy');
-  assert.equal((await resolveHostTarget({host:'workbuddy',scope:'project',project})).targetPath, join(project,'.codebuddy','skills','tansr'));
   const home = resolve('synthetic-workbuddy-home');
-  assert.equal((await resolveHostTarget({host:'workbuddy',scope:'user',home})).targetPath, join(home,'.codebuddy','skills','tansr'));
+  for (const [host,userRoot] of [['workbuddy','.workbuddy'],['codebuddy','.codebuddy']]) {
+    assert.equal(findHost(host).id,host);
+    assert.equal((await resolveHostTarget({host,scope:'project',project,home,env:{}})).targetPath,join(project,'.codebuddy','skills','tansr'));
+    assert.equal((await resolveHostTarget({host,scope:'user',home,env:{}})).targetPath,join(home,userRoot,'skills','tansr'));
+  }
+});
+
+test('WorkBuddy user config precedence is trimmed while CodeBuddy uses only its own untrimmed override', async () => {
+  const home=resolve('synthetic-buddy-home'),workbuddy=resolve('synthetic-workbuddy-config'),codebuddy=resolve('synthetic-codebuddy-config');
+  const env={WORKBUDDY_CONFIG_DIR:`  ${workbuddy}  `,CODEBUDDY_CONFIG_DIR:codebuddy};
+  assert.equal((await resolveHostTarget({host:'workbuddy',scope:'user',home,env})).targetPath,join(workbuddy,'skills','tansr'));
+  assert.equal((await resolveHostTarget({host:'codebuddy',scope:'user',home,env})).targetPath,join(codebuddy,'skills','tansr'));
+  assert.equal((await resolveHostTarget({host:'workbuddy',scope:'user',home,env:{WORKBUDDY_CONFIG_DIR:'  ',CODEBUDDY_CONFIG_DIR:` ${codebuddy} `}})).targetPath,join(codebuddy,'skills','tansr'));
+  for(const [host,root] of [['workbuddy','.workbuddy'],['codebuddy','.codebuddy']]) {
+    assert.equal((await resolveHostTarget({host,scope:'user',home,env:{WORKBUDDY_CONFIG_DIR:' ',CODEBUDDY_CONFIG_DIR:'\t'}})).targetPath,join(home,root,'skills','tansr'));
+    await assert.rejects(resolveHostTarget({host,scope:'user',home,env:{CODEBUDDY_CONFIG_DIR:'relative'}}),{code:'project_path_relative'});
+    await assert.rejects(resolveHostTarget({host,scope:'user',home,env:{CODEBUDDY_CONFIG_DIR:parse(home).root}}),{code:'filesystem_root_forbidden'});
+  }
+  await assert.rejects(resolveHostTarget({host:'workbuddy',scope:'user',home,env:{WORKBUDDY_CONFIG_DIR:'relative',CODEBUDDY_CONFIG_DIR:codebuddy}}),{code:'project_path_relative'});
+  await assert.rejects(resolveHostTarget({host:'codebuddy',scope:'user',home,env:{CODEBUDDY_CONFIG_DIR:` ${codebuddy} `}}),{code:'project_path_relative'});
+  assert.equal((await resolveHostTarget({host:'codebuddy',scope:'user',home,env:{WORKBUDDY_CONFIG_DIR:workbuddy}})).targetPath,join(home,'.codebuddy','skills','tansr'));
+});
+
+test('Buddy project configuration override may confirm the default root but cannot redirect installation', async () => {
+  const project=resolve('synthetic-buddy-project'),home=resolve('synthetic-buddy-home'),expected=join(project,'.codebuddy','skills','tansr');
+  for(const host of ['workbuddy','codebuddy']) {
+    for(const value of ['', '  ', '.codebuddy', ' ./.codebuddy ', join(project,'.codebuddy')]) {
+      const env={CODEBUDDY_PROJECT_CONFIG_DIR:value,WORKBUDDY_CONFIG_DIR:resolve('other-user-root'),CODEBUDDY_CONFIG_DIR:resolve('another-user-root')};
+      assert.equal((await resolveHostTarget({host,scope:'project',project,home,env})).targetPath,expected);
+    }
+    for(const value of ['other-config', '../.codebuddy', join(project,'.workbuddy'),resolve('external-project-config')]) {
+      await assert.rejects(resolveHostTarget({host,scope:'project',project,home,env:{CODEBUDDY_PROJECT_CONFIG_DIR:value}}),{code:'host_custom_configuration_unsupported'});
+    }
+  }
 });
 
 test('invalid host, scope and unsafe base are rejected; public descriptions cannot change the resolver', async () => {
@@ -33,7 +65,8 @@ test('documented native roots stay separate for each product, region and scope',
   // Independent expected contracts catch accidental brand/region directory conflation.
   const expected = [
     ['generic','.agents/skills','.agents/skills'], ['codex','.agents/skills','.agents/skills'],
-    ['workbuddy','.codebuddy/skills','.codebuddy/skills'], ['claude-code','.claude/skills','.claude/skills'],
+    ['workbuddy','.codebuddy/skills','.workbuddy/skills'], ['codebuddy','.codebuddy/skills','.codebuddy/skills'],
+    ['claude-code','.claude/skills','.claude/skills'],
     ['cursor','.cursor/skills','.cursor/skills'], ['trae','.trae/skills','.trae-cn/skills'],
     ['trae-cli','.traecli/skills','.traecli/skills'], ['qoder','.qoder/skills','.qoder/skills'],
     ['qoder-cn','.lingma/skills','.lingma/skills'], ['zcode',null,'.zcode/skills'],

@@ -273,10 +273,13 @@ async function isCliEntryPoint() {
   if (!process.argv[1]) return false;
   const entry = path.resolve(process.argv[1]);
   if (import.meta.url === pathToFileURL(entry).href) return true;
-  // Node normally canonicalizes its main module, while argv retains npm's
-  // symlink or an OS directory alias such as macOS /var -> /private/var.
+  // argv may retain an npm symlink or OS alias; a Windows junction can also
+  // preserve short-name/case spelling in import.meta.url. Resolve both sides.
   // Only executable identity is resolved here; target validation is unchanged.
-  try { return import.meta.url === pathToFileURL(await realpath(entry)).href; }
+  try {
+    const [entryPath, modulePath] = await Promise.all([realpath(entry), realpath(fileURLToPath(import.meta.url))]);
+    return entryPath === modulePath;
+  }
   catch { return false; } // Importing from an embedding process need not have a resolvable argv[1].
 }
 

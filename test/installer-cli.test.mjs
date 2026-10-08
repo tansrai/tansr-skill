@@ -377,7 +377,12 @@ test('executable invocation through filesystem aliases returns help, version and
       links.push(linkedBin);
       entries.push(linkedBin);
     } else {
+      const caseAlias = join(f.root, 'case alias');
+      await symlink(f.packageRoot.toUpperCase(), caseAlias, 'junction');
+      links.push(caseAlias);
+      entries.push(join(caseAlias, 'installer', 'cli.mjs'));
       t.diagnostic('Windows npm uses command shims; POSIX npm-style file symlink route runs on macOS/Linux. Directory junction alias is exercised here.');
+      t.diagnostic('Windows also executes a junction whose stored target uses a different path spelling; the fixture root is not canonicalized.');
     }
     for (const entry of entries) {
       for (const [args, expectedCode, expectedAction] of [

@@ -3,14 +3,14 @@
   "task": "TPB-01",
   "skill": {
     "name": "tansr",
-    "version": "0.1.0",
-    "status": "stage1-accepted-local-candidate",
+    "version": "0.1.1",
+    "status": "stage2-multi-host-local-candidate",
     "license": "MIT",
     "publishedInstaller": {
       "packageName": "@tansr/skill",
-      "version": "0.1.0",
-      "status": "not-published-stage2-local-candidate",
-      "snapshotAt": "2026-10-08T03:22:28Z",
+      "version": "0.1.1",
+      "status": "not-published-stage2-multi-host-local-candidate",
+      "snapshotAt": "2026-10-08T05:00:00.884Z",
       "publicationStateIsBuildSnapshot": true,
       "currentRegistry": "https://registry.npmjs.org/@tansr%2fskill",
       "candidateTag": "next",
@@ -153,6 +153,35 @@
           "https://learn.chatgpt.com/docs/build-skills"
         ],
         "evidence": "archive/TPB-01-two-step-product/stage2/host-codex/codex-host-contract.md"
+      },
+      "registry": {
+        "source": "installer/hosts.mjs",
+        "packageVersion": "0.1.1",
+        "label": "Codex",
+        "aliases": [],
+        "installation": "directory",
+        "scopes": [
+          "project",
+          "user"
+        ],
+        "directories": {
+          "project": ".agents/skills",
+          "user": ".agents/skills"
+        },
+        "documentation": "https://learn.chatgpt.com/docs/build-skills",
+        "readiness": "directory-contract-or-manual-guidance-only; host-loading-not-verified",
+        "loading": {
+          "discovery": "自动检测变化；未出现时重启。与 generic 共用物理目录，更新、回退、卸载影响同目录所有消费者 / Restart if missing. The generic profile shares this location and all management actions.",
+          "explicitInvocation": "在 CLI/IDE 使用 /skills 或 $tansr / Use /skills or $tansr.",
+          "automaticInvocation": "向所选助手描述产品需求；是否自动选择由宿主及任务决定 / Describe your product; automatic selection depends on the host and task.",
+          "verification": "文件安装不证明助手加载成功；请核对实际读取的 tansr/SKILL.md 路径 / File installation does not prove host loading; verify the actual Skill path read."
+        }
+      },
+      "currentCandidateHostValidation": {
+        "packageVersion": "0.1.1",
+        "project": "not_tested",
+        "user": "not_tested",
+        "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
       }
     },
     {
@@ -212,6 +241,736 @@
           "https://www.codebuddy.cn/docs/workbuddy/From-Beginner-to-Expert-Guide/Installation-Win-Guide"
         ],
         "evidence": "archive/TPB-01-two-step-product/stage2/host-workbuddy/REPORT.md"
+      },
+      "registry": {
+        "source": "installer/hosts.mjs",
+        "packageVersion": "0.1.1",
+        "label": "WorkBuddy / CodeBuddy",
+        "aliases": [
+          "codebuddy"
+        ],
+        "installation": "directory",
+        "scopes": [
+          "project",
+          "user"
+        ],
+        "directories": {
+          "project": ".codebuddy/skills",
+          "user": ".codebuddy/skills"
+        },
+        "documentation": "https://www.codebuddy.cn/docs/workbuddy/From-Beginner-to-Expert-Guide/Function-Description/Project",
+        "readiness": "directory-contract-or-manual-guidance-only; host-loading-not-verified",
+        "loading": {
+          "discovery": "打开目标项目，检查技能启用状态；用户目录同时兼容 CodeBuddy / Open the project and check Skill activation; the user root is shared with CodeBuddy.",
+          "explicitInvocation": "在技能选择器选择 Tansr，或明确提及 Tansr Skill / Select Tansr or explicitly request it.",
+          "automaticInvocation": "向所选助手描述产品需求；是否自动选择由宿主及任务决定 / Describe your product; automatic selection depends on the host and task.",
+          "verification": "文件安装不证明助手加载成功；请核对实际读取的 tansr/SKILL.md 路径 / File installation does not prove host loading; verify the actual Skill path read."
+        }
+      },
+      "currentCandidateHostValidation": {
+        "packageVersion": "0.1.1",
+        "project": "not_tested",
+        "user": "not_tested",
+        "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
+      }
+    },
+    {
+      "id": "generic",
+      "documentationStatus": "installer-directory-contract-recorded; runtime-loading-not-tested",
+      "actualDiscovery": "not_tested",
+      "actualInvocation": "not_tested",
+      "stage2Documentation": {
+        "checkedAt": "2026-10-08",
+        "sources": [
+          "https://agentskills.io/integrate-skills"
+        ],
+        "evidence": "archive/TPB-01-two-step-product/stage2/multi-host/research/"
+      },
+      "registry": {
+        "source": "installer/hosts.mjs",
+        "packageVersion": "0.1.1",
+        "label": "通用 Agent Skills 目录",
+        "aliases": [
+          "agents",
+          "universal",
+          "通用"
+        ],
+        "installation": "directory",
+        "scopes": [
+          "project",
+          "user"
+        ],
+        "directories": {
+          "project": ".agents/skills",
+          "user": ".agents/skills"
+        },
+        "documentation": "https://agentskills.io/integrate-skills",
+        "readiness": "directory-contract-or-manual-guidance-only; host-loading-not-verified",
+        "loading": {
+          "discovery": "与 Codex 共用同一物理目录，更新、回退、卸载影响所有读取它的助手；请确认宿主支持通用目录 / Shared with Codex; updates, rollback and removal affect every consumer of this path.",
+          "explicitInvocation": "按所用助手的技能入口调用 / Use your host Skill entry.",
+          "automaticInvocation": "向所选助手描述产品需求；是否自动选择由宿主及任务决定 / Describe your product; automatic selection depends on the host and task.",
+          "verification": "文件安装不证明助手加载成功；请核对实际读取的 tansr/SKILL.md 路径 / File installation does not prove host loading; verify the actual Skill path read."
+        }
+      },
+      "currentCandidateHostValidation": {
+        "packageVersion": "0.1.1",
+        "project": "not_tested",
+        "user": "not_tested",
+        "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
+      }
+    },
+    {
+      "id": "claude-code",
+      "documentationStatus": "installer-directory-contract-recorded; runtime-loading-not-tested",
+      "actualDiscovery": "not_tested",
+      "actualInvocation": "not_tested",
+      "stage2Documentation": {
+        "checkedAt": "2026-10-08",
+        "sources": [
+          "https://code.claude.com/docs/en/skills"
+        ],
+        "evidence": "archive/TPB-01-two-step-product/stage2/multi-host/research/"
+      },
+      "registry": {
+        "source": "installer/hosts.mjs",
+        "packageVersion": "0.1.1",
+        "label": "Claude Code",
+        "aliases": [
+          "claude"
+        ],
+        "installation": "directory",
+        "scopes": [
+          "project",
+          "user"
+        ],
+        "directories": {
+          "project": ".claude/skills",
+          "user": ".claude/skills"
+        },
+        "documentation": "https://code.claude.com/docs/en/skills",
+        "unsupportedUserConfigEnv": [
+          "CLAUDE_CONFIG_DIR"
+        ],
+        "readiness": "directory-contract-or-manual-guidance-only; host-loading-not-verified",
+        "loading": {
+          "discovery": "使用 /reload-skills；旧版不支持时重新启动 / Use /reload-skills, or restart older versions.",
+          "explicitInvocation": "/tansr",
+          "automaticInvocation": "向所选助手描述产品需求；是否自动选择由宿主及任务决定 / Describe your product; automatic selection depends on the host and task.",
+          "verification": "文件安装不证明助手加载成功；请核对实际读取的 tansr/SKILL.md 路径 / File installation does not prove host loading; verify the actual Skill path read."
+        }
+      },
+      "currentCandidateHostValidation": {
+        "packageVersion": "0.1.1",
+        "project": "not_tested",
+        "user": "not_tested",
+        "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
+      }
+    },
+    {
+      "id": "cursor",
+      "documentationStatus": "installer-directory-contract-recorded; runtime-loading-not-tested",
+      "actualDiscovery": "not_tested",
+      "actualInvocation": "not_tested",
+      "stage2Documentation": {
+        "checkedAt": "2026-10-08",
+        "sources": [
+          "https://cursor.com/docs/context/skills"
+        ],
+        "evidence": "archive/TPB-01-two-step-product/stage2/multi-host/research/"
+      },
+      "registry": {
+        "source": "installer/hosts.mjs",
+        "packageVersion": "0.1.1",
+        "label": "Cursor",
+        "aliases": [],
+        "installation": "directory",
+        "scopes": [
+          "project",
+          "user"
+        ],
+        "directories": {
+          "project": ".cursor/skills",
+          "user": ".cursor/skills"
+        },
+        "documentation": "https://cursor.com/docs/context/skills",
+        "readiness": "directory-contract-or-manual-guidance-only; host-loading-not-verified",
+        "loading": {
+          "discovery": "重新打开 Cursor，检查 Agent 的技能列表；不会开启云端同步 / Reopen Cursor and inspect Agent Skills; no cloud sync is enabled.",
+          "explicitInvocation": "/tansr 或 @ 选择技能 / /tansr or @ Skill selection.",
+          "automaticInvocation": "向所选助手描述产品需求；是否自动选择由宿主及任务决定 / Describe your product; automatic selection depends on the host and task.",
+          "verification": "文件安装不证明助手加载成功；请核对实际读取的 tansr/SKILL.md 路径 / File installation does not prove host loading; verify the actual Skill path read."
+        }
+      },
+      "currentCandidateHostValidation": {
+        "packageVersion": "0.1.1",
+        "project": "not_tested",
+        "user": "not_tested",
+        "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
+      }
+    },
+    {
+      "id": "trae",
+      "documentationStatus": "installer-directory-contract-recorded; runtime-loading-not-tested",
+      "actualDiscovery": "not_tested",
+      "actualInvocation": "not_tested",
+      "stage2Documentation": {
+        "checkedAt": "2026-10-08",
+        "sources": [
+          "https://docs.trae.cn/ide_skills"
+        ],
+        "evidence": "archive/TPB-01-two-step-product/stage2/multi-host/research/"
+      },
+      "registry": {
+        "source": "installer/hosts.mjs",
+        "packageVersion": "0.1.1",
+        "label": "TRAE 国内版 / TraeCode",
+        "aliases": [
+          "trae-cn",
+          "traecode"
+        ],
+        "installation": "directory",
+        "scopes": [
+          "project",
+          "user"
+        ],
+        "directories": {
+          "project": ".trae/skills",
+          "user": ".trae-cn/skills"
+        },
+        "documentation": "https://docs.trae.cn/ide_skills",
+        "readiness": "directory-contract-or-manual-guidance-only; host-loading-not-verified",
+        "loading": {
+          "discovery": "在设置的技能与命令中检查并启用；不代改通用目录导入开关 / Check Skills and Commands; generic-directory import settings remain under your control.",
+          "explicitInvocation": "在技能入口选择，或明确要求使用 Tansr Skill / Select the Skill or explicitly request it.",
+          "automaticInvocation": "向所选助手描述产品需求；是否自动选择由宿主及任务决定 / Describe your product; automatic selection depends on the host and task.",
+          "verification": "文件安装不证明助手加载成功；请核对实际读取的 tansr/SKILL.md 路径 / File installation does not prove host loading; verify the actual Skill path read."
+        }
+      },
+      "currentCandidateHostValidation": {
+        "packageVersion": "0.1.1",
+        "project": "not_tested",
+        "user": "not_tested",
+        "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
+      }
+    },
+    {
+      "id": "trae-cli",
+      "documentationStatus": "installer-directory-contract-recorded; runtime-loading-not-tested",
+      "actualDiscovery": "not_tested",
+      "actualInvocation": "not_tested",
+      "stage2Documentation": {
+        "checkedAt": "2026-10-08",
+        "sources": [
+          "https://docs.trae.cn/cli_skills"
+        ],
+        "evidence": "archive/TPB-01-two-step-product/stage2/multi-host/research/"
+      },
+      "registry": {
+        "source": "installer/hosts.mjs",
+        "packageVersion": "0.1.1",
+        "label": "TraeCode CLI",
+        "aliases": [
+          "traecode-cli"
+        ],
+        "installation": "directory",
+        "scopes": [
+          "project",
+          "user"
+        ],
+        "directories": {
+          "project": ".traecli/skills",
+          "user": ".traecli/skills"
+        },
+        "documentation": "https://docs.trae.cn/cli_skills",
+        "readiness": "directory-contract-or-manual-guidance-only; host-loading-not-verified",
+        "loading": {
+          "discovery": "重启 CLI 后使用 /skills；CLI 2.0 可用范围由厂商套餐决定 / Restart and inspect /skills; CLI 2.0 availability depends on the vendor plan.",
+          "explicitInvocation": "/skills 中选择 Tansr / Select Tansr in /skills.",
+          "automaticInvocation": "向所选助手描述产品需求；是否自动选择由宿主及任务决定 / Describe your product; automatic selection depends on the host and task.",
+          "verification": "文件安装不证明助手加载成功；请核对实际读取的 tansr/SKILL.md 路径 / File installation does not prove host loading; verify the actual Skill path read."
+        }
+      },
+      "currentCandidateHostValidation": {
+        "packageVersion": "0.1.1",
+        "project": "not_tested",
+        "user": "not_tested",
+        "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
+      }
+    },
+    {
+      "id": "qoder",
+      "documentationStatus": "installer-directory-contract-recorded; runtime-loading-not-tested",
+      "actualDiscovery": "not_tested",
+      "actualInvocation": "not_tested",
+      "stage2Documentation": {
+        "checkedAt": "2026-10-08",
+        "sources": [
+          "https://docs.qoder.com/cli/Skills"
+        ],
+        "evidence": "archive/TPB-01-two-step-product/stage2/multi-host/research/"
+      },
+      "registry": {
+        "source": "installer/hosts.mjs",
+        "packageVersion": "0.1.1",
+        "label": "Qoder 国际版 IDE / CLI",
+        "aliases": [],
+        "installation": "directory",
+        "scopes": [
+          "project",
+          "user"
+        ],
+        "directories": {
+          "project": ".qoder/skills",
+          "user": ".qoder/skills"
+        },
+        "documentation": "https://docs.qoder.com/cli/Skills",
+        "unsupportedUserConfigEnv": [
+          "QODER_CONFIG_DIR"
+        ],
+        "readiness": "directory-contract-or-manual-guidance-only; host-loading-not-verified",
+        "loading": {
+          "discovery": "IDE 重启；CLI 新会话或 /skills reload；两种 scope 的优先级按宿主版本核实 / Restart the IDE or use /skills reload in the CLI.",
+          "explicitInvocation": "/tansr",
+          "automaticInvocation": "向所选助手描述产品需求；是否自动选择由宿主及任务决定 / Describe your product; automatic selection depends on the host and task.",
+          "verification": "文件安装不证明助手加载成功；请核对实际读取的 tansr/SKILL.md 路径 / File installation does not prove host loading; verify the actual Skill path read."
+        }
+      },
+      "currentCandidateHostValidation": {
+        "packageVersion": "0.1.1",
+        "project": "not_tested",
+        "user": "not_tested",
+        "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
+      }
+    },
+    {
+      "id": "qoder-cn",
+      "documentationStatus": "installer-directory-contract-recorded; runtime-loading-not-tested",
+      "actualDiscovery": "not_tested",
+      "actualInvocation": "not_tested",
+      "stage2Documentation": {
+        "checkedAt": "2026-10-08",
+        "sources": [
+          "https://docs.qoder.cn/user-guide/skills"
+        ],
+        "evidence": "archive/TPB-01-two-step-product/stage2/multi-host/research/"
+      },
+      "registry": {
+        "source": "installer/hosts.mjs",
+        "packageVersion": "0.1.1",
+        "label": "Qoder 国内版 IDE",
+        "aliases": [
+          "lingma"
+        ],
+        "installation": "directory",
+        "scopes": [
+          "project",
+          "user"
+        ],
+        "directories": {
+          "project": ".lingma/skills",
+          "user": ".lingma/skills"
+        },
+        "documentation": "https://docs.qoder.cn/user-guide/skills",
+        "unsupportedUserConfigEnv": [
+          "QODER_CONFIG_DIR"
+        ],
+        "readiness": "directory-contract-or-manual-guidance-only; host-loading-not-verified",
+        "loading": {
+          "discovery": "重启 IDE，再在 / 列表确认技能；此目录合同不代表 Qoder CN CLI / Restart the IDE; this profile does not claim the CN CLI path.",
+          "explicitInvocation": "/tansr",
+          "automaticInvocation": "向所选助手描述产品需求；是否自动选择由宿主及任务决定 / Describe your product; automatic selection depends on the host and task.",
+          "verification": "文件安装不证明助手加载成功；请核对实际读取的 tansr/SKILL.md 路径 / File installation does not prove host loading; verify the actual Skill path read."
+        }
+      },
+      "currentCandidateHostValidation": {
+        "packageVersion": "0.1.1",
+        "project": "not_tested",
+        "user": "not_tested",
+        "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
+      }
+    },
+    {
+      "id": "zcode",
+      "documentationStatus": "installer-directory-contract-recorded; runtime-loading-not-tested",
+      "actualDiscovery": "not_tested",
+      "actualInvocation": "not_tested",
+      "stage2Documentation": {
+        "checkedAt": "2026-10-08",
+        "sources": [
+          "https://zcode.z.ai/cn/docs/skill"
+        ],
+        "evidence": "archive/TPB-01-two-step-product/stage2/multi-host/research/"
+      },
+      "registry": {
+        "source": "installer/hosts.mjs",
+        "packageVersion": "0.1.1",
+        "label": "ZCode Agent",
+        "aliases": [],
+        "installation": "directory",
+        "scopes": [
+          "user"
+        ],
+        "directories": {
+          "user": ".zcode/skills"
+        },
+        "documentation": "https://zcode.z.ai/cn/docs/skill",
+        "readiness": "directory-contract-or-manual-guidance-only; host-loading-not-verified",
+        "loading": {
+          "discovery": "设置 → 技能 → 刷新并启用；当前只核实用户范围 / Refresh and enable in Settings → Skills; user scope only.",
+          "explicitInvocation": "$tansr 或 / 菜单 / $tansr or the / menu.",
+          "automaticInvocation": "向所选助手描述产品需求；是否自动选择由宿主及任务决定 / Describe your product; automatic selection depends on the host and task.",
+          "verification": "文件安装不证明助手加载成功；请核对实际读取的 tansr/SKILL.md 路径 / File installation does not prove host loading; verify the actual Skill path read."
+        }
+      },
+      "currentCandidateHostValidation": {
+        "packageVersion": "0.1.1",
+        "project": "not_applicable",
+        "user": "not_tested",
+        "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
+      }
+    },
+    {
+      "id": "kimi",
+      "documentationStatus": "installer-directory-contract-recorded; runtime-loading-not-tested",
+      "actualDiscovery": "not_tested",
+      "actualInvocation": "not_tested",
+      "stage2Documentation": {
+        "checkedAt": "2026-10-08",
+        "sources": [
+          "https://github.com/MoonshotAI/kimi-code"
+        ],
+        "evidence": "archive/TPB-01-two-step-product/stage2/multi-host/research/skill-hosts-cn/REPORT.md"
+      },
+      "registry": {
+        "source": "installer/hosts.mjs",
+        "packageVersion": "0.1.1",
+        "label": "Kimi Code",
+        "aliases": [
+          "kimi-code"
+        ],
+        "installation": "directory",
+        "scopes": [
+          "project",
+          "user"
+        ],
+        "directories": {
+          "project": ".kimi-code/skills",
+          "user": ".kimi-code/skills"
+        },
+        "documentation": "https://github.com/MoonshotAI/kimi-code",
+        "userRootEnv": [
+          "KIMI_CODE_HOME"
+        ],
+        "readiness": "directory-contract-or-manual-guidance-only; host-loading-not-verified",
+        "loading": {
+          "discovery": "适用于新版 Kimi Code；Git 项目须在仓库根安装，不写旧版 kimi-cli 的 .kimi 目录 / Current Kimi Code discovers project Skills at the Git root; archived kimi-cli is separate.",
+          "explicitInvocation": "在 Kimi Code 技能入口检查并使用 Tansr / Inspect and invoke Tansr in Kimi Code.",
+          "automaticInvocation": "向所选助手描述产品需求；是否自动选择由宿主及任务决定 / Describe your product; automatic selection depends on the host and task.",
+          "verification": "文件安装不证明助手加载成功；请核对实际读取的 tansr/SKILL.md 路径 / File installation does not prove host loading; verify the actual Skill path read."
+        },
+        "projectRoot": "git"
+      },
+      "currentCandidateHostValidation": {
+        "packageVersion": "0.1.1",
+        "project": "not_tested",
+        "user": "not_tested",
+        "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
+      }
+    },
+    {
+      "id": "minimax",
+      "documentationStatus": "installer-directory-contract-recorded; runtime-loading-not-tested",
+      "actualDiscovery": "not_tested",
+      "actualInvocation": "not_tested",
+      "stage2Documentation": {
+        "checkedAt": "2026-10-08",
+        "sources": [
+          "https://github.com/MiniMax-AI/minimax-code"
+        ],
+        "evidence": "archive/TPB-01-two-step-product/stage2/multi-host/research/skill-hosts-cn/REPORT.md"
+      },
+      "registry": {
+        "source": "installer/hosts.mjs",
+        "packageVersion": "0.1.1",
+        "label": "MiniMax Code CLI",
+        "aliases": [
+          "minimax-code",
+          "mcode"
+        ],
+        "installation": "directory",
+        "scopes": [
+          "project",
+          "user"
+        ],
+        "directories": {
+          "project": ".minimax/skills",
+          "user": ".minimax/skills"
+        },
+        "documentation": "https://github.com/MiniMax-AI/minimax-code",
+        "userRootEnv": [
+          "MINIMAX_DATA_DIR",
+          "MAVIS_DATA_DIR"
+        ],
+        "readiness": "directory-contract-or-manual-guidance-only; host-loading-not-verified",
+        "trimUserRootEnv": true,
+        "unsupportedUserProfileEnv": [
+          "__MAVIS_RUNTIME_PROFILE"
+        ],
+        "loading": {
+          "discovery": "适用于 MiniMax Code CLI 默认 profile；命名 profile 请明确 MINIMAX_DATA_DIR。云端 Agent 需独立插件导入 / Default CLI profile; set MINIMAX_DATA_DIR for a named profile. Cloud Agent import is separate.",
+          "explicitInvocation": "在 MiniMax Code CLI 检查已加载技能并明确要求使用 Tansr / Inspect loaded Skills and request Tansr.",
+          "automaticInvocation": "向所选助手描述产品需求；是否自动选择由宿主及任务决定 / Describe your product; automatic selection depends on the host and task.",
+          "verification": "文件安装不证明助手加载成功；请核对实际读取的 tansr/SKILL.md 路径 / File installation does not prove host loading; verify the actual Skill path read."
+        }
+      },
+      "currentCandidateHostValidation": {
+        "packageVersion": "0.1.1",
+        "project": "not_tested",
+        "user": "not_tested",
+        "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
+      }
+    },
+    {
+      "id": "qwen-code",
+      "documentationStatus": "installer-directory-contract-recorded; runtime-loading-not-tested",
+      "actualDiscovery": "not_tested",
+      "actualInvocation": "not_tested",
+      "stage2Documentation": {
+        "checkedAt": "2026-10-08",
+        "sources": [
+          "https://qwenlm.github.io/qwen-code-docs/en/users/features/skills/"
+        ],
+        "evidence": "archive/TPB-01-two-step-product/stage2/multi-host/research/skill-hosts-cn/REPORT.md"
+      },
+      "registry": {
+        "source": "installer/hosts.mjs",
+        "packageVersion": "0.1.1",
+        "label": "千问 Qwen Code",
+        "aliases": [
+          "qwen",
+          "qianwen",
+          "千问"
+        ],
+        "installation": "directory",
+        "scopes": [
+          "project",
+          "user"
+        ],
+        "directories": {
+          "project": ".qwen/skills",
+          "user": ".qwen/skills"
+        },
+        "documentation": "https://qwenlm.github.io/qwen-code-docs/en/users/features/skills/",
+        "readiness": "directory-contract-or-manual-guidance-only; host-loading-not-verified",
+        "loading": {
+          "discovery": "使用 Qwen Code 的技能列表核实加载；普通千问聊天端不是本地目录宿主 / Verify in Qwen Code; this does not install into Qwen chat.",
+          "explicitInvocation": "通过 /skills 管理和显式选择 Tansr / Manage and select Tansr with /skills.",
+          "automaticInvocation": "向所选助手描述产品需求；是否自动选择由宿主及任务决定 / Describe your product; automatic selection depends on the host and task.",
+          "verification": "文件安装不证明助手加载成功；请核对实际读取的 tansr/SKILL.md 路径 / File installation does not prove host loading; verify the actual Skill path read."
+        }
+      },
+      "currentCandidateHostValidation": {
+        "packageVersion": "0.1.1",
+        "project": "not_tested",
+        "user": "not_tested",
+        "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
+      }
+    },
+    {
+      "id": "feishu",
+      "documentationStatus": "manual-guidance-only; no-verified-local-directory",
+      "actualDiscovery": "not_tested",
+      "actualInvocation": "not_tested",
+      "stage2Documentation": {
+        "checkedAt": "2026-10-08",
+        "sources": [
+          "https://www.feishu.cn/content/article/7646699294103292898"
+        ],
+        "evidence": "archive/TPB-01-two-step-product/stage2/multi-host/research/"
+      },
+      "registry": {
+        "source": "installer/hosts.mjs",
+        "packageVersion": "0.1.1",
+        "label": "飞书 aily SkillHub",
+        "aliases": [
+          "lark",
+          "aily",
+          "飞书"
+        ],
+        "installation": "manual",
+        "scopes": [],
+        "directories": {},
+        "documentation": "https://www.feishu.cn/content/article/7646699294103292898",
+        "reason": "飞书 aily 使用云端技能上传与审核流程，尚无已核实的本地扫描目录；请在 aily SkillHub 按官方规范导入 / Cloud import and review required; no verified local directory.",
+        "readiness": "directory-contract-or-manual-guidance-only; host-loading-not-verified",
+        "loading": {
+          "discovery": "飞书 aily 使用云端技能上传与审核流程，尚无已核实的本地扫描目录；请在 aily SkillHub 按官方规范导入 / Cloud import and review required; no verified local directory.",
+          "explicitInvocation": "按该产品官方技能导入或发布流程操作 / Follow the product-specific Skill import or publishing instructions.",
+          "automaticInvocation": "向所选助手描述产品需求；是否自动选择由宿主及任务决定 / Describe your product; automatic selection depends on the host and task.",
+          "verification": "文件安装不证明助手加载成功；请核对实际读取的 tansr/SKILL.md 路径 / File installation does not prove host loading; verify the actual Skill path read."
+        }
+      },
+      "currentCandidateHostValidation": {
+        "packageVersion": "0.1.1",
+        "project": "not_applicable",
+        "user": "not_applicable",
+        "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
+      }
+    },
+    {
+      "id": "yuanbao",
+      "documentationStatus": "manual-guidance-only; no-verified-local-directory",
+      "actualDiscovery": "not_tested",
+      "actualInvocation": "not_tested",
+      "stage2Documentation": {
+        "checkedAt": "2026-10-08",
+        "sources": [
+          "https://yuanbao.tencent.com/"
+        ],
+        "evidence": "archive/TPB-01-two-step-product/stage2/multi-host/research/"
+      },
+      "registry": {
+        "source": "installer/hosts.mjs",
+        "packageVersion": "0.1.1",
+        "label": "腾讯元宝 Agent",
+        "aliases": [
+          "元宝"
+        ],
+        "installation": "manual",
+        "scopes": [],
+        "directories": {},
+        "documentation": "https://yuanbao.tencent.com/",
+        "reason": "尚未核实该产品开放给第三方的本地 Skill 目录；请确认具体 Agent 产品及官方技能入口。腾讯开发助手可选择 --host workbuddy / Confirm the Agent integration; use workbuddy for the documented Tencent coding host.",
+        "readiness": "directory-contract-or-manual-guidance-only; host-loading-not-verified",
+        "loading": {
+          "discovery": "尚未核实该产品开放给第三方的本地 Skill 目录；请确认具体 Agent 产品及官方技能入口。腾讯开发助手可选择 --host workbuddy / Confirm the Agent integration; use workbuddy for the documented Tencent coding host.",
+          "explicitInvocation": "按该产品官方技能导入或发布流程操作 / Follow the product-specific Skill import or publishing instructions.",
+          "automaticInvocation": "向所选助手描述产品需求；是否自动选择由宿主及任务决定 / Describe your product; automatic selection depends on the host and task.",
+          "verification": "文件安装不证明助手加载成功；请核对实际读取的 tansr/SKILL.md 路径 / File installation does not prove host loading; verify the actual Skill path read."
+        }
+      },
+      "currentCandidateHostValidation": {
+        "packageVersion": "0.1.1",
+        "project": "not_applicable",
+        "user": "not_applicable",
+        "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
+      }
+    },
+    {
+      "id": "doubao",
+      "documentationStatus": "manual-guidance-only; no-verified-local-directory",
+      "actualDiscovery": "not_tested",
+      "actualInvocation": "not_tested",
+      "stage2Documentation": {
+        "checkedAt": "2026-10-08",
+        "sources": [
+          "https://www.doubao.com/"
+        ],
+        "evidence": "archive/TPB-01-two-step-product/stage2/multi-host/research/"
+      },
+      "registry": {
+        "source": "installer/hosts.mjs",
+        "packageVersion": "0.1.1",
+        "label": "豆包 Agent",
+        "aliases": [
+          "豆包"
+        ],
+        "installation": "manual",
+        "scopes": [],
+        "directories": {},
+        "documentation": "https://www.doubao.com/",
+        "reason": "尚未核实豆包 Agent 的本地 Skill 目录；字节开发助手可选择 --host trae，云端 Agent 需其官方导入入口 / Confirm the Agent integration; use trae for the documented coding host.",
+        "readiness": "directory-contract-or-manual-guidance-only; host-loading-not-verified",
+        "loading": {
+          "discovery": "尚未核实豆包 Agent 的本地 Skill 目录；字节开发助手可选择 --host trae，云端 Agent 需其官方导入入口 / Confirm the Agent integration; use trae for the documented coding host.",
+          "explicitInvocation": "按该产品官方技能导入或发布流程操作 / Follow the product-specific Skill import or publishing instructions.",
+          "automaticInvocation": "向所选助手描述产品需求；是否自动选择由宿主及任务决定 / Describe your product; automatic selection depends on the host and task.",
+          "verification": "文件安装不证明助手加载成功；请核对实际读取的 tansr/SKILL.md 路径 / File installation does not prove host loading; verify the actual Skill path read."
+        }
+      },
+      "currentCandidateHostValidation": {
+        "packageVersion": "0.1.1",
+        "project": "not_applicable",
+        "user": "not_applicable",
+        "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
+      }
+    },
+    {
+      "id": "volcengine",
+      "documentationStatus": "manual-guidance-only; no-verified-local-directory",
+      "actualDiscovery": "not_tested",
+      "actualInvocation": "not_tested",
+      "stage2Documentation": {
+        "checkedAt": "2026-10-08",
+        "sources": [
+          "https://www.volcengine.com/"
+        ],
+        "evidence": "archive/TPB-01-two-step-product/stage2/multi-host/research/"
+      },
+      "registry": {
+        "source": "installer/hosts.mjs",
+        "packageVersion": "0.1.1",
+        "label": "火山引擎 Agent",
+        "aliases": [
+          "volcano",
+          "火山"
+        ],
+        "installation": "manual",
+        "scopes": [],
+        "directories": {},
+        "documentation": "https://www.volcengine.com/",
+        "reason": "请明确火山 Agent 产品及官方技能导入入口；veCLI、arkcli、云端 Agent 与 TRAE 是不同产品，尚无本轮已核实的统一扫描目录 / Select the actual Agent integration; no shared local directory is assumed.",
+        "readiness": "directory-contract-or-manual-guidance-only; host-loading-not-verified",
+        "loading": {
+          "discovery": "请明确火山 Agent 产品及官方技能导入入口；veCLI、arkcli、云端 Agent 与 TRAE 是不同产品，尚无本轮已核实的统一扫描目录 / Select the actual Agent integration; no shared local directory is assumed.",
+          "explicitInvocation": "按该产品官方技能导入或发布流程操作 / Follow the product-specific Skill import or publishing instructions.",
+          "automaticInvocation": "向所选助手描述产品需求；是否自动选择由宿主及任务决定 / Describe your product; automatic selection depends on the host and task.",
+          "verification": "文件安装不证明助手加载成功；请核对实际读取的 tansr/SKILL.md 路径 / File installation does not prove host loading; verify the actual Skill path read."
+        }
+      },
+      "currentCandidateHostValidation": {
+        "packageVersion": "0.1.1",
+        "project": "not_applicable",
+        "user": "not_applicable",
+        "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
+      }
+    },
+    {
+      "id": "trae-global",
+      "documentationStatus": "manual-guidance-only; no-verified-local-directory",
+      "actualDiscovery": "not_tested",
+      "actualInvocation": "not_tested",
+      "stage2Documentation": {
+        "checkedAt": "2026-10-08",
+        "sources": [
+          "https://www.trae.ai/blog/trae_tutorial_0115"
+        ],
+        "evidence": "archive/TPB-01-two-step-product/stage2/multi-host/research/"
+      },
+      "registry": {
+        "source": "installer/hosts.mjs",
+        "packageVersion": "0.1.1",
+        "label": "TRAE 国际版",
+        "aliases": [],
+        "installation": "manual",
+        "scopes": [],
+        "directories": {},
+        "documentation": "https://www.trae.ai/blog/trae_tutorial_0115",
+        "reason": "已核实官方技能导入入口，未核实国际版精确本地目录；请使用其设置中的技能导入 / Use the official Skill import UI; international filesystem paths are not yet verified.",
+        "readiness": "directory-contract-or-manual-guidance-only; host-loading-not-verified",
+        "loading": {
+          "discovery": "已核实官方技能导入入口，未核实国际版精确本地目录；请使用其设置中的技能导入 / Use the official Skill import UI; international filesystem paths are not yet verified.",
+          "explicitInvocation": "按该产品官方技能导入或发布流程操作 / Follow the product-specific Skill import or publishing instructions.",
+          "automaticInvocation": "向所选助手描述产品需求；是否自动选择由宿主及任务决定 / Describe your product; automatic selection depends on the host and task.",
+          "verification": "文件安装不证明助手加载成功；请核对实际读取的 tansr/SKILL.md 路径 / File installation does not prove host loading; verify the actual Skill path read."
+        }
+      },
+      "currentCandidateHostValidation": {
+        "packageVersion": "0.1.1",
+        "project": "not_applicable",
+        "user": "not_applicable",
+        "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
       }
     }
   ],
@@ -527,5 +1286,35 @@
     "recordingProvider": "Local synthetic ASR; no speech-recognition accuracy or paid-provider claim",
     "fullGate": "archive/TPB-01-two-step-product/stage1-closure/skill-gates-20261007T192248341Z/receipt.json",
     "metadataOnlyAfterGate": true
+  },
+  "hostRegistry": {
+    "source": "installer/hosts.mjs",
+    "checkedAt": "2026-10-08",
+    "candidatePackageVersion": "0.1.1",
+    "status": "directory-installation-contracts-and-manual-guidance; not-host-loading-certification",
+    "directoryProfiles": [
+      "generic",
+      "codex",
+      "workbuddy",
+      "claude-code",
+      "cursor",
+      "trae",
+      "trae-cli",
+      "qoder",
+      "qoder-cn",
+      "zcode",
+      "kimi",
+      "minimax",
+      "qwen-code"
+    ],
+    "manualProfiles": [
+      "feishu",
+      "yuanbao",
+      "doubao",
+      "volcengine",
+      "trae-global"
+    ],
+    "boundary": "A directory profile records where the installer can place files. Manual entries do not write a guessed directory. Neither state proves host discovery, invocation, reload, or a generated product.",
+    "research": "archive/TPB-01-two-step-product/stage2/multi-host/research/"
   }
 }

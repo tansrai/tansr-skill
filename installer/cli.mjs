@@ -3,6 +3,7 @@
 import { readFile, realpath } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { listHosts, findHost, resolveHostTarget } from './hosts.mjs';
 
 /** @typedef {'install'|'preview'|'status'|'update'|'rollback'|'uninstall'|'recover'} Action */
 /** @typedef {{command: Action|'hosts'|'help'|'version', host?: string, scope?: string, project?: string, yes: boolean, json: boolean, dryRun: boolean}} Arguments */
@@ -62,7 +63,11 @@ export function parseArguments(argv) {
   if (seen.has('--help') && seen.has('--version')) throw new CliError('INVALID_ARGUMENT', '--help 与 --version 不能同时使用 / Choose --help or --version.');
   if (seen.has('--help')) parsed.command = 'help';
   if (seen.has('--version')) parsed.command = 'version';
-  if (parsed.host !== undefined && !['codex', 'workbuddy'].includes(parsed.host)) throw new CliError('INVALID_HOST', '--host 必须为 / must be codex or workbuddy.');
+  if (parsed.host !== undefined) {
+    const host = findHost(parsed.host);
+    if (!host) throw new CliError('INVALID_HOST', '未知助手；运行 hosts 查看可用 ID 与安装方式 / Unknown host; run hosts for IDs and installation methods.');
+    parsed.host = host.id;
+  }
   if (parsed.scope !== undefined && !['project', 'user'].includes(parsed.scope)) throw new CliError('INVALID_SCOPE', '--scope 必须为 / must be project or user.');
   if (parsed.project !== undefined && !path.isAbsolute(parsed.project)) throw new CliError('INVALID_PROJECT', '--project 必须为绝对路径 / must be an absolute path.');
   if (parsed.project !== undefined && parsed.scope === 'user') throw new CliError('INVALID_SCOPE', '--project 仅适用于 --scope project / --project requires project scope.');
@@ -128,7 +133,7 @@ function helpText(release) {
   return `Tansr Skill ${release.version} — 安装后向助手描述你想做的 AI 产品 / Install, then describe your AI product.\n\n`
     + `用法 / Usage: ${release.binName} [install|preview|status|update|rollback|uninstall|recover|hosts] [options]\n`
     + `默认命令 / Default: install. Node ${release.node}; 无第三方运行依赖 / no third-party runtime dependencies.\n\n`
-    + '  --host codex|workbuddy  选择一个助手 / Choose one assistant\n'
+    + '  --host <id>            选择一个助手；运行 hosts 查询 / Choose one host; run hosts to list IDs\n'
     + '  --scope project|user   明确安装范围 / Choose the installation scope\n'
     + '  --project <absolute>   项目绝对路径，默认当前目录 / Absolute project path; defaults to cwd\n'
     + '  --yes                  确认更改 / Confirm changes\n'
@@ -136,7 +141,8 @@ function helpText(release) {
     + '  --dry-run              install/update 只读预览 / Read-only install/update preview\n'
     + '  --help, -h             查看帮助 / Show help\n'
     + '  --version, -v          查看版本 / Show version\n\n'
-    + '示例 / Example: tansr-skill install --host codex --scope project --yes\n'
+    + '查询宿主 / List hosts: tansr-skill hosts --json\n'
+    + '选择宿主支持的范围 / Choose a supported scope: tansr-skill install --host <id> --scope <scope> --yes\n'
     + '无人值守执行需明确 host/scope，更改还需 --yes / Noninteractive use requires host/scope and --yes for changes.\n'
     + '用户级安装仅在显式选择 user 后执行 / User-wide installation requires explicit user scope.\n'
     + 'preview/status 为只读；recover 仅在确认后恢复中断事务 / preview/status are read-only; recover requires confirmation.\n'
@@ -188,26 +194,39 @@ export async function runCli(argv = process.argv.slice(2), context = {}) {
       output.write(json ? `${JSON.stringify({ schemaVersion: 1, action: parsed.command, ok: true, exitCode: 0, ...release, ...(parsed.command === 'help' ? { help: text } : {}) })}\n` : text);
       return 0;
     }
-    const adapters = await import('./hosts.mjs');
     if (parsed.command === 'hosts') {
-      const hosts = adapters.listHosts();
+      const hosts = listHosts();
       output.write(json ? `${JSON.stringify({ schemaVersion: 1, action: 'hosts', ok: true, exitCode: 0, hosts })}\n` : `宿主安装合同 / Host installation contracts:\n${JSON.stringify(hosts, null, 2)}\n实际发现及调用需要在宿主内验证 / Discovery and invocation require verification in the host.\n`);
       return 0;
     }
     if (!parsed.host) {
-      if (!interactive) throw new CliError('HOST_REQUIRED', '请指定 --host codex 或 --host workbuddy / Specify --host codex or --host workbuddy.');
-      const answer = (await ask('选择助手 / Host [1 codex, 2 workbuddy]: ')).trim().toLowerCase();
-      parsed.host = answer === '1' ? 'codex' : answer === '2' ? 'workbuddy' : answer;
-      if (!['codex', 'workbuddy'].includes(parsed.host)) throw new CliError('INVALID_HOST', '未选择有效宿主 / No valid host selected.');
+      if (!interactive) throw new CliError('HOST_REQUIRED', '请指定 --host <id>；运行 hosts 查看助手及安装方式 / Specify --host <id>; run hosts for installation methods.');
+      const choices = listHosts().filter(host => host.installation === 'directory' && host.scopes.length > 0);
+      if (!choices.length) throw new CliError('NO_INSTALLABLE_HOSTS', '当前没有目录安装目标；运行 hosts 查看手动安装指引 / No directory installation targets; run hosts for manual setup guidance.');
+      const menu = choices.map((host, index) => `${index + 1} ${host.label} (${host.id})`).join('\n');
+      const answer = (await ask(`选择助手 / Choose one host:\n${menu}\n输入编号或 ID / Number or ID: `)).trim();
+      const host = /^[1-9]\d*$/.test(answer) ? choices[Number(answer) - 1] : findHost(answer);
+      if (!host) throw new CliError('INVALID_HOST', '未选择有效助手；运行 hosts 查询 / No valid host selected; run hosts.');
+      parsed.host = host.id;
+    }
+    const host = findHost(parsed.host);
+    if (!host) throw new CliError('INVALID_HOST', '未知助手；运行 hosts 查询 / Unknown host; run hosts.');
+    if (host.installation !== 'directory' || host.scopes.length === 0) {
+      // The adapter supplies the product-specific manual setup error before
+      // asking for an inapplicable scope or loading any installation engine.
+      await resolveHostTarget({ host: host.id, scope: parsed.scope ?? '' });
+      throw new CliError('HOST_NOT_INSTALLABLE', '此助手不支持目录安装；运行 hosts 查看指引 / This host requires manual setup; run hosts.');
     }
     if (!parsed.scope) {
-      if (!interactive) throw new CliError('SCOPE_REQUIRED', '请指定 --scope project 或 --scope user / Specify --scope project or --scope user.');
-      const answer = (await ask('选择范围 / Scope [1 project, 2 user (全部项目 / all projects)]: ')).trim().toLowerCase();
-      parsed.scope = answer === '1' ? 'project' : answer === '2' ? 'user' : answer;
-      if (!['project', 'user'].includes(parsed.scope)) throw new CliError('INVALID_SCOPE', '未选择有效范围 / No valid scope selected.');
+      if (!interactive) throw new CliError('SCOPE_REQUIRED', `请明确选择此助手支持的范围 / Explicitly choose a supported scope: ${host.scopes.map(scope => `--scope ${scope}`).join(' | ')}.`);
+      const menu = host.scopes.map((scope, index) => `${index + 1} ${scope}${scope === 'user' ? ' (全部项目 / all projects)' : ''}`).join('\n');
+      const answer = (await ask(`选择范围 / Choose a scope for ${host.label}:\n${menu}\n输入编号或范围 / Number or scope: `)).trim().toLowerCase();
+      const scope = /^[1-9]\d*$/.test(answer) ? host.scopes[Number(answer) - 1] : answer;
+      if (!scope || !['project', 'user'].includes(scope)) throw new CliError('INVALID_SCOPE', '未选择有效范围 / No valid scope selected.');
+      parsed.scope = scope;
     }
     if (parsed.project !== undefined && parsed.scope === 'user') throw new CliError('INVALID_SCOPE', '--project 仅适用于 --scope project / --project requires project scope.');
-    target = await adapters.resolveHostTarget({ host: parsed.host, scope: parsed.scope, ...(parsed.scope === 'project' ? { project: parsed.project ?? context.cwd ?? process.cwd() } : {}), ...(context.home === undefined ? {} : { home: context.home }) });
+    target = await resolveHostTarget({ host: parsed.host, scope: parsed.scope, ...(parsed.scope === 'project' ? { project: parsed.project ?? context.cwd ?? process.cwd() } : {}), ...(context.home === undefined ? {} : { home: context.home }) });
     const action = parsed.dryRun ? 'preview' : parsed.command;
     if (mutations.has(action) && !parsed.yes) {
       if (!interactive) throw new CliError('CONFIRMATION_REQUIRED', `尚未授权更改目标 ${target.targetPath}；检查目标后添加 --yes / Changes require confirmation; review the target and add --yes.`);

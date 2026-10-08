@@ -7,6 +7,7 @@ import { Writable } from 'node:stream';
 import { spawnSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 import { runCli, parseArguments, supportsNode } from '../installer/cli.mjs';
+import { listHosts, findHost } from '../installer/hosts.mjs';
 
 const release = {
   schemaVersion: 1, packageName: '@tansr/skill', binName: 'tansr-skill', version: '0.1.0', node: '>=22.19', skillVersion: '0.1.0',
@@ -36,6 +37,15 @@ async function fixture(t) {
   // These are controlled CLI inputs, not an installation/integrity fixture.
   await writeFile(join(packageRoot, 'manifest.json'), JSON.stringify({ schemaVersion: 1, name: 'tansr', version: '0.1.0', files: [] }));
   return { root, packageRoot, project, home };
+}
+
+async function copyExecutable(f) {
+  const installer = join(f.packageRoot, 'installer');
+  await mkdir(installer);
+  for (const file of ['cli.mjs', 'hosts.mjs']) {
+    await writeFile(join(installer, file), await readFile(new URL(`../installer/${file}`, import.meta.url)));
+  }
+  return join(installer, 'cli.mjs');
 }
 
 function outputStream(append) {
@@ -167,6 +177,100 @@ test('WorkBuddy project and explicitly selected user scopes delegate through the
   assert.equal(user.json.readiness.hostDiscovery, 'not-verified');
 });
 
+test('registered new host IDs and aliases are canonicalized before a single engine delegation', async t => {
+  const f = await fixture(t);
+  for (const [input, canonical] of [
+    ['generic', 'generic'], ['agents', 'generic'], ['universal', 'generic'],
+    ['claude-code', 'claude-code'], ['claude', 'claude-code'], ['cursor', 'cursor'],
+    ['qwen', 'qwen-code'], ['qianwen', 'qwen-code'],
+  ]) {
+    assert.equal(parseArguments(['--host', input]).host, canonical);
+    const r = await invoke(f, ['preview', '--host', input, '--scope', 'project', '--json']);
+    assert.equal(r.exitCode, 0, `${input}: ${r.stdout}`);
+    assert.equal(r.calls.length, 1);
+    assert.equal(r.calls[0].action, 'preview');
+    assert.equal(r.calls[0].options.metadata.host, canonical);
+    assert.equal(r.json.host, canonical);
+    assert.equal(r.prompts.length, 0);
+  }
+  assert.deepEqual(await readdir(f.project), []);
+  assert.deepEqual(await readdir(f.home), []);
+});
+
+test('hosts includes manual entries while every manual operation rejects before scope prompts or engine load', async t => {
+  const f = await fixture(t);
+  const listing = await invoke(f, ['hosts', '--json']);
+  assert.equal(listing.exitCode, 0);
+  for (const id of ['yuanbao', 'doubao', 'feishu']) {
+    const host = listing.json.hosts.find(item => item.id === id);
+    assert.equal(host.installation, 'manual');
+    assert.equal(parseArguments(['--host', id]).host, id);
+    for (const action of actions) {
+      const r = await invoke(f, [action, '--host', id, '--yes', '--json']);
+      assert.notEqual(r.exitCode, 0);
+      assert.equal(r.json.error.code, 'host_manual_setup_required');
+      assert.equal(r.loads, 0);
+      assert.equal(r.prompts.length, 0);
+    }
+    const interactive = await invoke(f, ['--host', id], { isTTY: true });
+    assert.notEqual(interactive.exitCode, 0);
+    assert.equal(interactive.loads, 0);
+    assert.equal(interactive.prompts.length, 0);
+    assert.match(interactive.stderr, /host_manual_setup_required/);
+  }
+  assert.deepEqual(await readdir(f.project), []);
+  assert.deepEqual(await readdir(f.home), []);
+});
+
+test('interactive host numbers follow the current installable registry and omit manual entries', async t => {
+  const f = await fixture(t);
+  const choices = listHosts().filter(host => host.installation === 'directory' && host.scopes.length > 0);
+  const selected = choices.findIndex(host => host.id === 'claude-code');
+  assert.ok(selected >= 0);
+  const questions = [];
+  const answers = [String(selected + 1), 'project', 'yes'];
+  const r = await invoke(f, [], { isTTY: true, prompt: async question => { questions.push(question); return answers.shift(); } });
+  assert.equal(r.exitCode, 0);
+  assert.equal(r.calls.length, 1);
+  assert.equal(r.calls[0].options.metadata.host, 'claude-code');
+  assert.equal(questions.length, 3);
+  for (const [index, host] of choices.entries()) assert.ok(questions[0].includes(`${index + 1} ${host.label} (${host.id})`));
+  for (const host of listHosts().filter(host => host.installation === 'manual')) assert.ok(!questions[0].includes(`(${host.id})`));
+  assert.ok(questions[2].includes(r.calls[0].options.targetPath));
+  const outOfRange = await invoke(f, [], { isTTY: true, prompt: async () => String(choices.length + 1) });
+  assert.notEqual(outOfRange.exitCode, 0);
+  assert.equal(outOfRange.loads, 0);
+  assert.match(outOfRange.stderr, /INVALID_HOST/);
+});
+
+test('user-only hosts still require an explicit scope and reject project scope before engine load', async t => {
+  const f = await fixture(t);
+  const host = findHost('zcode');
+  assert.deepEqual(host.scopes, ['user']);
+  const missing = await invoke(f, ['--host', 'zcode', '--yes', '--json']);
+  assert.equal(missing.json.error.code, 'SCOPE_REQUIRED');
+  assert.equal(missing.loads, 0);
+  const unsupported = await invoke(f, ['--host', 'zcode', '--scope', 'project', '--yes', '--json']);
+  assert.notEqual(unsupported.exitCode, 0);
+  assert.equal(unsupported.json.error.code, 'scope_unsupported');
+  assert.equal(unsupported.loads, 0);
+  const questions = [], answers = ['1', 'yes'];
+  const selected = await invoke(f, ['--host', 'zcode'], { isTTY: true, prompt: async question => { questions.push(question); return answers.shift(); } });
+  assert.equal(selected.exitCode, 0);
+  assert.equal(questions.length, 2);
+  assert.ok(questions[0].includes('1 user'));
+  assert.equal(selected.calls.length, 1);
+  assert.equal(selected.calls[0].options.metadata.scope, 'user');
+  assert.ok(questions[1].includes(selected.calls[0].options.targetPath));
+  for (const answer of ['', '0', '2']) {
+    const invalid = await invoke(f, ['--host', 'zcode'], { isTTY: true, prompt: async () => answer });
+    assert.equal(invalid.loads, 0);
+    assert.match(invalid.stderr, /INVALID_SCOPE/);
+  }
+  assert.deepEqual(await readdir(f.project), []);
+  assert.deepEqual(await readdir(f.home), []);
+});
+
 test('preview, status and install/update dry runs do not request confirmation or call mutation methods', async t => {
   const f = await fixture(t);
   for (const command of ['preview', 'status']) {
@@ -187,7 +291,10 @@ test('preview, status and install/update dry runs do not request confirmation or
 
 test('interactive selection displays one exact target before confirmation', async t => {
   const f = await fixture(t);
-  const answers = ['1', '1', 'yes'], questions = [];
+  const choices = listHosts().filter(host => host.installation === 'directory' && host.scopes.length > 0);
+  const selected = choices.findIndex(host => host.id === 'codex');
+  assert.ok(selected >= 0);
+  const answers = [String(selected + 1), String(choices[selected].scopes.indexOf('project') + 1), 'yes'], questions = [];
   const r = await invoke(f, [], { isTTY: true, prompt: async question => { questions.push(question); return answers.shift(); } });
   assert.equal(r.exitCode, 0);
   assert.equal(questions.length, 3);
@@ -342,12 +449,9 @@ test('help, version and hosts terminate without engine import, target creation, 
   assert.deepEqual(await readdir(f.home), []);
 });
 
-test('executable help and JSON argument failures run in a package without an engine or adapters', async t => {
+test('executable help and JSON argument failures run with the host registry but without an engine', async t => {
   const f = await fixture(t);
-  const installer = join(f.packageRoot, 'installer');
-  await mkdir(installer);
-  const executable = join(installer, 'cli.mjs');
-  await writeFile(executable, await readFile(new URL('../installer/cli.mjs', import.meta.url)));
+  const executable = await copyExecutable(f);
   const help = spawnSync(process.execPath, [executable, '--help', '--json'], { encoding: 'utf8', timeout: 10000, cwd: f.project });
   assert.equal(help.status, 0, help.stderr);
   assert.equal(JSON.parse(help.stdout).action, 'help');
@@ -359,10 +463,7 @@ test('executable help and JSON argument failures run in a package without an eng
 
 test('executable invocation through filesystem aliases returns help, version and JSON errors', async t => {
   const f = await fixture(t);
-  const installer = join(f.packageRoot, 'installer');
-  await mkdir(installer);
-  const executable = join(installer, 'cli.mjs');
-  await writeFile(executable, await readFile(new URL('../installer/cli.mjs', import.meta.url)));
+  const executable = await copyExecutable(f);
   const alias = join(f.root, 'package alias');
   const links = [];
   try {
@@ -410,9 +511,7 @@ test('executable invocation through filesystem aliases returns help, version and
 
 test('importing the CLI through an alias never starts it or fails for a nonexistent argv entry', async t => {
   const f = await fixture(t);
-  const installer = join(f.packageRoot, 'installer');
-  await mkdir(installer);
-  await writeFile(join(installer, 'cli.mjs'), await readFile(new URL('../installer/cli.mjs', import.meta.url)));
+  await copyExecutable(f);
   const alias = join(f.root, 'import alias');
   await symlink(f.packageRoot, alias, process.platform === 'win32' ? 'junction' : 'dir');
   try {

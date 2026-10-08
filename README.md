@@ -12,6 +12,8 @@ npx --yes @tansr/skill@0.1.0 install --host codex --scope project --yes
 
 候选使用合同见 [安装说明](INSTALL.md)，实际助手接入见 [assistant-setup.md](references/assistant-setup.md)。本次发布显式指定 `next`，但 registry 同时返回 `latest=0.1.0`，删除该标签返回403；标签现状不作为完整宿主验收通过的证明。发布事实及剩余项见 [第二阶段回执](doc/S2-实施回执.md)。
 
+多助手扩展候选 `0.1.1` 提供 13 个目录配置，覆盖通用目录、Codex、WorkBuddy、Claude Code、Cursor、TRAE、Qoder、ZCode、Kimi Code、MiniMax Code CLI 与千问 Qwen Code 的已核实入口及地区/CLI差异。另 5 个入口提供手动导入或待核实说明，不假报安装成功。精确路径与状态可运行 `hosts --json` 查看；请先核对 npm 已发行版本，再使用安装说明中的 `@0.1.1` 命令。目录安装验收不等于全部助手实际加载验收。
+
 ## 开始一个产品
 
 把本仓 Skill 交给编程助手，并描述想做什么，例如：“我想做一个可以录入日常活动、查看历史与生成建议的健身助手”。助手应完成界面、业务数据、Tansr 接线及验证，不能只返回聊天回答或方案。已有项目保留原技术栈和锁文件。

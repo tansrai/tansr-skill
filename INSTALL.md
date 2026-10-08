@@ -1,88 +1,85 @@
 # Tansr Skill
 
-让熟悉的编程助手，帮你把想法做成 AI 产品。
+让你熟悉的编程助手，帮你把想法做成 AI 产品：选择助手安装 Skill，再描述产品需求。Skill 提供开发指引、SDK / Serve 接入资料和起步工程；安装本身不创建账号、不调用模型、不部署应用。
 
-发行状态以 npm 上的实际版本和标签为准：`next` 用于候选验收，只有完成公开安装闭环的版本才启用 `latest`。下文 `@latest` 是正式入口；若 registry 尚无对应标签，请等待正式发行，不能把文档中的命令当作已发布证明。
+**发行快照（2026-10-08）：** `0.1.0` 已公开，支持 Codex、WorkBuddy 两个安装目标；registry 的 `latest` 也实际指向 `0.1.0`，这是已记录的候选标签隔离异常，不代表完整宿主验收已通过。本轮多助手版本 `0.1.1` 是待发行候选。**下文所有 `@0.1.1` 命令须等该精确版本发布后使用**；请先核对 [npm 版本与标签](https://www.npmjs.com/package/@tansr/skill)，不要用旧 `@latest` 代替新候选。
 
-Tansr Skill 提供需求梳理、SDK 与服务接入、可运行起步工程，以及验证和排错指引。安装后，直接描述想做的产品即可。Skill 为开发过程提供帮助；生成的应用使用 Tansr SDK 或 Serve 运行。
+## 第一步：选择一个助手并安装
 
-## 第一步：交给助手安装
+需要已有 Node.js ≥22.19、npm 和目标助手。安装器不代装这些软件。首次 npx 获取包需要网络；缺少 Node 时先从 [Node.js 官网](https://nodejs.org/en/download)安装受支持版本，重新打开终端。
 
-在你准备开发产品的目录打开 Codex，把下面这段话交给它：
-
-> 请在当前项目安装 Tansr Skill。先确认 Node.js 至少为22.19，并检查安装目标是否已有用户修改。运行 `npx --yes @tansr/skill@latest install --host codex --scope project --yes`。如遇冲突请保留已有内容并说明，不强制覆盖。随后检查 Skill 是否能被发现，实际读取它的 SKILL.md 后告诉我结果。
-
-在 WorkBuddy 中使用同样的指令，将 `--host codex` 改为 `--host workbuddy`。
-
-熟悉终端也可直接执行：
+在准备开发产品的目录运行以下命令。以下以 Codex 为例，换助手时只替换 `--host`：
 
 ```sh
-npx --yes @tansr/skill@latest install --host codex --scope project --yes
+# 0.1.1 候选发布后使用
+npx --yes @tansr/skill@0.1.1 hosts
+npx --yes @tansr/skill@0.1.1 preview --host codex --scope project
+npx --yes @tansr/skill@0.1.1 install --host codex --scope project --yes
 ```
 
-安装器需要已有 Node.js ≥22.19 和 npm。它不自动安装 Node、桌面助手或模型运行依赖。缺少运行环境时，先安装 [Node.js 的受支持版本](https://nodejs.org/en/download)，重新打开终端后再执行。
+也可把这段话交给编程助手：
 
-这里的 `latest` 是正式发行入口；候选验收使用明确的 `next` 或精确版本。安装前可在 [npm 包页面](https://www.npmjs.com/package/@tansr/skill) 核对实际发行状态。文件安装成功后，助手是否发现、实际读取，仍需分别确认。
+> 请在当前项目安装 Tansr Skill。先确认精确版本 0.1.1 已发布、Node.js 至少为 22.19，使用 `preview --host codex --scope project` 查看目标，再运行同版本的 `install --host codex --scope project --yes`。有冲突时保留已有内容。安装后在本助手中确认技能可见，并实际读取它的 SKILL.md，分别报告结果。
+
+0.1.1 候选的目录安装选择如下；**支持写入目录不等于该助手已通过实际加载验收**。产品版本、启用状态和运行系统仍会影响发现结果。
+
+| 助手 / 产品 | `--host`（括号内为别名） | 可选范围 |
+| --- | --- | --- |
+| Codex | `codex` | `project` / `user` |
+| WorkBuddy / CodeBuddy | `workbuddy`（`codebuddy`） | `project` / `user` |
+| Claude Code | `claude-code`（`claude`） | `project` / `user` |
+| Cursor | `cursor` | `project` / `user` |
+| TRAE 国内版 / TraeCode | `trae`（`trae-cn`、`traecode`） | `project` / `user` |
+| TraeCode CLI | `trae-cli`（`traecode-cli`） | `project` / `user` |
+| Qoder 国际版 IDE / CLI | `qoder` | `project` / `user` |
+| Qoder 国内版 IDE | `qoder-cn`（`lingma`） | `project` / `user` |
+| ZCode Agent | `zcode` | 仅 `user` |
+| Kimi Code | `kimi`（`kimi-code`） | `project` / `user` |
+| MiniMax Code CLI | `minimax`（`minimax-code`、`mcode`） | `project` / `user` |
+| 千问 Qwen Code | `qwen-code`（`qwen`、`qianwen`、`千问`） | `project` / `user` |
+| 通用 Agent Skills 目录 | `generic`（`agents`、`universal`、`通用`） | `project` / `user` |
+
+别名与正式 ID 指向同一目标，例如 `--host claude` 等同 `--host claude-code`。一般选项目范围；跨项目使用时明确选 `--scope user`。ZCode 目前只核实用户目录，例如：
+
+```sh
+# 仅当你选择 ZCode；0.1.1 候选发布后使用
+npx --yes @tansr/skill@0.1.1 install --host zcode --scope user --yes
+```
+
+**一次只安装所选的一处。** `generic` 写入 `.agents/skills/tansr`，与 Codex 共用目标，也可能被其他已支持该约定的助手读取；它不是“自动安装到所有助手”。精确路径、重载和自定义配置根限制见[助手安装说明](https://github.com/tansrai/tansr-skill/blob/main/references/assistant-setup.md)；包内对应 `skill/references/assistant-setup.md`。
+
+共用目录的更新、回退或卸载会影响读取它的所有助手。Kimi 的项目安装需从最近的 Git 根执行，子目录调用会提示正确根路径；MiniMax 自定义 profile 必须明确实际数据目录。
+
+`feishu`（飞书 aily）、`yuanbao`、`doubao`、`volcengine`（火山 Agent）和 `trae-global` 仅提供官方手动入口或待核实说明，不执行目录安装。云端 Agent、普通聊天产品与同品牌编程助手分别处理，不自动上传、注册或启用 Skill。
 
 ## 第二步：描述你想做的产品
 
-例如：
+回到所选助手，按安装回执重载或检查技能列表，再描述需求：
 
-> 使用 Tansr Skill，帮我做一个智能健身助手。可以记录每天的活动和感受，查看历史与趋势，并根据我提供的信息生成可以检查和修改的建议。先做出能运行的第一版，再告诉我哪些配置需要完成。
+> 使用 Tansr Skill，帮我做一个学习计划助手，能记录目标、安排每日任务并回顾进展。先做出能运行的第一版，再告诉我需要完成哪些配置。
 
-已有产品也可以直接说：
+已有项目也可以说：
 
-> 使用 Tansr Skill，为当前订单系统加入自然语言查询助手，沿用原登录、权限和数据库，保留我的现有修改。
+> 使用 Tansr Skill，为当前订单系统加入自然语言查询助手，沿用原登录、权限、数据库和锁文件，保留我的现有修改。
 
-助手会继续完成界面、业务工具、接线与验证。需要平台应用或模型授权时会说明具体步骤；安装 Skill 本身不创建账号、不发起模型调用，也不部署你的产品。
-
-## 安装位置
-
-| 宿主 | 当前项目 | 当前用户所有项目 |
-|---|---|---|
-| Codex | `.agents/skills/tansr` | `~/.agents/skills/tansr` |
-| WorkBuddy | `.codebuddy/skills/tansr` | `~/.codebuddy/skills/tansr` |
-
-默认建议项目范围。跨项目使用时，明确改为 `--scope user`。每次只安装所选的一处，不会同时写入多个助手。`--project` 可以指定项目绝对路径；用户范围不接受此参数。
-
-WorkBuddy 的目录依据是其官方项目文档明确支持的项目配置和用户级兼容配置。文件安装与目标版本实际加载是两项验证；如没有显示技能，先按宿主界面检查当前项目、技能启用及重载，不猜测其他目录反复复制。
-
-Codex 会自动检测技能变化；未显示时保存工作后重新启动助手。在 CLI/IDE 可通过 `/skills` 或 `$tansr` 显式选择，也可以在对话中说明“使用 Tansr Skill”。同名技能可能来自不同范围，请核对实际读取路径。
+助手会继续完成界面、业务工具、接线与验证。需要平台应用或模型授权时，按实际平台入口人工配置；真实密钥放在应用服务端，不填入聊天、客户端或 Skill 安装记录。
 
 ## 检查、更新与卸载
 
-先预览目标，不修改文件：
+以下同样使用已发布的精确候选版本，并保留最初选择的宿主与范围：
 
 ```sh
-npx --yes @tansr/skill@latest preview --host codex --scope project
-npx --yes @tansr/skill@latest status --host codex --scope project
+# 0.1.1 候选发布后使用
+npx --yes @tansr/skill@0.1.1 status --host codex --scope project
+npx --yes @tansr/skill@0.1.1 update --host codex --scope project --yes
+npx --yes @tansr/skill@0.1.1 rollback --host codex --scope project --yes
+npx --yes @tansr/skill@0.1.1 uninstall --host codex --scope project --yes
 ```
 
-更新到当前命令取得的包版本：
+`status` 只检查文件，不证明助手已加载。`update` 使用当前命令取得的包内容；`rollback` 回退登记的前一版。卸载保留用户修改、未知文件、其他 Skill 和已创建的产品。上次进程中断时先看 `status`，仅按提示执行同目标的 `recover --yes`。
 
-```sh
-npx --yes @tansr/skill@latest update --host codex --scope project --yes
-```
+`--project <绝对路径>` 只适用于项目范围；`--json` 不等待交互输入，修改操作仍需明确 `--yes`。安装器校验随包文件大小和 SHA256，不执行模板依赖或安装脚本，不上传项目数据。
 
-回退到保留的前一版，或卸载登记的 Skill 文件：
-
-```sh
-npx --yes @tansr/skill@latest rollback --host codex --scope project --yes
-npx --yes @tansr/skill@latest uninstall --host codex --scope project --yes
-```
-
-安装器保留被用户修改的文件和其他 Skill，不接管来源不明的同名目录。遇到冲突会列出保留项并返回非零状态；不会用“完成”掩盖未处理文件。卸载不删除你使用 Skill 创建的产品。
-
-如果上次进程中断，先查看 `status`。只有提示需要恢复时，运行相同宿主与范围的 `recover --yes`。正在使用目标的安装进程不会被另一个命令强制抢占。
-
-自动化调用使用 `--json` 获取结构化状态；这个模式不会等待交互输入，修改命令需要明确 `--yes`。`--help` 和 `hosts` 列出实际支持参数与宿主。
-
-## 内容与版本
-
-包内包含 Skill、参考资料、起步模板、固定文件清单，以及离线生成/诊断/Demo准备工具。安装时核验文件大小及 SHA256；不在后台下载另一份技能、不上传项目数据、不执行模板依赖或安装脚本。
-
-模板保留锁文件、`.env.example`、`.tansr` 和 `.gitignore` 等必要配置。真实密钥由应用的服务端安全配置持有，不应填入聊天、Skill 安装记录或客户端代码。
-
-Tansr 自有安装器、工具、测试及原创贡献采用 MIT，见随包 [LICENSE](LICENSE)。入口和参考资料中既有的 Apache 来源适配内容继续保留相应义务，完整许可见 [LICENSES/Apache-2.0.txt](LICENSES/Apache-2.0.txt)，具体来源与许可范围见 [NOTICE](NOTICE)。随包 Demo 资产及独立发行的 SDK、Serve、CLI 与各平台产物沿用各自许可；根 MIT 许可不改变第三方内容的许可。
+Tansr 自有安装器与原创贡献采用 [MIT](LICENSE)。既有 Apache 来源适配义务及第三方许可见 [NOTICE](NOTICE) 和 [LICENSES/Apache-2.0.txt](LICENSES/Apache-2.0.txt)；随包 Demo 与独立 SDK / Serve 沿用各自许可。
 
 [Tansr 官网](https://tansr.com/) · [开发文档](https://docs.tansr.com/)

@@ -7,10 +7,11 @@ import { execFileSync } from 'node:child_process';
 import { gzipSync } from 'node:zlib';
 import { buildInstaller, PAYLOAD_FILES, INSTALLER_FILES, repositoryRoot, BUILD_RECEIPT, payloadSourcePath, validateRelease } from '../scripts/build-installer.mjs';
 import { checkInstallerPackage, auditTarball, readTarball, validatePackedContent } from '../scripts/check-installer-package.mjs';
+import { listHosts } from '../installer/hosts.mjs';
 
-const release = { schemaVersion: 1, packageName: '@tansr/skill', binName: 'tansr-skill', version: '0.1.0',
+const release = { schemaVersion: 1, packageName: '@tansr/skill', binName: 'tansr-skill', version: '0.1.1',
   node: '>=22.19', license: 'MIT', homepage: 'https://tansr.com/', repository: 'https://github.com/tansrai/tansr-skill',
-  skillVersion: '0.1.0', templateBaselines: [{ id: 'node', version: '1.0.0' }, { id: 'web', version: '0.1.0' }],
+  skillVersion: '0.1.1', templateBaselines: [{ id: 'node', version: '1.0.0' }, { id: 'web', version: '0.1.0' }],
   runtimeBaselines: [{ id: 'serve', name: '@tansr/serve', version: '0.15.0' }, { id: 'sdk', name: '@tansr/sdk', version: '0.18.1' }] };
 
 async function fixture(t) {
@@ -67,6 +68,28 @@ function tarball(entries) {
   return gzipSync(Buffer.concat(pieces));
 }
 
+test('release candidate metadata records the current host registry without asserting host loading', async () => {
+  const currentRelease = JSON.parse(await readFile(join(repositoryRoot, 'release.json'), 'utf8'));
+  const workspace = JSON.parse(await readFile(join(repositoryRoot, 'package.json'), 'utf8'));
+  const compatibility = JSON.parse(await readFile(join(repositoryRoot, 'compatibility.json'), 'utf8'));
+  const hosts = listHosts();
+  assert.equal(workspace.version, currentRelease.version);
+  assert.equal(compatibility.skill.version, currentRelease.skillVersion);
+  assert.equal(compatibility.skill.publishedInstaller.version, currentRelease.version);
+  assert.equal(compatibility.hostRegistry.candidatePackageVersion, currentRelease.version);
+  assert.deepEqual(compatibility.hosts.map(host => host.id).sort(), hosts.map(host => host.id).sort());
+  for (const host of hosts) {
+    const declared = compatibility.hosts.find(item => item.id === host.id);
+    assert.equal(declared.registry.packageVersion, currentRelease.version);
+    for (const key of ['label', 'aliases', 'installation', 'scopes', 'directories', 'documentation', 'loading',
+      'projectRoot', 'userRootEnv', 'trimUserRootEnv', 'unsupportedUserProfileEnv', 'unsupportedUserConfigEnv', 'reason']) {
+      assert.deepEqual(declared.registry[key], host[key], `${host.id}.${key}`);
+    }
+    assert.equal(declared.currentCandidateHostValidation.packageVersion, currentRelease.version);
+    for (const scope of ['project', 'user']) assert.equal(declared.currentCandidateHostValidation[scope], host.scopes.includes(scope) ? 'not_tested' : 'not_applicable');
+  }
+});
+
 test('explicit tracked package builds, real npm pack preserves every payload byte and public metadata', async t => {
   const f = await fixture(t);
   await writeFile(join(f.root, 'assets/product-starter/.env'), 'synthetic-sensitive-fixture-only');
@@ -82,6 +105,8 @@ test('explicit tracked package builds, real npm pack preserves every payload byt
   const files = readTarball(await readFile(result.tarball));
   const pkg = JSON.parse(files.get('package.json').bytes);
   assert.equal(pkg.name, '@tansr/skill');
+  assert.equal(pkg.version, release.version);
+  assert.equal(JSON.parse(files.get('manifest.json').bytes).version, release.skillVersion);
   assert.equal(pkg.private, undefined);
   assert.equal(pkg.scripts, undefined);
   assert.equal(files.has(BUILD_RECEIPT), false);

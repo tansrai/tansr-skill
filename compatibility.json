@@ -4,7 +4,7 @@
   "skill": {
     "name": "tansr",
     "version": "0.1.0",
-    "status": "stage1-development",
+    "status": "stage1-accepted-local-candidate",
     "license": "Apache-2.0",
     "publishedInstaller": null
   },
@@ -306,7 +306,7 @@
         "ios": 16,
         "macOS": 13
       },
-      "status": "public_sdk030_repaired_consumer: builds_and_tests_passed; serve015_tcp_pairing_three_tests_thirteen_checkpoints_passed; original_eight_UI_journeys_and_video_passed_across_documented_revisions; positive_microphone_recording_pending",
+      "status": "public_sdk030_repaired_consumer: builds_and_tests_passed; serve015_tcp_pairing_three_tests_thirteen_checkpoints_passed; original_eight_UI_journeys_and_video_passed_across_documented_revisions; single_native_recording_auto_stop_synthetic_ASR_unsent_draft_and_cleanup_passed",
       "hostPreparation": "assets/ios-app-host/prepare.mjs",
       "hostPreparationEvidence": "archive/TPB-01-two-step-product/stage1-closure/review/ios-prepare-r14-final-public-receipt.json",
       "hostPreparationDeliveryEvidence": "archive/TPB-01-two-step-product/stage1-closure/review/ios-prepare-r14-delivery.json",
@@ -317,12 +317,18 @@
         "originalJourneyIds": 8,
         "originalJourneyStatus": "passed_original_assertion_scope_across_revisions; earlier_failed_reports_retained; not_a_single_eight_test_rerun",
         "additionalVideoPlayback": "passed_original_AVPlayer_completion_replay_background_close",
-        "recordingPositive": "pending_explicit_microphone_capture_authorization; denial_path_passed",
-        "repairs": ["paused_segment_label", "media_sheet_history_refresh", "bounded_history_scroll_viewport"],
+        "recordingPositive": "passed_once_with_original_AVAudioRecorder_and_test_cap3s; automatic_stop_to_original_editable_draft; no_Stop_or_Send_tap; synthetic_ASR_only",
+        "repairs": [
+          "paused_segment_label",
+          "media_sheet_history_refresh",
+          "bounded_history_scroll_viewport"
+        ],
         "publishedZipUpdated": false,
         "scope": "Original public App and binary SDK; synthetic model/media, original system photo picker; no real-model, physical-device, signing or private SDK2 full-gate claim",
         "evidence": "archive/TPB-01-two-step-product/stage1-closure/ios/final-journey-matrix.md",
-        "cleanup": "owned_simulator_shutdown_and_own_tunnel_closed; original_fourteen_simulators_unchanged"
+        "cleanup": "owned_microphone_permission_revoked; old_and_current_App_container_temporary_audio_zero; owned_simulator_shutdown_and_tunnel_closed; original_fourteen_devices_preserved",
+        "recordingEvidence": "archive/TPB-01-two-step-product/stage1-closure/recording-final-20261008/ios/FINAL.md",
+        "recordingScope": "Only recorder maxDurationSec narrowed from60 to3 for bounded acceptance; released source retains original limit; actual audio not exported or archived"
       },
       "controlledServePairing": {
         "sdk": "0.3.0",
@@ -387,7 +393,7 @@
       "protocol": "public HAR legacy /v2; local SDK2/UAPI not same artifact",
       "minApi": 20,
       "targetApi": 22,
-      "status": "public_bundled_HAR_build_lint_and_22_unique_Hypium_cases_passed_across_documented_retests; six_original_App_flows_including_core64_and_separate_video24_verified; video_background_P05_repair_native_retest_passed; positive_microphone_pending",
+      "status": "public_bundled_HAR_build_lint_and_22_unique_Hypium_cases_passed_across_documented_retests; six_original_App_flows_including_core64_and_separate_video24_verified; video_background_P05_repair_native_retest_passed; single_native_recording_auto_stop_synthetic_ASR_editable_draft_and_cleanup_passed",
       "nativeAcceptance": {
         "runtime": "API22 native HarmonyOS emulator; isolated bundle; original public HAR 0.1.0",
         "hypium": "22_unique_cases_covered_across_21_pass_1_UI_error_and_unchanged_UI_retest_pass; original_error_retained",
@@ -400,10 +406,13 @@
         "videoFinding": "archive/TPB-01-two-step-product/stage1-closure/review/harmony-video-background-p05-review.md",
         "videoRepairEvidence": "archive/TPB-01-two-step-product/stage1-closure/harmony/p05-video-background/final-regression-receipt.json",
         "uiEvidence": "archive/TPB-01-two-step-product/stage1-closure/harmony/native-journey-outcome-final.json",
-        "recordingPositive": "pending_explicit_microphone_capture_authorization",
-        "resourceCleanup": "owned_emulator_processes_exited_and_device_offline; virtual_disk_preserved",
-        "resourceCleanupEvidence": "archive/TPB-01-two-step-product/stage1-closure/harmony/native-emulator-stop-settled.json",
-        "scope": "controlled synthetic model/media and public App; unknown earlier Allow and TTS operations excluded; no private SDK2, live-provider or signed-publication claim"
+        "recordingPositive": "passed_once_after_original_system_permission; native_maxDuration_and_timer3s_from_actual_metadata; original_draft_edit_verified_without_Send; synthetic_ASR_only",
+        "resourceCleanup": "owned_microphone_permission_revoked; two_App_cache_recording_counts_zero; owned_emulator_processes_exited_and_device_offline; virtual_disk_preserved",
+        "resourceCleanupEvidence": "archive/TPB-01-two-step-product/stage1-closure/recording-final-20261008/harmony/FINAL.md",
+        "scope": "controlled synthetic model/media and public App; unknown earlier Allow and TTS operations excluded; no private SDK2, live-provider or signed-publication claim",
+        "recordingEvidence": "archive/TPB-01-two-step-product/stage1-closure/recording-final-20261008/harmony/FINAL.md",
+        "recordingScope": "Same public HAR and P05 HAP; actual audio not exported or archived; duration cap configuration and automatic completion verified, no encoded-duration measurement",
+        "historicalResourceCleanupEvidence": "archive/TPB-01-two-step-product/stage1-closure/harmony/native-emulator-stop-settled.json"
       },
       "consumerRepair": {
         "scope": "Remove only the background onStopVideo that overwrites original Index pause; explicit load, close and audio switches keep stop; original HAR and published ZIP unchanged",
@@ -457,5 +466,19 @@
     "doc/S1-01-来源与支持矩阵.md",
     "doc/PLAN-01-Skill生态与两步产品构建实施方案.md",
     "doc/S1-实施回执.md"
-  ]
+  ],
+  "stage1Acceptance": {
+    "completedAt": "2026-10-08",
+    "engineering": "S1-01..S1-08: 8/8",
+    "adversarial": "A1-01..A1-08: 8/8",
+    "parentCards": [
+      "E1",
+      "A1"
+    ],
+    "scope": "Original Stage1 Skill delivery; no installer publication, remote push or homepage deployment",
+    "review": "archive/TPB-01-two-step-product/stage1-closure/recording-final-20261008/stage1-final-review.md",
+    "recordingProvider": "Local synthetic ASR; no speech-recognition accuracy or paid-provider claim",
+    "fullGate": "archive/TPB-01-two-step-product/stage1-closure/skill-gates-20261007T192248341Z/receipt.json",
+    "metadataOnlyAfterGate": true
+  }
 }

@@ -2,7 +2,7 @@
 
 帮助用户在熟悉的编程助手中，把产品想法做成可运行的 AI 应用，为已有项目接入 Tansr，并继续修改、验证与排错。
 
-当前是 TPB-01 第一阶段开发候选。入口为 [SKILL.md](SKILL.md)，不需要自行挑选多组内部技能。第二阶段的 npx 安装器尚未发布；这里不提供虚构的安装命令。助手手动接入见 [assistant-setup.md](references/assistant-setup.md)。
+TPB-01 第一阶段 Skill 集已完成验收，当前为本地可交付候选。入口为 [SKILL.md](SKILL.md)，不需要自行挑选多组内部技能。第二阶段的 npx 安装器尚未发布；这里不提供虚构的安装命令。助手手动接入见 [assistant-setup.md](references/assistant-setup.md)。
 
 ## 开始一个产品
 

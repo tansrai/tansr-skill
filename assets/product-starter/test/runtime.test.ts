@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { mkdtemp, readFile, rm, writeFile, rename } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile, rename, mkdir, rmdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -260,6 +260,97 @@ test('corrupt state and competing owner preserve files; persistence failure pres
     } finally { await store.close(); }
   } finally { await rm(dir, { recursive: true, force: true }); }
 });
+
+test('saveRun snapshots caller-owned data before queueing and detaches committed history', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'tansr-store-snapshot-'));
+  const store = new LocalStore(dir); await store.open();
+  try {
+    const row = await store.add({ title: '合成记录', content: '调用时的事实' });
+    const first: Run = { id: 'first', status: 'completed', mode: 'offline', recordIds: [row.id], inputRecords: [structuredClone(row)], createdAt: '2026-10-09T00:00:00Z', result: { text: '已保存结果', readIds: [row.id], toolCalls: 1 } };
+    const queued: Run = { id: 'queued', status: 'running', mode: 'offline', recordIds: [row.id], inputRecords: [structuredClone(row)], createdAt: '2026-10-09T00:00:01Z' };
+    const firstSave = store.saveRun(first);
+    const queuedSave = store.saveRun(queued);
+    queued.id = 'mutated-id'; queued.status = 'completed';
+    queued.inputRecords[0].content = '未授权的新事实';
+    queued.result = { text: '尚未提交的结果', readIds: [], toolCalls: 0 };
+    await firstSave; await queuedSave;
+    const saved = JSON.parse(await readFile(join(dir, 'state.json'), 'utf8'));
+    assert.deepEqual(saved.runs.map((run: Run) => run.id), ['first', 'queued']);
+    assert.equal(saved.runs[1].status, 'running');
+    assert.equal(saved.runs[1].result, undefined);
+    assert.equal(saved.runs[1].inputRecords[0].content, row.content);
+    await store.saveRun(first); // Exercise replacement as the most recent committed object.
+    const committed = JSON.parse(await readFile(join(dir, 'state.json'), 'utf8'));
+    first.status = 'failed'; first.inputRecords[0].content = '保存后被调用方改写';
+    first.result!.text = '保存后替换的结果'; first.result!.readIds.length = 0;
+    assert.deepEqual(store.snapshot(), committed, 'later caller mutations cannot change committed memory or nested evidence');
+    assert.deepEqual(JSON.parse(await readFile(join(dir, 'state.json'), 'utf8')), committed);
+  } finally { await store.close(); await rm(dir, { recursive: true, force: true }); }
+});
+
+for (const outcome of ['success', 'failure'] as const) {
+  test(`terminal result waits for durable commit before REST, cancellation and replay observe it: ${outcome}`, { timeout: 10_000 }, async () => {
+    const f = await fixture();
+    const path = join(f.dir, 'state.json'), backup = join(f.dir, 'before-terminal.json');
+    const originalSave = f.app.store.saveRun.bind(f.app.store);
+    let release = () => undefined as void;
+    let reached = () => undefined as void;
+    let rejectDeadline: (error: Error) => void = () => undefined;
+    const held = new Promise<void>(resolve => { release = resolve; });
+    const terminalReached = new Promise<void>((resolve, reject) => { reached = resolve; rejectDeadline = reject; });
+    const deadline = setTimeout(() => rejectDeadline(new Error('SDK did not reach the terminal persistence boundary')), 5_000);
+    let blocked = false;
+    let unsubscribe = () => undefined as void;
+    f.app.store.saveRun = async value => {
+      if (value.status === 'completed') { reached(); await held; }
+      await originalSave(value);
+    };
+    try {
+      const row = await add(f);
+      const started = await run(f, [row.id]);
+      await terminalReached; clearTimeout(deadline);
+      const disk = JSON.parse(await readFile(path, 'utf8'));
+      const state = await (await f.request('/api/state')).json();
+      assert.equal(state.runs[0].status, 'running');
+      assert.equal(state.runs[0].result, undefined);
+      assert.equal(f.app.runs.getRun(started.id).status, 'running');
+      assert.deepEqual(f.app.store.snapshot(), disk);
+      const replay: RunEvent[] = [];
+      unsubscribe = f.app.runs.subscribe(started.id, Number.MAX_SAFE_INTEGER, event => replay.push(event));
+      assert.equal(replay.length, 0, 'resume must not synthesize done before durable terminal commit');
+      const cancelled = await f.request(`/api/runs/${started.id}/cancel`, 'POST', {});
+      assert.equal(cancelled.status, 409);
+      assert.equal((await cancelled.json()).error.code, 'run_finalizing');
+      if (outcome === 'failure') {
+        await rename(path, backup); await mkdir(path); blocked = true;
+      }
+      release();
+      const stream = await events(f, started.id);
+      const final = (await (await f.request('/api/state')).json()).runs[0] as Run;
+      if (outcome === 'success') {
+        assert.equal(final.status, 'completed');
+        assert.ok(final.result);
+        assert.equal(stream.at(-1)?.status, 'completed');
+        assert.ok(stream.some(event => event.type === 'result'));
+        assert.deepEqual(f.app.store.snapshot(), JSON.parse(await readFile(path, 'utf8')));
+      } else {
+        assert.equal(final.status, 'failed');
+        assert.equal(final.error?.code, 'storage_failed');
+        assert.equal(final.result, undefined);
+        assert.equal(stream.at(-1)?.status, 'failed');
+        assert.equal(stream.some(event => event.type === 'result'), false);
+        assert.deepEqual(f.app.store.snapshot(), disk, 'failed terminal rename cannot change committed memory');
+        assert.deepEqual(JSON.parse(await readFile(backup, 'utf8')), disk);
+        assert.equal((await f.request('/api/runs', 'POST', { recordIds: [row.id] })).status, 503);
+      }
+    } finally {
+      clearTimeout(deadline); release(); unsubscribe();
+      await f.app.runs.close();
+      if (blocked) { await rmdir(path); await rename(backup, path); }
+      await f.close();
+    }
+  });
+}
 
 test('SDK persistence failure retains host recovery handle and original failure; cannot report result', async () => {
   const row: BusinessRecord = { id: 'record-1', title: 'SDK数据', content: '真实工具数据', source: '', status: 'new', createdAt: '', updatedAt: '' };

@@ -143,6 +143,8 @@ export class LocalStore {
     });
   }
   async saveRun(run: Run): Promise<void> {
+    // Capture before queueing: caller mutations must never change committed state.
+    run = structuredClone(run);
     await this.update(db => {
       const index = db.runs.findIndex(item => item.id === run.id);
       if (index < 0) {

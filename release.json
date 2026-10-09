@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "packageName": "@tansr/skill",
   "binName": "tansr-skill",
-  "version": "0.1.5",
-  "skillVersion": "0.1.5",
+  "version": "0.1.6",
+  "skillVersion": "0.1.6",
   "templateBaselines": [
     {
       "id": "web",

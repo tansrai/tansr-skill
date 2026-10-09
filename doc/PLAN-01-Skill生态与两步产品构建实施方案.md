@@ -1,6 +1,6 @@
 # Tansr Skill 生态与两步产品构建实施方案
 
-方案编号：TPB-01。建立日期：2026-10-07。负责人：当前任务主代理，用户负责产品方向。当前状态：2026-10-09 Skill 0.1.4已以next公开，历史来源eddc48c不可变且本轮未提升其latest；用户追加后端建立、接线、启动及安全配置入口后，0.1.5本地集中原门已通过，待精确主线CI、正式公开消费、新版主站vendor与生产闭环。原工程/对抗各22/24，S3-07/08与A3-07/08仍待；当前事实见§11.9及S3回执§7.22，旧记录保留历史。
+方案编号：TPB-01。建立日期：2026-10-07。负责人：当前任务主代理，用户负责产品方向。当前状态：2026-10-09 Skill 0.1.5已公开next，但真实CLI消费在写入前因发行元数据校验失败，已加deprecated提示；latest仍为0.1.3。当前0.1.6为待发布修复候选，严格补齐四模板校验与真实打包CLI消费门。原工程/对抗各22/24，S3-07/08与A3-07/08仍待；当前事实见§11.10及S3回执§7.23，旧记录保留历史。
 
 2026-10-08第三阶段方向深化：按用户最新确认，首页包含普通用户、入门开发者、成熟技术与产品人员、组织与企业四层价值入口；第一层明确“自己的AI产品”，第二层明确减少智能体Harness通用能力的重复开发。详细背景、已确认语义、建议布局、旧功能合同、执行点与对抗断言见 [首页四层引导开发方案与背景说明](S3-首页四层引导开发方案与背景说明.md)，总体公司文案见 [品牌综合文案](S3-云联慧算与Tansr品牌综合文案.md)。初次仅做方案，用户随后明确授权实施及后台动态配置；当前事实见 [第三阶段实施回执](S3-实施回执.md)。原S3/A3各8项待统一结算，父卡与分母不变。
 
@@ -347,3 +347,12 @@ API 6bd20e63c79a9ad34af0c9bd3a5aeb2a5c319a2b的CI37900134243已绿，真MySQL/Re
 证据根：stage3/full-closure-20261009。行为与宿主见behavior/review、host-environment、behavior/workbuddy-desktop-review-20261009/companion-backend-20261009/FINAL-RECEIPT.json；API/配置见local-real-db/RESULT.json与config-alignment/REVIEW-FINAL.json；主站CI见server-vendor-014-20261009T082841Z-c967584f/ci-37906676721；015实现见backend-assets-015、companion-scripts、skill-015-guidance。最终集中门见 `skill-015-integration/gates-2026-10-09T101632241Z/FINAL-LOCAL-GATES.json`；两后端31文件及修后回执见 `backend-assets-015/BACKEND-ASSETS-FINAL.json`，辅助工具见 `companion-scripts/FINAL-RECEIPT.json`。0.1.5正式消费与新版主站vendor尚未完成，S3-07/A3-07继续未勾；未执行生产部署，S3-08/A3-08继续未勾。
 
 当前实施细节及验收边界同步在[第三阶段实施回执](S3-实施回执.md)§7.22。
+
+
+### 11.10 公开0.1.5安装阻断与0.1.6修复候选（2026-10-09）
+
+本节接续§11.9，保留0.1.5原本地门与三系统CI实际通过的历史。主线843097bddc0fdb41442d71799c746643268e9e6a的CI37923997862通过后，同run Linux包发布next；匿名元数据与tar完整性通过，但独立空缓存npx WorkBuddy安装在落盘前退出3，报INVALID_RELEASE。CLI只接受web/node两种模板，与0.1.5的四模板元数据不一致；原包门核字节但没有执行真实包CLI，旧测试夹具又用了占位入口，因而未检出。该公开失败不能以CI通过覆盖。0.1.5已加deprecated说明，精确包与失败回执保留；latest未提升，仍为0.1.3。
+
+0.1.6仅为待发布修复候选：CLI明确接受web/node/token-server/serve四项并保留数量、唯一ID、合法版本和runtime白名单检查；实际打包、离线npm安装后，以Node真实execPath执行声明bin，在隔离目录验证版本和两宿主install/status/uninstall、104项安装字节、record和无残留入口。未知/重复模板与非法版本仍在加载引擎前拒绝。包文件118、payload104不扩张，后端资产与产品行为未改。版本、安装说明和兼容快照同步为0.1.6，独立模板/runtime版本不变。
+
+已保全真实打包旧CLI的红例，修后定向与原完整门分别归档于stage3/full-closure-20261009/skill-016-release-repair，最终退出码与源码身份以FINAL-REPAIR-RECEIPT.json为准。本节不预写未完成的完整门、主线CI、公开消费或宿主加载结果；0.1.6仍须按原发行流程核验。当前工程/对抗各22/24、父卡各2/3不变，不增卡或变更原DoD；旧宿主及维护者修复样品的证据边界沿用§11.9，不称为自主宿主一次成功。

@@ -2,18 +2,18 @@
 
 帮助用户在熟悉的编程助手中，把产品想法做成可运行的 AI 应用，为已有项目接入 Tansr，并继续修改、验证与排错。
 
-入口为 [SKILL.md](SKILL.md)，不需要自行挑选多组内部技能。`0.1.3` 与 `0.1.4` 已公开发行；本次源码快照为 **0.1.5 待发布候选**，增加所需后端的创建、接线、启动及安全配置入口。下列命令固定使用 `0.1.5`，执行前须确认 registry 已提供该精确版本；本说明不宣称候选已发布。发行、标签与宿主验收的实际结果见[第三阶段回执](doc/S3-实施回执.md)，不以旧版本证据代签新候选。
+入口为 [SKILL.md](SKILL.md)，不需要自行挑选多组内部技能。`0.1.3` 与 `0.1.4` 已公开发行；`0.1.5` 已发布到 next，但其 CLI 发行元数据校验拒绝新增后端模板，安装前退出，已加 deprecated 说明；latest 仍为 0.1.3。当前源码为 **0.1.6 待发布修复候选**，保留后端创建、接线、启动及安全配置能力，并补齐真实打包 CLI 的安装回归。下列命令固定使用 `0.1.6`，执行前须确认 registry 已提供该精确版本；本说明不宣称候选已发布。发行、标签与宿主验收的实际结果见[第三阶段回执](doc/S3-实施回执.md)，不以旧版本证据代签新候选。
 
-安装（Node.js ≥22.19，在目标项目目录执行，以下选择 Codex）：先核实版本查询返回 `0.1.5`，查询失败或版本尚不可用时不要继续安装，也不自动换成旧版本。
+安装（Node.js ≥22.19，在目标项目目录执行，以下选择 Codex）：先核实版本查询返回 `0.1.6`，查询失败或版本尚不可用时不要继续安装，也不自动换成旧版本。
 
 ```sh
-npm view @tansr/skill@0.1.5 version
-npx --yes @tansr/skill@0.1.5 install --host codex --scope project --yes
+npm view @tansr/skill@0.1.6 version
+npx --yes @tansr/skill@0.1.6 install --host codex --scope project --yes
 ```
 
 WorkBuddy 将参数改为 `--host workbuddy`；需要用户级安装时使用 `--scope user`。安装后重新加载助手，并确认实际读到 Tansr 入口。WorkBuddy 5.7.6 与 CodeBuddy 项目根共用 `.codebuddy/skills`，默认用户根分别为 `.workbuddy/skills` / `.codebuddy/skills`。安装器不会自动搬移可能由另一助手使用的旧目录。
 
-确认精确版本可用后，可用 `npx --yes @tansr/skill@0.1.5 hosts` 查看目标；安装、检查和更新使用同一精确版本，更新时保留原宿主与范围。安装合同见 [安装说明](INSTALL.md)，助手接入见 [assistant-setup.md](references/assistant-setup.md)。**包内安装说明和兼容清单是构建时快照，其中“待发布／未测试”不表示当前状态；`latest`、`next` 是可变标签，实际发行和同包核验见[第三阶段回执](doc/S3-实施回执.md)**。第二阶段历史事实见 [S2 回执](doc/S2-实施回执.md)，不改写已发布包的字节或历史失败证据。
+确认精确版本可用后，可用 `npx --yes @tansr/skill@0.1.6 hosts` 查看目标；安装、检查和更新使用同一精确版本，更新时保留原宿主与范围。安装合同见 [安装说明](INSTALL.md)，助手接入见 [assistant-setup.md](references/assistant-setup.md)。**包内安装说明和兼容清单是构建时快照，其中“待发布／未测试”不表示当前状态；`latest`、`next` 是可变标签，实际发行和同包核验见[第三阶段回执](doc/S3-实施回执.md)**。第二阶段历史事实见 [S2 回执](doc/S2-实施回执.md)，不改写已发布包的字节或历史失败证据。
 
 安装器提供 14 个目录配置，覆盖通用目录、Codex、WorkBuddy、CodeBuddy、Claude Code、Cursor、TRAE、Qoder、ZCode、Kimi Code、MiniMax Code CLI 与千问 Qwen Code 的已核实入口及地区/CLI差异。另 5 个入口提供手动导入或待核实说明，不假报安装成功。精确路径与状态可运行 `hosts --json` 查看。目录安装验收不等于全部助手实际加载验收。
 

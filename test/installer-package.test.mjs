@@ -9,10 +9,7 @@ import { buildInstaller, PAYLOAD_FILES, INSTALLER_FILES, repositoryRoot, BUILD_R
 import { checkInstallerPackage, auditTarball, readTarball, validatePackedContent } from '../scripts/check-installer-package.mjs';
 import { listHosts } from '../installer/hosts.mjs';
 
-const release = { schemaVersion: 1, packageName: '@tansr/skill', binName: 'tansr-skill', version: '0.1.5',
-  node: '>=22.19', license: 'MIT', homepage: 'https://tansr.com/', repository: 'https://github.com/tansrai/tansr-skill',
-  skillVersion: '0.1.5', templateBaselines: [{ id: 'node', version: '1.0.0' }, { id: 'web', version: '0.1.0' }, { id: 'token-server', version: '0.1.1' }, { id: 'serve', version: '0.1.1' }],
-  runtimeBaselines: [{ id: 'serve', name: '@tansr/serve', version: '0.15.0' }, { id: 'sdk', name: '@tansr/sdk', version: '0.18.1' }] };
+const release = JSON.parse(await readFile(join(repositoryRoot, 'release.json'), 'utf8'));
 
 async function fixture(t) {
   const temporaryRoot = await realpath(tmpdir());
@@ -29,8 +26,7 @@ async function fixture(t) {
     await writeFile(join(root, path), await readFile(join(repositoryRoot, path)));
   }
   await mkdir(join(root, 'installer'));
-  for (const path of INSTALLER_FILES) await writeFile(join(root, path), 'export {};\n');
-  await writeFile(join(root, 'installer/cli.mjs'), '#!/usr/bin/env node\nconsole.log("fixture-only");\n');
+  for (const path of INSTALLER_FILES) await writeFile(join(root, path), await readFile(join(repositoryRoot, path)));
   await writeFile(join(root, 'release.json'), JSON.stringify(release));
   await writeFile(join(root, 'INSTALL.md'), '# Installer fixture\n');
   execFileSync('git', ['init', '--quiet'], { cwd: root });
@@ -130,6 +126,9 @@ test('explicit tracked package builds, real npm pack preserves every payload byt
   assert.ok(![...files].some(([path, file]) => /node_modules|internal-sdk|\.env$|^doc\//.test(path) || file.bytes.includes('synthetic-sensitive-fixture-only')));
   for (const path of PAYLOAD_FILES) assert.ok(files.get(`skill/${payloadSourcePath(path)}`)?.bytes.equals(await readFile(join(f.root, path))), path);
   assert.equal(result.npmExtractionVerified, true);
+  assert.equal(result.cliValidation.version, release.version);
+  assert.deepEqual(result.cliValidation.templateBaselines, release.templateBaselines);
+  assert.deepEqual(result.cliValidation.hosts, ['workbuddy', 'codex'].map(host => ({ host, payloadFiles: PAYLOAD_FILES.length, statusAfterUninstall: 'uninstalled' })));
   const second = await buildInstaller({ sourceRoot: f.root });
   assert.equal(second.manifestSha256, built.manifestSha256);
   const packedAgain = await checkInstallerPackage(f);

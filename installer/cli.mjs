@@ -104,7 +104,7 @@ async function readRelease(root) {
     const value = JSON.parse(await readFile(path.join(root, 'release.json'), 'utf8'));
     if (value?.schemaVersion !== 1 || value.packageName !== '@tansr/skill' || value.binName !== 'tansr-skill'
       || !validVersion(value.version) || !validVersion(value.skillVersion) || value.node !== '>=22.19'
-      || !validBaselines(value.templateBaselines, ['web', 'node'], false)
+      || !validBaselines(value.templateBaselines, ['web', 'node', 'token-server', 'serve'], false)
       || !validBaselines(value.runtimeBaselines, ['sdk', 'serve'], true)) throw new Error('Invalid release metadata');
     const release = /** @type {Release} */ (value);
     return {

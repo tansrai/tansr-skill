@@ -1,4 +1,5 @@
 // @ts-check
+import assert from 'node:assert/strict';
 import { mkdtemp, readFile, writeFile, mkdir, rm, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, dirname, resolve, relative, isAbsolute, sep, delimiter } from 'node:path';
@@ -179,6 +180,72 @@ function npmEntry() {
   throw new Error('Cannot find the installed npm CLI; install Node.js with npm.');
 }
 
+/** Exercise npm's actual installed bin and release metadata in owned projects.
+ * @param {string} packageRoot @param {string} temporary
+ */
+async function verifyInstalledCli(packageRoot, temporary) {
+  const release = validateRelease(JSON.parse((await readRegularFile(join(packageRoot, 'release.json'))).toString('utf8')));
+  const pkg = JSON.parse((await readRegularFile(join(packageRoot, 'package.json'))).toString('utf8'));
+  const executable = join(packageRoot, pkg.bin[release.binName]);
+  const manifest = JSON.parse((await readRegularFile(join(packageRoot, 'manifest.json'))).toString('utf8'));
+  const home = join(temporary, 'cli-home');
+  await mkdir(home);
+  const env = Object.fromEntries(Object.entries(process.env).filter(([key]) => /^(?:PATH|PATHEXT|SystemRoot|WINDIR|ComSpec|LANG|TEMP|TMP|TMPDIR)$/i.test(key)));
+  Object.assign(env, { HOME: home, USERPROFILE: home, APPDATA: join(home, 'AppData/Roaming'), LOCALAPPDATA: join(home, 'AppData/Local'),
+    XDG_CONFIG_HOME: join(home, '.config'), XDG_CACHE_HOME: join(home, '.cache') });
+  /** @param {string[]} args @param {string} cwd */
+  function run(args, cwd) {
+    let stdout;
+    try {
+      stdout = execFileSync(process.execPath, [executable, ...args], { cwd, env, encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'pipe'], timeout: 120000, maxBuffer: 4 * 1024 * 1024 });
+    } catch (error) {
+      const failed = /** @type {Error & {stdout?: Buffer|string, stderr?: Buffer|string}} */ (error);
+      throw new Error(`Packed CLI ${args[0]} failed. stdout: ${String(failed.stdout ?? '').slice(0, 65536)} stderr: ${String(failed.stderr ?? '').slice(0, 65536)}`, { cause: error });
+    }
+    const value = JSON.parse(stdout);
+    assert.equal(value.ok, true); assert.equal(value.exitCode, 0);
+    return value;
+  }
+  const version = run(['--version', '--json'], temporary);
+  assert.equal(version.version, release.version); assert.equal(version.skillVersion, release.skillVersion);
+  assert.deepEqual(version.templateBaselines, release.templateBaselines);
+  assert.deepEqual(version.runtimeBaselines, release.runtimeBaselines);
+  /** @type {{host: string, payloadFiles: number, statusAfterUninstall: string}[]} */
+  const hosts = [];
+  for (const host of ['workbuddy', 'codex']) {
+    const project = join(temporary, `${host} CLI project with spaces`);
+    await mkdir(project);
+    const options = ['--host', host, '--scope', 'project', '--project', project, '--json'];
+    const installed = run(['install', ...options, '--yes'], project);
+    const target = join(project, host === 'workbuddy' ? '.codebuddy' : '.agents', 'skills', 'tansr');
+    assert.equal(installed.targetPath, target); assert.equal(installed.version, release.skillVersion);
+    assert.equal(installed.readiness.filesInstalled, true); assert.equal(installed.readiness.staticStructureValid, true);
+    assert.equal(installed.readiness.hostDiscovery, 'not-verified'); assert.equal(installed.readiness.skillInvocation, 'not-verified');
+    assert.equal(installed.recoveryRequired, false); assert.deepEqual(installed.preserved, []); assert.deepEqual(installed.warnings, []);
+    const payload = await readPackageTree(target);
+    assert.equal(payload.size, manifest.files.length);
+    for (const entry of manifest.files) {
+      const file = payload.get(entry.path);
+      assert.ok(file, entry.path); assert.equal(file.bytes.length, entry.bytes); assert.equal(sha256(file.bytes), entry.sha256);
+    }
+    const record = JSON.parse((await readRegularFile(join(installed.statePath, 'record.json'))).toString('utf8'));
+    assert.equal(record.complete, true); assert.equal(record.version, release.skillVersion);
+    assert.deepEqual(record.metadata.templateBaselines, release.templateBaselines);
+    assert.deepEqual(record.metadata.runtimeBaselines, release.runtimeBaselines);
+    const status = run(['status', ...options], project);
+    assert.equal(status.status, 'installed'); assert.equal(status.readiness.filesInstalled, true);
+    const removed = run(['uninstall', ...options, '--yes'], project);
+    assert.equal(removed.status, 'uninstalled'); assert.equal(removed.changes.removed.length, manifest.files.length);
+    assert.deepEqual(removed.preserved, []); assert.deepEqual(removed.warnings, []); assert.equal(existsSync(target), false);
+    const scanned = await readPackageTree(dirname(target));
+    assert.ok(![...scanned.keys()].some(path => path.toLowerCase().split('/').includes('skill.md')));
+    const final = run(['status', ...options], project);
+    assert.equal(final.status, 'uninstalled');
+    hosts.push({ host, payloadFiles: payload.size, statusAfterUninstall: final.status });
+  }
+  return { version: version.version, templateBaselines: version.templateBaselines, hosts };
+}
 /** A real npm pack; all npm cache/config/temporary outputs live in os.tmpdir().
  * @param {{packageDir?: string, packDestination?: string}} [options]
  */
@@ -218,6 +285,7 @@ export async function checkInstallerPackage(options = {}) {
     for (const [path, original] of packageFiles) {
       if (!installed.get(path)?.bytes.equals(original.bytes)) throw new Error(`npm extraction changed a required package file: ${path}`);
     }
+    const cliValidation = await verifyInstalledCli(join(consumer, 'node_modules', '@tansr', 'skill'), temporary);
     const destination = resolve(options.packDestination ?? join(repositoryRoot, 'dist', 'packages'));
     await assertUnlinkedPath(destination);
     await mkdir(destination, { recursive: true });
@@ -229,7 +297,7 @@ export async function checkInstallerPackage(options = {}) {
       if (/** @type {NodeJS.ErrnoException} */ (error).code !== 'EEXIST') throw error;
       if (!(await readRegularFile(output)).equals(bytes)) throw new Error('Existing tarball differs; preserved. Choose a new pack destination.');
     }
-    return { ...audit, tarball: output, npmScriptsExecuted: false, npmExtractionVerified: true, runtimeDependencies: 0 };
+    return { ...audit, tarball: output, npmScriptsExecuted: false, npmExtractionVerified: true, cliValidation, runtimeDependencies: 0 };
   } finally {
     const rel = relative(temporaryRoot, temporary);
     if (isAbsolute(rel) || rel.includes(sep) || !rel.startsWith('tansr-package-check-')) throw new Error('Unexpected package temporary directory; retained.');

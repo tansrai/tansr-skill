@@ -80,7 +80,8 @@ test('real installer CLI targeting WorkBuddy leaves no recursive backup Skill en
 
 const release = {
   schemaVersion: 1, packageName: '@tansr/skill', binName: 'tansr-skill', version: '0.1.0', node: '>=22.19', skillVersion: '0.1.0',
-  templateBaselines: [{ id: 'web', version: '0.1.0' }, { id: 'node', version: '1.0.0' }],
+  templateBaselines: [{ id: 'web', version: '0.1.0' }, { id: 'node', version: '1.0.0' },
+    { id: 'token-server', version: '0.1.1' }, { id: 'serve', version: '0.1.1' }],
   runtimeBaselines: [{ id: 'sdk', name: '@tansr/sdk', version: '0.18.1' }, { id: 'serve', name: '@tansr/serve', version: '0.15.0' }],
 };
 const actions = ['install', 'preview', 'status', 'update', 'rollback', 'uninstall', 'recover'];
@@ -439,11 +440,28 @@ test('malformed release and manifest fail before loading the engine', async t =>
   assert.equal(brokenRelease.loads, 0);
 });
 
+test('CLI reads the current real release metadata before loading an engine', async t => {
+  const f = await fixture(t);
+  const current = JSON.parse(await readFile(new URL('../release.json', import.meta.url), 'utf8'));
+  await writeFile(join(f.packageRoot, 'release.json'), JSON.stringify(current));
+  const result = await invoke(f, ['--version', '--json']);
+  assert.equal(result.exitCode, 0);
+  assert.equal(result.json.version, current.version);
+  assert.deepEqual(result.json.templateBaselines, current.templateBaselines);
+  assert.deepEqual(result.json.runtimeBaselines, current.runtimeBaselines);
+  assert.equal(result.loads, 0);
+  assert.deepEqual(await readdir(f.project), []);
+});
+
 test('release baseline metadata must be complete and valid before engine load', async t => {
   const f = await fixture(t);
   for (const delta of [
     { skillVersion: undefined }, { skillVersion: 'latest' },
     { templateBaselines: [] }, { templateBaselines: [{ id: 'web', version: '0.1.0' }, { id: 'web', version: '1.0.0' }] },
+    { templateBaselines: release.templateBaselines.slice(0, 2) },
+    { templateBaselines: [...release.templateBaselines.slice(0, 3), release.templateBaselines[0]] },
+    { templateBaselines: release.templateBaselines.map(item => item.id === 'serve' ? { ...item, id: 'unknown-template' } : item) },
+    { templateBaselines: release.templateBaselines.map(item => item.id === 'token-server' ? { ...item, version: 'latest' } : item) },
     { runtimeBaselines: [{ id: 'sdk', name: 'wrong-package', version: '0.18.1' }, release.runtimeBaselines[1]] },
   ]) {
     await writeFile(join(f.packageRoot, 'release.json'), JSON.stringify({ ...release, ...delta }));

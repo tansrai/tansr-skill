@@ -3,20 +3,20 @@
   "task": "TPB-01",
   "skill": {
     "name": "tansr",
-    "version": "0.1.3",
-    "status": "stage2-workbuddy-runtime-directory-candidate",
+    "version": "0.1.4",
+    "status": "stage3-onboarding-feedback-local-candidate",
     "license": "MIT",
     "publishedInstaller": {
       "packageName": "@tansr/skill",
-      "version": "0.1.3",
-      "status": "not-published-stage2-workbuddy-runtime-directory-candidate",
-      "snapshotAt": "2026-10-08T07:39:46.594Z",
+      "version": "0.1.4",
+      "status": "not-published-onboarding-feedback-candidate",
+      "snapshotAt": "2026-10-09T03:26:36.323Z",
       "publicationStateIsBuildSnapshot": true,
       "currentRegistry": "https://registry.npmjs.org/@tansr%2fskill",
       "candidateTag": "next",
       "stableTag": "latest",
       "registryDownloadVerified": false,
-      "packagedHostValidation": "pending-correct-workbuddy-user-root",
+      "packagedHostValidation": "pending-current-candidate-validation",
       "releaseSource": "release.json"
     }
   },
@@ -156,7 +156,7 @@
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "label": "Codex",
         "aliases": [],
         "installation": "directory",
@@ -178,7 +178,7 @@
         }
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "project": "not_tested",
         "user": "not_tested",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -247,7 +247,7 @@
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "label": "WorkBuddy",
         "aliases": [],
         "installation": "directory",
@@ -277,7 +277,7 @@
         ]
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "project": "not_tested",
         "user": "not_tested",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -331,7 +331,7 @@
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "label": "CodeBuddy",
         "aliases": [],
         "installation": "directory",
@@ -360,7 +360,7 @@
         ]
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "project": "not_tested",
         "user": "not_tested",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -380,7 +380,7 @@
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "label": "通用 Agent Skills 目录",
         "aliases": [
           "agents",
@@ -406,7 +406,7 @@
         }
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "project": "not_tested",
         "user": "not_tested",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -426,7 +426,7 @@
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "label": "Claude Code",
         "aliases": [
           "claude"
@@ -453,7 +453,7 @@
         }
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "project": "not_tested",
         "user": "not_tested",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -473,7 +473,7 @@
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "label": "Cursor",
         "aliases": [],
         "installation": "directory",
@@ -495,7 +495,7 @@
         }
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "project": "not_tested",
         "user": "not_tested",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -515,7 +515,7 @@
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "label": "TRAE 国内版 / TraeCode",
         "aliases": [
           "trae-cn",
@@ -540,7 +540,7 @@
         }
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "project": "not_tested",
         "user": "not_tested",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -560,7 +560,7 @@
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "label": "TraeCode CLI",
         "aliases": [
           "traecode-cli"
@@ -584,7 +584,7 @@
         }
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "project": "not_tested",
         "user": "not_tested",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -604,7 +604,7 @@
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "label": "Qoder 国际版 IDE / CLI",
         "aliases": [],
         "installation": "directory",
@@ -629,7 +629,7 @@
         }
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "project": "not_tested",
         "user": "not_tested",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -649,7 +649,7 @@
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "label": "Qoder 国内版 IDE",
         "aliases": [
           "lingma"
@@ -676,7 +676,7 @@
         }
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "project": "not_tested",
         "user": "not_tested",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -696,7 +696,7 @@
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "label": "ZCode Agent",
         "aliases": [],
         "installation": "directory",
@@ -716,7 +716,7 @@
         }
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "project": "not_applicable",
         "user": "not_tested",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -736,7 +736,7 @@
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "label": "Kimi Code",
         "aliases": [
           "kimi-code"
@@ -764,7 +764,7 @@
         "projectRoot": "git"
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "project": "not_tested",
         "user": "not_tested",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -784,7 +784,7 @@
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "label": "MiniMax Code CLI",
         "aliases": [
           "minimax-code",
@@ -817,7 +817,7 @@
         }
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "project": "not_tested",
         "user": "not_tested",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -837,7 +837,7 @@
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "label": "千问 Qwen Code",
         "aliases": [
           "qwen",
@@ -863,7 +863,7 @@
         }
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "project": "not_tested",
         "user": "not_tested",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -883,7 +883,7 @@
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "label": "飞书 aily SkillHub",
         "aliases": [
           "lark",
@@ -904,7 +904,7 @@
         }
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "project": "not_applicable",
         "user": "not_applicable",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -924,7 +924,7 @@
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "label": "腾讯元宝 Agent",
         "aliases": [
           "元宝"
@@ -943,7 +943,7 @@
         }
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "project": "not_applicable",
         "user": "not_applicable",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -963,7 +963,7 @@
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "label": "豆包 Agent",
         "aliases": [
           "豆包"
@@ -982,7 +982,7 @@
         }
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "project": "not_applicable",
         "user": "not_applicable",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -1002,7 +1002,7 @@
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "label": "火山引擎 Agent",
         "aliases": [
           "volcano",
@@ -1022,7 +1022,7 @@
         }
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "project": "not_applicable",
         "user": "not_applicable",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -1042,7 +1042,7 @@
       },
       "registry": {
         "source": "installer/hosts.mjs",
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "label": "TRAE 国际版",
         "aliases": [],
         "installation": "manual",
@@ -1059,7 +1059,7 @@
         }
       },
       "currentCandidateHostValidation": {
-        "packageVersion": "0.1.3",
+        "packageVersion": "0.1.4",
         "project": "not_applicable",
         "user": "not_applicable",
         "boundary": "Previous observations remain under their original fields; no prior version or directory-only check certifies this candidate."
@@ -1382,7 +1382,7 @@
   "hostRegistry": {
     "source": "installer/hosts.mjs",
     "checkedAt": "2026-10-08",
-    "candidatePackageVersion": "0.1.3",
+    "candidatePackageVersion": "0.1.4",
     "status": "directory-installation-contracts-and-manual-guidance; not-host-loading-certification",
     "directoryProfiles": [
       "generic",

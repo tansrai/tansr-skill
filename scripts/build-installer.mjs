@@ -45,7 +45,7 @@ export const PAYLOAD_FILES = Object.freeze([
   'references/product-brief.md', 'references/product.md', 'references/quickstart-en.md',
   'references/sdk.md', 'references/serve-mobile.md', 'references/troubleshoot.md',
   'references/use.md', 'references/validation.md',
-  'scripts/create-project.mjs', 'scripts/doctor.mjs', 'scripts/prepare-demo.mjs',
+  'scripts/create-project.mjs', 'scripts/doctor.mjs', 'scripts/configure-project.mjs', 'scripts/prepare-demo.mjs',
 ].sort());
 
 /** npm excludes/renames .gitignore; the installer restores its logical path.

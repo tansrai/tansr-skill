@@ -40,6 +40,10 @@ export async function createProject(options) {
   try { await lstat(target); throw new Error('目标已存在；为保护已有项目，请选择新的目录。'); }
   catch (error) { if (/** @type {NodeJS.ErrnoException} */ (error).code !== 'ENOENT') throw error; }
   const source = await realpath(join(skillRoot, 'assets', templates[options.template]));
+  const baseline = JSON.parse(await readFile(join(skillRoot, 'compatibility.json'), 'utf8'));
+  if (typeof baseline.skill?.version !== 'string' || !/^\d+\.\d+\.\d+$/.test(baseline.skill.version)) {
+    throw new Error('Skill 版本记录无效，停止生成工程。');
+  }
   // 只新建目标；不合并未知文件，也不安装或执行模板中的依赖。
   await mkdir(dirname(target), { recursive: true });
   const staging = join(dirname(target), `.${basename(target)}-tansr-${randomUUID()}.tmp`);
@@ -71,7 +75,7 @@ export async function createProject(options) {
       if (lock.packages?.['']) lock.packages[''].name = options.name;
       await writeFile(lockPath, JSON.stringify(lock, null, 2) + '\n');
     } catch (error) { if (/** @type {NodeJS.ErrnoException} */ (error).code !== 'ENOENT') throw error; }
-    const receipt = { template: options.template, createdAt: new Date().toISOString(), package: options.name, skillVersion: '0.1.0', installedDependencies: false, actualModelVerified: false };
+    const receipt = { template: options.template, createdAt: new Date().toISOString(), package: options.name, skillVersion: baseline.skill.version, installedDependencies: false, actualModelVerified: false };
     await writeFile(join(staging, 'tansr-project.json'), JSON.stringify(receipt, null, 2) + '\n');
     await assertNoLinks(target);
     // rename 前再次拒绝已存在目标；竞态下操作系统也不得替换非空目录。

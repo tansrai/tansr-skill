@@ -2,7 +2,7 @@
 
 让你熟悉的编程助手，帮你把想法做成 AI 产品：选择助手安装 Skill，再描述产品需求。Skill 提供开发指引、SDK / Serve 接入资料和起步工程；安装本身不创建账号、不调用模型、不部署应用。
 
-**发行快照（2026-10-08）：** `0.1.2` 已发布至 `next` 并修复备份误发现；真实 WorkBuddy 5.7.6 的用户技能根为 `.workbuddy/skills`，与旧官方文档不同。`0.1.3` 为区分 WorkBuddy / CodeBuddy 目录的修正候选，**下文精确命令在该版本实际发布后使用**。实际发行以 [npm 版本与标签](https://www.npmjs.com/package/@tansr/skill)为准；宿主加载单独验收。
+**发行与候选（2026-10-09）：** `0.1.3` 已正式发布，修复备份误发现并区分 WorkBuddy / CodeBuddy 目录；真实 WorkBuddy 的用户技能根为 `.workbuddy/skills`。当前源码 `0.1.4` 是新手引导本地候选，尚未发布；下文精确命令仍使用已发行的 `0.1.3`。实际发行以 [npm 版本与标签](https://www.npmjs.com/package/@tansr/skill)为准；宿主加载单独验收。
 
 ## 第一步：选择一个助手并安装
 
@@ -11,7 +11,7 @@
 在准备开发产品的目录运行以下命令。以下以 Codex 为例，换助手时只替换 `--host`：
 
 ```sh
-# 0.1.3 候选发布后使用
+# 已发行的 0.1.3
 npx --yes @tansr/skill@0.1.3 hosts
 npx --yes @tansr/skill@0.1.3 preview --host codex --scope project
 npx --yes @tansr/skill@0.1.3 install --host codex --scope project --yes
@@ -21,7 +21,7 @@ npx --yes @tansr/skill@0.1.3 install --host codex --scope project --yes
 
 > 请在当前项目安装 Tansr Skill。先确认精确版本 0.1.3 已发布、Node.js 至少为 22.19，使用 `preview --host codex --scope project` 查看目标，再运行同版本的 `install --host codex --scope project --yes`。有冲突时保留已有内容。安装后在本助手中确认技能可见，并实际读取它的 SKILL.md，分别报告结果。
 
-0.1.3 候选的目录安装选择如下；**支持写入目录不等于该助手已通过实际加载验收**。产品版本、启用状态和运行系统仍会影响发现结果。
+0.1.3 的目录安装选择如下；**支持写入目录不等于该助手已通过实际加载验收**。产品版本、启用状态和运行系统仍会影响发现结果。
 
 | 助手 / 产品 | `--host`（括号内为别名） | 可选范围 |
 | --- | --- | --- |
@@ -43,7 +43,7 @@ npx --yes @tansr/skill@0.1.3 install --host codex --scope project --yes
 别名与正式 ID 指向同一目标，例如 `--host claude` 等同 `--host claude-code`。一般选项目范围；跨项目使用时明确选 `--scope user`。ZCode 目前只核实用户目录，例如：
 
 ```sh
-# 仅当你选择 ZCode；0.1.3 候选发布后使用
+# 仅当你选择 ZCode；已发行的 0.1.3
 npx --yes @tansr/skill@0.1.3 install --host zcode --scope user --yes
 ```
 
@@ -57,20 +57,20 @@ npx --yes @tansr/skill@0.1.3 install --host zcode --scope user --yes
 
 回到所选助手，按安装回执重载或检查技能列表，再描述需求：
 
-> 使用 Tansr Skill，帮我做一个学习计划助手，能记录目标、安排每日任务并回顾进展。先做出能运行的第一版，再告诉我需要完成哪些配置。
+> 使用 Tansr Skill，帮我做一个运行在 Windows 电脑上的学习计划助手，能记录目标、安排每日任务并回顾进展。先做出能运行的第一版，协助完成所需配置，并展示真实工具执行的进度和结果。
 
 已有项目也可以说：
 
 > 使用 Tansr Skill，为当前订单系统加入自然语言查询助手，沿用原登录、权限、数据库和锁文件，保留我的现有修改。
 
-助手会继续完成界面、业务工具、接线与验证。需要平台应用或模型授权时，按实际平台入口人工配置；真实密钥放在应用服务端，不填入聊天、客户端或 Skill 安装记录。
+助手会继续完成界面、业务工具、接线与验证。需要平台应用或模型授权时，由助手沿实际平台入口引导获取 App ID / App Key，协助本机配置和检查，避免只留一句“填写 .env”。真实密钥放在应用服务端，日常不回显；诊断确有必要时可在当前受控界面最小范围展示，随后提醒适时轮换并更新相关服务，不擅自轮换。密钥不进入客户端、常规日志或 Skill 安装记录。交付时说明当前可用的平台及验证状态，并给出适合本产品的后续选择，如手机 App、电脑安装包或网站发布。
 
 ## 检查、更新与卸载
 
-以下同样使用已发布的精确候选版本，并保留最初选择的宿主与范围：
+以下同样使用已发布的精确版本，并保留最初选择的宿主与范围：
 
 ```sh
-# 0.1.3 候选发布后使用
+# 已发行的 0.1.3
 npx --yes @tansr/skill@0.1.3 status --host codex --scope project
 npx --yes @tansr/skill@0.1.3 update --host codex --scope project --yes
 npx --yes @tansr/skill@0.1.3 rollback --host codex --scope project --yes

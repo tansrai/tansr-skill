@@ -28,6 +28,9 @@ test('Node project contains usable locked manifest and hidden configuration with
   assert.equal(pkg.name, 'my-agent');
   assert.equal(lock.packages[''].name, 'my-agent');
   assert.equal(pkg.dependencies['@tansr/sdk'], '0.18.1');
+  const receipt = JSON.parse(await readFile(join(target, 'tansr-project.json'), 'utf8'));
+  const baseline = JSON.parse(await readFile(new URL('../compatibility.json', import.meta.url), 'utf8'));
+  assert.equal(receipt.skillVersion, baseline.skill.version);
   assert.ok((await readFile(join(target, '.env.example'), 'utf8')).includes('MODEL_API_KEY'));
   assert.ok((await readFile(join(target, '.tansr/settings.json'), 'utf8')).includes('MODEL_API_KEY'));
   const entries = await readdir(target);
@@ -100,6 +103,7 @@ test('generation from a previously used template excludes saved data and secrets
   await mkdir(join(template, '.data'), { recursive: true });
   await mkdir(join(template, '.tansr'));
   await writeFile(join(fakeSkill, 'scripts', 'create-project.mjs'), await readFile(new URL('../scripts/create-project.mjs', import.meta.url)));
+  await writeFile(join(fakeSkill, 'compatibility.json'), JSON.stringify({ skill: { version: '0.1.4' } }));
   await writeFile(join(template, 'package.json'), JSON.stringify({ name: 'template', private: true }));
   await writeFile(join(template, '.env'), 'TOKEN=synthetic-private');
   await writeFile(join(template, '.env.example'), 'TOKEN=');

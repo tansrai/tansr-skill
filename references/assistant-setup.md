@@ -2,13 +2,13 @@
 
 先选择你实际使用的编程助手或 Agent 产品，安装后向同一个助手描述需求。Skill 提供开发步骤与资源，应用运行使用 SDK / Serve，见[产品使用](use.md)。
 
-**发行快照（2026-10-08）：** `0.1.2` 已发布至 `next` 并修复备份误发现；真实 WorkBuddy 5.7.6 的用户技能根为 `.workbuddy/skills`，与旧官方文档不同。`0.1.3` 为区分 WorkBuddy / CodeBuddy 目录的修正候选，**下文精确命令在该版本实际发布后使用**。实际发行以 [npm 版本与标签](https://www.npmjs.com/package/@tansr/skill)为准；宿主加载单独验收。
+**已验证发行基线（2026-10-08）：** `0.1.3` 已经正式发布并通过稳定安装入口验收，包含备份隔离及 WorkBuddy / CodeBuddy 目录修正。真实 WorkBuddy 5.7.6 的用户技能根为 `.workbuddy/skills`，与旧官方文档不同。实际最新发行以 [npm 版本与标签](https://www.npmjs.com/package/@tansr/skill)为准；本地新候选不等于已经发布，安装文件和宿主实际加载分别记录。
 
 ## 选择目标并预览
 
 需要 Node.js ≥22.19 和 npm。初次 npx 下载需要网络，之后使用随包内容；安装器不安装宿主、模型或模板依赖，不调用模型。
 
-以下是 0.1.3 候选的原生目录合同。项目列相对所选项目，`~` 表示当前运行环境的用户主目录；每个目标都保留完整 `tansr/` 及其相对资源。表中路径有文档或官方源码依据，**不是实际加载通过表**。
+以下是已核对的原生目录合同。项目列相对所选项目，`~` 表示当前运行环境的用户主目录；每个目标都保留完整 `tansr/` 及其相对资源。表中路径有文档或官方源码依据，**不是所有助手实际加载通过表**。
 
 | 产品 / `--host` | `project` | `user` | 官方依据 |
 | --- | --- | --- | --- |
@@ -30,10 +30,10 @@
 一般选 `project`，跨项目使用时明确选 `user`。一次只处理所选位置。项目路径默认当前目录，也可用 `--project <绝对路径>`；用户范围不接受 `--project`。
 
 ```sh
-# 0.1.3 候选发布后使用；下面只选择 Claude Code 一个目标
-npx --yes @tansr/skill@0.1.3 hosts --json
-npx --yes @tansr/skill@0.1.3 preview --host claude --scope project --json
-npx --yes @tansr/skill@0.1.3 install --host claude-code --scope project --yes --json
+# 下面选择已发布稳定标签，并且只安装 Claude Code 一个目标
+npx --yes @tansr/skill@latest hosts --json
+npx --yes @tansr/skill@latest preview --host claude --scope project --json
+npx --yes @tansr/skill@latest install --host claude-code --scope project --yes --json
 ```
 
 这里 `claude` 是 `claude-code` 的别名，预览与安装仍是同一目标。其他别名包括 `kimi-code` → `kimi`、`mcode` → `minimax`、`qwen` / `qianwen` → `qwen-code`、`agents` → `generic`；完整列表以当前包的 `hosts` 为准。

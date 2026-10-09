@@ -24,6 +24,7 @@ license: MIT
 | 从模糊想法开始、不知道如何描述产品 | [需求与产品说明](references/product-brief.md)，明确输入、动作、结果后进入开发 |
 | 新建应用、为现有应用增加功能 | [应用开发](references/build.md)，再按需读所选运行形态 |
 | 接入 Node / Electron SDK | [SDK 接入](references/sdk.md) |
+| 接入 .NET、Go、Rust、Python 或 C++ | [语言 SDK](references/language-sdks.md)，锁定已发布版本，不把移动端包当这些语言的依赖 |
 | Web 后端、多用户、移动端、服务部署 | [Serve 与移动端](references/serve-mobile.md) |
 | 安装、登录、模型配置、套餐和日常使用 | [产品使用](references/use.md) |
 | 安装本开发 Skill、助手找不到技能 | [编程助手接入](references/assistant-setup.md)，只使用已核实机制 |

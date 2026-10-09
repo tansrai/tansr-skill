@@ -130,8 +130,8 @@ test('MIT public package preserves both license layers and rejects metadata or a
   await buildInstaller({ sourceRoot: f.root });
   const packed = await checkInstallerPackage(f);
   assert.equal(packed.npmExtractionVerified, true);
-  assert.equal(packed.payloadFiles, 71);
-  assert.equal(packed.packageFiles, 85);
+  assert.equal(packed.payloadFiles, 72);
+  assert.equal(packed.packageFiles, 86);
   const files = readTarball(await readFile(packed.tarball));
   const pkg = JSON.parse(files.get('package.json').bytes);
   assert.equal(pkg.license, 'MIT');

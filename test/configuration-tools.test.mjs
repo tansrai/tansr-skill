@@ -293,6 +293,35 @@ test('existing permissions survive actual replacement', async t => {
   }
 });
 
+test('Windows legacy inherited permissions survive replacement without changing inheritance metadata', { skip: process.platform !== 'win32' }, async t => {
+  const root = await fixture(t);
+  const path = join(root, '.env');
+  const command = `$ErrorActionPreference='Stop'
+Add-Type -TypeDefinition 'using System; using System.Runtime.InteropServices; public static class LegacyAclFixture { [DllImport("advapi32.dll", CharSet=CharSet.Unicode, SetLastError=true)] public static extern bool SetFileSecurity(string name, uint information, byte[] descriptor); }'
+$raw=[System.Security.AccessControl.RawSecurityDescriptor]::new((Get-Acl -LiteralPath $env:TANSR_TEST_ENV).GetSecurityDescriptorBinaryForm(),0)
+if (([int]$raw.ControlFlags -band 4096) -ne 0 -or -not (@($raw.DiscretionaryAcl | Where-Object { ([int]$_.AceFlags -band 16) -ne 0 }).Count)) { throw 'fixture-must-inherit' }
+$raw.SetFlags([System.Security.AccessControl.ControlFlags]([int]$raw.ControlFlags -band (-bnot 1024)))
+$bytes=New-Object byte[] $raw.BinaryLength; $raw.GetBinaryForm($bytes,0)
+if (-not [LegacyAclFixture]::SetFileSecurity($env:TANSR_TEST_ENV,4,$bytes)) { throw 'fixture-write-failed' }
+$acl=Get-Acl -LiteralPath $env:TANSR_TEST_ENV
+if (([int]([System.Security.AccessControl.RawSecurityDescriptor]::new($acl.GetSecurityDescriptorBinaryForm(),0)).ControlFlags -band 1024) -ne 0) { throw 'fixture-must-be-legacy' }
+$acl.Sddl`;
+  const env = { ...process.env, TANSR_TEST_ENV: path };
+  for (const name of Object.keys(env)) if (name.toUpperCase() === 'PSMODULEPATH') delete env[name];
+  const settings = { encoding: 'utf8', timeout: 10_000, windowsHide: true, env };
+  const ps = await windowsPowerShell();
+  const before = spawnSync(ps, ['-NoProfile', '-NonInteractive', '-Command', command], settings);
+  assert.equal(before.status, 0, 'real inherited ACL fixture must retain its legacy control flags');
+  const result = await configureProject({ project: root, mode: 'platform', apply: true });
+  assert.equal(result.status, 'applied');
+  noValues(result);
+  assert.equal(await readFile(path, 'utf8'), ready.replace('offline', 'platform'));
+  const after = spawnSync(ps, ['-NoProfile', '-NonInteractive', '-Command', '(Get-Acl -LiteralPath $env:TANSR_TEST_ENV).Sddl'], settings);
+  assert.equal(after.status, 0);
+  assert.equal(after.stdout.trim(), before.stdout.trim(), 'owner, group, control flags and every inherited ACE must remain exact');
+  assert.equal((await readdir(root)).some(name => name.startsWith('.env.tansr-configure') || name === '.tansr-configure.lock'), false);
+});
+
 test('Windows ACL comparison accepts only equivalent allow order and rejects changed permissions, flags, owner or deny order', { skip: process.platform !== 'win32' }, async () => {
   const command = `$ErrorActionPreference='Stop'; ${WINDOWS_ACL_SIGNATURE}
 function Signature($sddl) { Get-TansrRawAclSignature ([System.Security.AccessControl.RawSecurityDescriptor]::new($sddl)) }
@@ -304,6 +333,9 @@ try {
   $owner=Signature 'O:BAG:SYD:P(A;;FR;;;SY)(A;;FW;;;BA)'
   $denyA=Signature 'O:SYG:SYD:P(D;;FR;;;SY)(D;;FW;;;BA)(A;;FA;;;SY)'
   $denyB=Signature 'O:SYG:SYD:P(D;;FW;;;BA)(D;;FR;;;SY)(A;;FA;;;SY)'
+  $inheritedA=Signature 'O:SYG:SYD:AI(A;ID;FR;;;SY)(A;ID;FW;;;BA)'
+  $inheritedB=Signature 'O:SYG:SYD:AI(A;ID;FW;;;BA)(A;ID;FR;;;SY)'
+  $legacy=Signature 'O:SYG:SYD:(A;ID;FR;;;SY)(A;ID;FW;;;BA)'
   $noncanonicalRejected=$false
   try { $acl=[System.Security.AccessControl.FileSecurity]::new(); $acl.SetSecurityDescriptorSddlForm('O:SYG:SYD:P(A;;FR;;;SY)(D;;FW;;;BA)'); Get-TansrAclSignature $acl | Out-Null } catch { $noncanonicalRejected=$true }
   $nullRejected=$false
@@ -311,7 +343,7 @@ try {
   $emptyAccepted=[bool](Signature 'O:SYG:SYD:P')
   $systemAclRejected=$false
   try { Signature 'O:SYG:SYD:P(A;;FR;;;SY)S:(AU;SA;FR;;;SY)' | Out-Null } catch { $systemAclRejected=$true }
-  @{allowEquivalent=(Test-TansrAclSignatureEqual $original $reordered);permissionsRejected=(-not (Test-TansrAclSignatureEqual $original $permissions));flagsRejected=(-not (Test-TansrAclSignatureEqual $original $flags));ownerRejected=(-not (Test-TansrAclSignatureEqual $original $owner));denyOrderRejected=(-not (Test-TansrAclSignatureEqual $denyA $denyB));noncanonicalRejected=$noncanonicalRejected;nullRejected=$nullRejected;emptyAccepted=$emptyAccepted;systemAclRejected=$systemAclRejected;caseRejected=(-not (Test-TansrAclSignatureEqual 'AQ==' 'aQ=='))}|ConvertTo-Json -Compress
+  @{allowEquivalent=(Test-TansrAclSignatureEqual $original $reordered);permissionsRejected=(-not (Test-TansrAclSignatureEqual $original $permissions));flagsRejected=(-not (Test-TansrAclSignatureEqual $original $flags));ownerRejected=(-not (Test-TansrAclSignatureEqual $original $owner));denyOrderRejected=(-not (Test-TansrAclSignatureEqual $denyA $denyB));inheritedOrderRejected=(-not (Test-TansrAclSignatureEqual $inheritedA $inheritedB));inheritanceMetadataRejected=(-not (Test-TansrAclSignatureEqual $inheritedA $legacy));noncanonicalRejected=$noncanonicalRejected;nullRejected=$nullRejected;emptyAccepted=$emptyAccepted;systemAclRejected=$systemAclRejected;caseRejected=(-not (Test-TansrAclSignatureEqual 'AQ==' 'aQ=='))}|ConvertTo-Json -Compress
   exit 0
 } catch { exit 1 }`;
   const env = { ...process.env };
@@ -319,7 +351,7 @@ try {
   const result = spawnSync(await windowsPowerShell(), ['-NoLogo', '-NoProfile', '-NonInteractive', '-Command', command], { encoding: 'utf8', timeout: 10_000, windowsHide: true, env });
   assert.equal(result.status, 0, 'fixed ACL comparison must run within its bound');
   const checks = JSON.parse(result.stdout);
-  assert.equal(Object.keys(checks).length, 10);
+  assert.equal(Object.keys(checks).length, 12);
   assert.equal(Object.values(checks).every(value => value === true), true, `permission-preservation checks: ${JSON.stringify(checks)}`);
 });
 

@@ -287,7 +287,24 @@ export async function windowsPowerShell(searchPath = process.env.PATH ?? '', sys
 /** Preserve existing permissions before replacement; mode alone is not Windows ACL. @param {string} source @param {string} temporary @param {import('node:fs/promises').FileHandle} handle @param {import('node:fs').BigIntStats} stat */
 async function preservePermissions(source, temporary, handle, stat) {
   if (process.platform === 'win32') {
-    const command = `$ErrorActionPreference='Stop'; ${WINDOWS_ACL_SIGNATURE}; try { $acl=Get-Acl -LiteralPath $env:TANSR_CONFIG_SOURCE; Set-Acl -LiteralPath $env:TANSR_CONFIG_TEMP -AclObject $acl; if (-not (Test-TansrAclSignatureEqual (Get-TansrAclSignature (Get-Acl -LiteralPath $env:TANSR_CONFIG_TEMP)) (Get-TansrAclSignature (Get-Acl -LiteralPath $env:TANSR_CONFIG_SOURCE)))) { exit 2 }; exit 0 } catch { exit 1 }`;
+    const command = `$ErrorActionPreference='Stop'; ${WINDOWS_ACL_SIGNATURE}; try {
+  $acl=Get-Acl -LiteralPath $env:TANSR_CONFIG_SOURCE
+  $expected=Get-TansrAclSignature $acl
+  $binary=$acl.GetSecurityDescriptorBinaryForm()
+  $raw=[System.Security.AccessControl.RawSecurityDescriptor]::new($binary,0)
+  $legacy=-not $acl.AreAccessRulesProtected -and ([int]$raw.ControlFlags -band 1024) -eq 0
+  Set-Acl -LiteralPath $env:TANSR_CONFIG_TEMP -AclObject $acl
+  # Set-Acl converts legacy inherited ACLs to the automatic inheritance model.
+  # Preserve the original DACL, including its control flags, on the EMPTY staging
+  # file. This narrow legacy API use never retries a failed Set-Acl operation.
+  if ($legacy) {
+    Add-Type -TypeDefinition 'using System; using System.Runtime.InteropServices; public static class TansrLegacyAcl { [DllImport("advapi32.dll", EntryPoint="SetFileSecurityW", CharSet=CharSet.Unicode, ExactSpelling=true, SetLastError=true)] [return: MarshalAs(UnmanagedType.Bool)] public static extern bool SetFileSecurity(string name, uint information, byte[] descriptor); }'
+    if (-not [TansrLegacyAcl]::SetFileSecurity($env:TANSR_CONFIG_TEMP,4,$binary)) { throw 'permissions' }
+  }
+  if (-not (Test-TansrAclSignatureEqual (Get-TansrAclSignature (Get-Acl -LiteralPath $env:TANSR_CONFIG_TEMP)) $expected)) { exit 2 }
+  if (-not (Test-TansrAclSignatureEqual (Get-TansrAclSignature (Get-Acl -LiteralPath $env:TANSR_CONFIG_SOURCE)) $expected)) { exit 2 }
+  exit 0
+} catch { exit 1 }`;
     /** @type {NodeJS.ProcessEnv} */
     const env = { ...process.env, TANSR_CONFIG_SOURCE: source, TANSR_CONFIG_TEMP: temporary };
     // Cross-version inherited module paths can break the built-in Security module.

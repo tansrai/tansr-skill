@@ -49,9 +49,9 @@ Return to your assistant, reload as directed, and confirm that it actually reads
 
 For example:
 
-> Use Tansr Skill to build a study planner that records goals, schedules daily tasks, and reviews progress. Make a working first version and tell me which configuration steps remain.
+> Build a study planner that records goals, schedules daily tasks, and reviews progress.
 
-Start with the user's goal, target device and existing project. If the product form is unknown, ask whether they want a desktop program, a phone app, or a website. Clarify the target operating system when it affects the build; preserve a platform already chosen. Recommend a suitable path in ordinary language instead of silently choosing the bundled web template. Keep a short product brief with inputs, actions, outputs and observable acceptance criteria. Preserve existing code, data, login and lockfiles. See [product discovery](product-brief.md) and [application development](build.md).
+A plain request is enough; platform, configuration and delivery guidance belong in the Skill, without extra instructions appended by the homepage. Start with the user's goal, target device and existing project, preserving choices already made. When key information is missing, make one brief inquiry or invite the user to add it. If they have no preference, ask you to decide, decline to provide it or do not add it, explain a suitable, revisable default based on the use case and available environment, then continue authorized local development. An unknown platform alone must not block progress or silently make every product a basic web app. Keep a short brief with facts, assumptions, inputs, actions, outputs and observable acceptance criteria. Preserve existing code, data, login and lockfiles. Defaults do not grant permission for paid calls, publication, account changes or credential rotation. See [product discovery](product-brief.md) and [application development](build.md).
 
 Only when a local web product is the chosen target, `assets/product-starter` provides editable records, SDK tool execution, progress, cancellation and persisted history. Its default offline provider is clearly labelled and is not a live model. Platform mode requires server-side application configuration and never silently falls back to fake answers. From the installed skill directory, generate a new project with:
 

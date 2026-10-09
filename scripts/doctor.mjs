@@ -13,9 +13,11 @@ export async function inspectProject(project, expectedMode) {
   const root = resolve(project);
   const [major, minor] = process.versions.node.split('.').map(Number);
   const nodeSupported = major > 22 || (major === 22 && minor >= 19);
+  const dependencyNames = configuration.projectType === 'token-server' ? ['express'] : configuration.projectType === 'serve' ? ['@tansr/serve', '@tansr/api-client', 'tsx'] : ['@tansr/sdk'];
+  const dependencyChecks = await Promise.all(dependencyNames.map(name => exists(join(root, 'node_modules', ...name.split('/'), 'package.json'))));
   return {
     node: process.versions.node, nodeSupported, ...configuration,
-    dependenciesInstalled: await exists(join(root, 'node_modules', '@tansr', 'sdk', 'package.json')),
+    dependenciesInstalled: dependencyChecks.every(Boolean), dependencyNames,
     lockfilePresent: await exists(join(root, 'package-lock.json')),
     scope: '仅本工程文件与配置状态；不反映进程环境覆盖，不证明网络、账号授权、模型调用或完整功能通过。',
     next: nodeSupported ? configuration.next : '使用满足正式包要求的 Node.js 版本，再检查本工程配置。',

@@ -1,0 +1,19 @@
+{
+  "name": "tansr-example-token-server",
+  "version": "0.1.1",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "description": "tansr SDK 官方示例:开发者服务端令牌换发样板(appkey 恒不出服务端)",
+  "engines": {
+    "node": ">=22.19"
+  },
+  "scripts": {
+    "start": "node launch.mjs",
+    "check": "node --check server.mjs && node --check launch.mjs",
+    "test": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "express": "5.2.1"
+  }
+}

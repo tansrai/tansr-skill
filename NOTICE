@@ -53,6 +53,10 @@ Bundled demo-derived assets, patches, and notices retain their own existing
 licenses and source terms, including the LICENSE and provenance files under
 assets/ios-app-host/ and the platform license/source notices under
 assets/demo-repairs/. The root MIT License does not replace those terms.
+The token-server-starter retains its official demo LICENSE. The Serve demo
+declares MIT in package.json; serve-starter includes the Tansr MIT grant.
+Each SOURCE.json records its public ZIP origin and consumer adaptations;
+the original runtime locks and separate dependency licenses are retained.
 SDK, Serve, CLI, and other independently distributed runtime packages retain
 the licenses supplied with their respective releases.
 

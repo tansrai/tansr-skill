@@ -41,6 +41,37 @@ export const PAYLOAD_FILES = Object.freeze([
   'assets/product-starter/src/types.ts', 'assets/product-starter/test/platform.test.ts',
   'assets/product-starter/test/runtime.test.ts', 'assets/product-starter/tsconfig.build.json',
   'assets/product-starter/tsconfig.json',
+  "assets/token-server-starter/.env.example",
+  "assets/token-server-starter/.gitignore",
+  "assets/token-server-starter/.npmrc",
+  "assets/token-server-starter/launch.mjs",
+  "assets/token-server-starter/LICENSE",
+  "assets/token-server-starter/package-lock.json",
+  "assets/token-server-starter/package.json",
+  "assets/token-server-starter/README.md",
+  "assets/token-server-starter/server.mjs",
+  "assets/token-server-starter/SOURCE.json",
+  "assets/token-server-starter/test/token-server.test.mjs",
+  "assets/serve-starter/.env.example",
+  "assets/serve-starter/.gitignore",
+  "assets/serve-starter/agent-real.ts",
+  "assets/serve-starter/auth.ts",
+  "assets/serve-starter/configuration.ts",
+  "assets/serve-starter/configure.mjs",
+  "assets/serve-starter/developer-login.ts",
+  "assets/serve-starter/execution-policy.ts",
+  "assets/serve-starter/launch.mjs",
+  "assets/serve-starter/LICENSE",
+  "assets/serve-starter/login-server.ts",
+  "assets/serve-starter/local-request.ts",
+  "assets/serve-starter/package-lock.json",
+  "assets/serve-starter/package.json",
+  "assets/serve-starter/README.md",
+  "assets/serve-starter/server.ts",
+  "assets/serve-starter/shutdown.ts",
+  "assets/serve-starter/SOURCE.json",
+  "assets/serve-starter/starter.test.mjs",
+  "assets/serve-starter/tsconfig.json",
   'references/assistant-setup.md', 'references/build.md', 'references/language-sdks.md', 'references/platforms.md',
   'references/product-brief.md', 'references/product.md', 'references/quickstart-en.md',
   'references/sdk.md', 'references/serve-mobile.md', 'references/troubleshoot.md',
@@ -48,12 +79,15 @@ export const PAYLOAD_FILES = Object.freeze([
   'scripts/create-project.mjs', 'scripts/doctor.mjs', 'scripts/configure-project.mjs', 'scripts/prepare-demo.mjs',
 ].sort());
 
-/** npm excludes/renames .gitignore; the installer restores its logical path.
+/** npm excludes .npmrc and excludes/renames .gitignore; restore logical paths.
  * The mapping is narrow, reversible, and does not alter the source bytes.
  * @param {string} path
  */
 export function payloadSourcePath(path) {
-  return path.endsWith('/.gitignore') ? path.slice(0, -'.gitignore'.length) + 'tansr.gitignore' : path;
+  for (const name of ['.gitignore', '.npmrc']) {
+    if (path.endsWith('/' + name)) return path.slice(0, -name.length) + 'tansr' + name;
+  }
+  return path;
 }
 
 /** @typedef {{schemaVersion: number, packageName: string, binName: string, version: string, node: string, license: string, homepage: string, repository: string, skillVersion: string, templateBaselines: {id: string, version: string}[], runtimeBaselines: {id: string, name: string, version: string}[]}} Release */
@@ -154,8 +188,36 @@ export function checkReleaseBaselines(release, files, prefix = '') {
   for (const template of compatibility.templates) {
     validateRelativePath(template.directory);
     const pkg = json(`${template.directory}/package.json`);
-    if (pkg.version !== template.version || pkg.dependencies?.[compatibility.packages.sdk.name] !== compatibility.packages.sdk.version) {
-      throw new Error(`Template package differs from compatibility.json: ${template.id}`);
+    checkTemplateBaseline(template, pkg, json(`${template.directory}/package-lock.json`), runtimes);
+  }
+}
+
+/** Verify declared direct dependencies against package and immutable npm lock.
+ * @param {{id: string, version: string, dependencies: {name: string, range: string, version: string}[]}} template
+ * @param {{version?: string, dependencies?: Record<string,string>}} pkg
+ * @param {{packages?: Record<string,{version?: string, dependencies?: Record<string,string>}>}} lock
+ * @param {{name: string, version: string}[]} runtimes
+ */
+export function checkTemplateBaseline(template, pkg, lock, runtimes) {
+  const dependencies = template.dependencies;
+  if (pkg.version !== template.version || lock.packages?.['']?.version !== template.version
+    || !Array.isArray(dependencies) || dependencies.length === 0
+    || new Set(dependencies.map(item => item.name)).size !== dependencies.length) {
+    throw new Error(`Template package differs from compatibility.json: ${template.id}`);
+  }
+  const names = dependencies.map(item => item.name).sort().join('\n');
+  if (names !== Object.keys(pkg.dependencies ?? {}).sort().join('\n')
+    || names !== Object.keys(lock.packages?.['']?.dependencies ?? {}).sort().join('\n')) {
+    throw new Error(`Template dependency inventory drift: ${template.id}`);
+  }
+  for (const dependency of dependencies) {
+    const runtime = runtimes.find(item => item.name === dependency.name);
+    if (typeof dependency.range !== 'string' || typeof dependency.version !== 'string'
+      || pkg.dependencies?.[dependency.name] !== dependency.range
+      || lock.packages?.['']?.dependencies?.[dependency.name] !== dependency.range
+      || lock.packages?.[`node_modules/${dependency.name}`]?.version !== dependency.version
+      || (runtime && runtime.version !== dependency.version)) {
+      throw new Error(`Template locked dependency drift: ${template.id}`);
     }
   }
 }

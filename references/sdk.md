@@ -16,8 +16,8 @@ token 来自应用自己的服务端：校验自己的登录态 → 从服务端
 
 ## 把平台接入落到可执行步骤
 
-1. 主动确认是否已有平台应用，已有就复用；获取入口、一次显示 Key、服务端本机录入与助手协助检查见[产品使用](use.md#把自己的应用接到平台)。核对应用归属、平台类型与模型/能力配置，在受控后端配置 `TANSR_APP_ID` / `TANSR_APP_KEY`；日常不索取聊天密钥，不要求另购供应商 key。必要回显的例外和轮换提醒沿同一指南，不扩张为客户端可保存长期密钥。真实调用前核对该应用所属钱包、授权与费用范围，已有授权不重复询问。
-2. Web 后端优先复用已有登录与业务 API；移动端走 Serve 的平台工厂。只有需要自行在 Node 后端换票时，使用发布包已导出的 `@tansr/serve` **`createAppTokenMinter`**，复用签名、缓存与错误分类，不手写一份签名算法。这只需库，不要求另起 Serve HTTP 服务。已有换票模块先复用；新增依赖前核对目标版本导出并使用项目包管理器。
+1. 主动确认是否已有平台应用，已有就复用；获取入口、一次显示 Key、服务端本机录入与助手协助检查见[产品使用](use.md#把自己的应用接到平台)。核对应用归属、平台类型与模型/能力配置，在受控后端按选定工程实际读取的字段配置：token-server / Serve 使用 `TANSR_APP_KEY_ID` / `TANSR_APP_KEY`，Web 起步工程使用 `TANSR_APP_ID` / `TANSR_APP_KEY`；`TANSR_APP_ID` 与 `TANSR_APP_KEY_ID` 均填写目标应用创建弹窗或详情展示的 `ApiKeyId`（App ID），只是模板字段名不同，不能将该标识填作 App Key。日常不索取聊天密钥，不要求另购供应商 key。必要回显的例外和轮换提醒沿同一指南，不扩张为客户端可保存长期密钥。真实调用前核对该应用所属钱包、授权与费用范围，已有授权不重复询问。
+2. 优先复用已有受控后端、登录与业务 API；移动端走 Serve 的平台工厂。缺少必要后端时，由助手按[前后端交付](build.md#把所需后端一起交付)建立并接通，Electron 可复用[官方 token-server 工程](platforms.md#electron)。只有需要自行在 Node 后端换票时，使用发布包已导出的 `@tansr/serve` **`createAppTokenMinter`**，复用签名、缓存与错误分类，不手写一份签名算法。这只需库，不要求另起 Serve HTTP 服务。已有换票模块先复用；新增依赖前核对目标版本导出并使用项目包管理器。
 3. 下列服务端模块适用于一次短任务（Serve 0.15.0）。`verifiedUser` 必须来自已有登录中间件，不能从请求正文/自报用户头构造。它返回 SDK 来源，仍需接业务工具、事件和收尾。
 
 ```js
@@ -48,7 +48,7 @@ export async function sourceForUser(verifiedUser) {
 4. 在受控后端 `await sourceForUser(req.user)` 后，把结果传给 `createSession` 或反馈示例的 `runFeedback`；网页只得到业务结果，不返回 token/appkey。用户 ID 若不能满足协议，使用业务侧稳定映射，并确保在本应用与租户范围内唯一；不要全体映射成一个演示用户。工具访问数据也绑定此身份，不能相信模型给出的 ownerId。平台地址用已核实的 HTTPS 网关，带应用密钥的请求拒绝自动跳转。
 5. 本地先以假的 `fetchImpl` 和脚本模型核对请求形状、用户分域、错误与完整工具循环；有授权后再做一次范围明确的真实平台调用，核对结果与用量。换票成功本身不证明模型能运行。不要把测试凭据当作真实配置。
 
-该片段不提供桌面换票 HTTP 端点或长会话自动续期。Electron 端点需自家登录、限流和最小响应；按当前协议返回 `{ token, expiresAt }`，不要从只返回字符串的 `tokenFor()` 猜过期时间。长会话可用 Serve 平台工厂处理换票；直接 SDK 的 `token: () => currentToken` 是**同步** getter，刷新逻辑需在宿主安全更新内存值，覆盖长轮中的过期场景，不能传 `async () => minter.tokenFor(...)`。当前正式包没有 `createPlatformTokenProvider`。Serve 装配器每请求读取 `tokenFor()`，只对规定的令牌失效 401 重铸并重试一次；不要在业务层泛化为自动重放整轮或写入工具。
+该片段不提供桌面换票 HTTP 端点或长会话自动续期。项目没有所需端点时，助手须补齐后端、身份校验和客户端接线，启动两端并验证，不能把此片段或一个 `tokenUrl` 占位当成交付。Electron 端点需自家登录、限流和最小响应；按当前协议返回 `{ token, expiresAt }`，不要从只返回字符串的 `tokenFor()` 猜过期时间。长会话可用 Serve 平台工厂处理换票；直接 SDK 的 `token: () => currentToken` 是**同步** getter，刷新逻辑需在宿主安全更新内存值，覆盖长轮中的过期场景，不能传 `async () => minter.tokenFor(...)`。当前正式包没有 `createPlatformTokenProvider`。Serve 装配器每请求读取 `tokenFor()`，只对规定的令牌失效 401 重铸并重试一次；不要在业务层泛化为自动重放整轮或写入工具。
 
 ## 业务接线
 

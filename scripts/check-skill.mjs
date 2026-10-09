@@ -3,6 +3,7 @@ import { readFile, access, readdir } from 'node:fs/promises';
 import { dirname, resolve, join, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
+import { checkTemplateBaseline } from './build-installer.mjs';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const skill = await readFile(join(root, 'SKILL.md'), 'utf8');
 if (!/^---\r?\nname: tansr\r?\ndescription: .+\r?\n/m.test(skill)) throw new Error('Invalid skill frontmatter');
@@ -19,12 +20,11 @@ for (const path of paths) {
     references++;
   }
 }
-for (const template of ['product-starter', 'feedback-starter']) {
-  const packagePath = join(root, 'assets', template, 'package.json');
-  const pkg = JSON.parse(await readFile(packagePath, 'utf8'));
-  if (pkg.dependencies?.['@tansr/sdk'] !== matrix.packages.sdk.version) throw new Error(`${template}: SDK version drift`);
-  await access(join(root, 'assets', template, 'package-lock.json'));
-  await access(join(root, 'assets', template, '.env.example'));
+for (const template of matrix.templates) {
+  const pkg = JSON.parse(await readFile(join(root, template.directory, 'package.json'), 'utf8'));
+  const lock = JSON.parse(await readFile(join(root, template.directory, 'package-lock.json'), 'utf8'));
+  checkTemplateBaseline(template, pkg, lock, [matrix.packages.sdk, matrix.packages.serve]);
+  await access(join(root, template.directory, '.env.example'));
 }
 const iosRoot = join(root, 'assets', 'ios-app-host');
 const provenance = JSON.parse(await readFile(join(iosRoot, 'provenance.json'), 'utf8'));

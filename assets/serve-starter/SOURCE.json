@@ -1,0 +1,117 @@
+{
+  "task": "TPB-01",
+  "artifact": "Serve platform starter",
+  "source": {
+    "url": "https://download.tansr.com/demo/android/serve-demo.zip",
+    "packageName": "tansr-standalone-serve-demo",
+    "packageVersion": "0.1.1",
+    "sha256": "8ab5e120966db862c224bdfa9b8bdee7281d95beff444560d7c4d96f595d3bc9",
+    "licenseEvidence": "Original ZIP package.json declares MIT; the ZIP has no standalone LICENSE file. Included LICENSE supplies the Tansr project MIT grant; third-party runtime licenses remain in their npm packages.",
+    "license": "MIT",
+    "sourceCommit": "2a8ebfa7b3003464fcd631296c5e28bdef7f4d2a",
+    "archive": "stage1/public-artifacts/android-serve-demo.zip"
+  },
+  "originalFiles": [
+    {
+      "sha256": "559cb95d4813e048d4acc6c0addf6da05489540099f164061e33e775e56ce98c",
+      "path": "serve-demo/auth.ts"
+    },
+    {
+      "sha256": "ddb5b673b0ec7409a8f6b2a8ea2b673200c0307f25161c7502fd8962206e1ed6",
+      "path": "serve-demo/developer-login.ts"
+    },
+    {
+      "sha256": "3b2ea74d2414bc767c3d35bce65fce487929223f62a565938e98ead6ef22951f",
+      "path": "serve-demo/execution-policy.ts"
+    },
+    {
+      "sha256": "f5432000f563a1eacf5460675ededaa2f4ff592aa0774abbbee0e7576a93327f",
+      "path": "serve-demo/package.json"
+    },
+    {
+      "sha256": "06fcdc7c7f098b33b97fbd91e5370e2c302769b75b29e8e9d47c8a652c5af599",
+      "path": "serve-demo/package-lock.json"
+    },
+    {
+      "sha256": "7a55cd39dfff83c283c8fd1663d7728f4ef819ba05bb1e6a3ad7b570d404132a",
+      "path": "serve-demo/tsconfig.json"
+    },
+    {
+      "sha256": "4845c6265dcab593cab7d2928e9ff318e69f9ed52c6b98851dcf0e4643c15341",
+      "path": "serve-demo/.gitignore"
+    },
+    {
+      "sha256": "440e26ce8b6211006586b744f0c500a8d11e2bac344686b6605689121a0c2741",
+      "path": "serve-demo/.env.example"
+    },
+    {
+      "sha256": "04c47b18a66a12714a5539f37a144e64ca69678e4d18083dcd833b05d3df0756",
+      "path": "serve-demo/agent-real.ts"
+    },
+    {
+      "sha256": "e18b3e3bdd5e999b115840fae237865859c04ee9939e709273ffe2590ae14313",
+      "path": "serve-demo/launch.mjs"
+    },
+    {
+      "sha256": "a4212b94e9ab50dde8aa82f308242220e3c50fad96c0240d5a5c540a3106d28c",
+      "path": "serve-demo/login-server.ts"
+    },
+    {
+      "sha256": "a946d976605b5f97b628ea4b57d3ee641507d651ab0c1af5fcef75c9edc71fb4",
+      "path": "serve-demo/configure.mjs"
+    },
+    {
+      "sha256": "74a6660c27e1e19df4138503798cc8ef3bffc81f9e9049585edb630722639932",
+      "path": "serve-demo/store-config.ts"
+    },
+    {
+      "path": "serve-demo/shutdown.ts",
+      "sha256": "c454c2e792b758f572c92063aa9d90b75526d7ba310f3372a34516c9a97bc7c3"
+    }
+  ],
+  "unchangedFiles": [
+    "auth.ts",
+    "execution-policy.ts",
+    "package-lock.json",
+    "tsconfig.json",
+    "shutdown.ts"
+  ],
+  "adaptedFiles": {
+    "agent-real.ts": "Platform service only, no smoke prompt. SIGINT/SIGTERM use original createDemoShutdown drain + settleResources and preserve failures.",
+    "launch.mjs": "Original package-local env isolation retained; removed automatic dependency updates and app-credential startup precondition.",
+    "package.json": "Preserved original name/version/dependencies/devDependencies/engines. Removed unused client/audio/updater scripts; added single-worker local tests.",
+    "configure.mjs": "Creates missing .env and fills only uniquely assigned empty local secrets. Rejects duplicates/ambiguous syntax before any write; preserves short or placeholder existing secrets and reports configuration_not_ready without rotating them. CLI exits nonzero without a ready message on rejection.",
+    "developer-login.ts": "Original login/refresh contract plus GET /configuration; Host/Origin rejection uses existing forbidden code before ticket issuance or refresh consumption.",
+    "login-server.ts": "Original login server assembly plus safe configuration status.",
+    ".env.example": "Platform values may be empty. Local generated auth and explicit serve-only defaults.",
+    ".gitignore": "Original excludes retained; additionally ignore .env.tansr-configure-*.tmp and .tansr-configure.lock from shared project configuration."
+  },
+  "addedFiles": {
+    "README.md": "Runnable setup, env contract and front/backend wiring.",
+    "configuration.ts": "Shared local validation: loopback IP listeners only, platform HTTPS root URL (HTTP allowed only for loopback), no URL credentials/query/hash; field-name-only status.",
+    "LICENSE": "Full Tansr MIT text from skill repository LICENSE.",
+    "server.ts": "Minimal public factory/store/startServer assembly derived from official agent-real.ts. Missing config uses upstream_unavailable; failed local request guard returns null from public v2.authenticate (original unauthorized response).",
+    "starter.test.mjs": "OS temporary fixtures and real loopback TCP; covers original auth/configuration behavior, DNS rebinding/foreign Origin denial, and byte-preserving configure rejection for duplicate/ambiguous/invalid existing values. No paid platform or model traffic.",
+    "SOURCE.json": "Source provenance and changes.",
+    "local-request.ts": "Local authority and same-service Origin guard. Public Serve 0.15.0 has no Host/Origin option; the guard runs through its existing v2.authenticate hook and original login handlers."
+  },
+  "dependencyPolicy": "Original package-lock.json is byte-identical. npm ci consumes public npm registry packages; no private source imports and no automatic version update.",
+  "lockedRuntime": {
+    "@tansr/serve": "0.15.0",
+    "@tansr/api-client": "0.4.0",
+    "tsx": "4.23.1"
+  },
+  "exclusions": [
+    "No source imported from current CLI checkout",
+    "No real .env was read or extracted",
+    "No echo or fake platform token",
+    "No automatic paid smoke"
+  ],
+  "protocolBoundary": {
+    "createSession": "Original 503 upstream_unavailable. /api uses unified-v1 top-level code; legacy /v2 uses error.code. Public package owns the HTTP message; missing fields are on configuration/readiness routes.",
+    "health": "Original Serve GET /healthz unchanged",
+    "configuration": "Login service GET /configuration: status, configured, mode, missingConfig",
+    "readiness": "Original GET /readyz plus public readinessProbes hook, missing application configuration gives 503",
+    "localIdentityRequests": "Loopback Host authority must match actual listener port; Origin may be absent for native clients, otherwise must be same-service HTTP origin. Login/refresh reject with existing 403 forbidden; Serve uses existing authenticate null -> 401, preserving both /api and legacy envelopes."
+  }
+}

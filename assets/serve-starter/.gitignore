@@ -1,0 +1,7 @@
+.env
+node_modules/
+.serve-demo-store/
+.serve-demo-cold/
+*.log
+.env.tansr-configure-*.tmp
+.tansr-configure.lock

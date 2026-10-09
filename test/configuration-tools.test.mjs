@@ -401,3 +401,102 @@ test('detected concurrent same-size edit is preserved instead of overwritten', {
   assert.equal(await readFile(join(root, '.env'), 'utf8'), newer);
   assert.equal((await readdir(root)).some(name => name.startsWith('.env.tansr-configure') || name === '.tansr-configure.lock'), false);
 });
+
+async function backendFixture(t, type, text, originalName = false) {
+  const root = await fixture(t, text, false);
+  const pkg = {
+    name: originalName ? type === 'serve' ? 'tansr-standalone-serve-demo' : 'tansr-example-token-server' : 'renamed-generated-backend',
+    scripts: { start: type === 'serve' ? 'node launch.mjs start' : 'node launch.mjs' },
+    dependencies: type === 'serve' ? { '@tansr/serve': '0.15.0', '@tansr/api-client': '0.4.0', tsx: '4.23.1' } : { express: '5.2.1' },
+  };
+  await writeFile(join(root, 'package.json'), JSON.stringify(pkg));
+  if (!originalName) await writeFile(join(root, 'tansr-project.json'), JSON.stringify({ template: type }));
+  if (type === 'token-server') await writeFile(join(root, 'server.mjs'), '// fixture only; never executed\n');
+  return root;
+}
+
+test('backend doctor recognizes generated and original projects with official key names and local env links', async t => {
+  for (const type of ['token-server', 'serve']) {
+    for (const originalName of [false, true]) {
+      const root = await backendFixture(t, type, null, originalName);
+      const report = await inspectProject(root);
+      assert.equal(report.projectType, type);
+      assert.equal(report.mode, 'platform');
+      assert.equal(report.environmentFilePresent, false);
+      assert.deepEqual(report.missingConfigurationNames, type === 'serve' ? ['TANSR_APP_KEY_ID', 'TANSR_APP_KEY', 'DEMO_AUTH_SECRET', 'DEMO_LOGIN_PASSWORD'] : ['TANSR_APP_KEY_ID', 'TANSR_APP_KEY']);
+      assert.equal(report.environmentFilePath, join(root, '.env'));
+      assert.equal(report.environmentFileLink, '[.env](<' + join(root, '.env').replaceAll('\\', '/') + '>)');
+      assert.equal(report.startCommand, 'npm start');
+      assert.equal(report.loginCommand, type === 'serve' ? 'npm run login' : undefined);
+      assert.deepEqual(report.dependencyNames, type === 'serve' ? ['@tansr/serve', '@tansr/api-client', 'tsx'] : ['express']);
+      assert.equal(report.dependenciesInstalled, false);
+      noValues(report);
+      await assert.rejects(configureProject({ project: root, mode: 'platform', apply: true }), error => configurationFailure(error).code === 'missing');
+      assert.equal((await readdir(root)).includes('.env'), false);
+    }
+  }
+});
+
+test('backend comment activation shares safe preview/apply and preserves original login settings without a fake mode', async t => {
+  const original = ['# existing login state', 'DEMO_AUTH_SECRET=synthetic-login-preserved', 'DEMO_LOGIN_USER=existing-user', 'TANSR_APP_KEY_ID=', 'TANSR_APP_KEY=YOUR_KEY', '# TANSR_APP_KEY_ID=' + ID, '# TANSR_APP_KEY="' + KEY + '"', ''].join('\r\n');
+  for (const type of ['token-server', 'serve']) {
+    const root = await backendFixture(t, type, original);
+    const preview = await configureProject({ project: root, mode: 'platform' });
+    assert.deepEqual(preview.changes.map(c => c.name), ['TANSR_APP_KEY_ID', 'TANSR_APP_KEY']);
+    assert.equal(await readFile(join(root, '.env'), 'utf8'), original);
+    noValues(preview, ['synthetic-login-preserved', 'existing-user']);
+    const applied = await configureProject({ project: root, mode: 'platform', apply: true });
+    assert.equal(applied.status, 'applied');
+    assert.equal(applied.configurationAfter.projectType, type);
+    const actual = await readFile(join(root, '.env'), 'utf8');
+    assert.equal(actual, original.replace('TANSR_APP_KEY_ID=\r\n', '# TANSR_APP_KEY_ID=\r\n').replace('TANSR_APP_KEY=YOUR_KEY', '# TANSR_APP_KEY=YOUR_KEY').replace('# TANSR_APP_KEY_ID=' + ID, ' TANSR_APP_KEY_ID=' + ID).replace('# TANSR_APP_KEY="' + KEY, ' TANSR_APP_KEY="' + KEY));
+    assert.equal(Object.hasOwn(parseEnv(actual), 'TANSR_MODE'), false);
+    assert.equal((await configureProject({ project: root, mode: 'platform', apply: true })).status, 'unchanged');
+    noValues(applied, ['synthetic-login-preserved', 'existing-user']);
+  }
+});
+
+test('backend helper refuses offline, invalid mode, duplicate or ambiguous official credentials without changing env', async t => {
+  const readyBackend = 'TANSR_APP_KEY_ID=' + ID + '\nTANSR_APP_KEY="' + KEY + '"\n';
+  for (const type of ['token-server', 'serve']) {
+    const root = await backendFixture(t, type, readyBackend);
+    await refusesUnchanged(root, { mode: 'offline' }, 'mode');
+    await writeFile(join(root, '.env'), readyBackend + 'TANSR_MODE=offline\n');
+    assert.equal((await inspectProject(root)).mode, 'invalid');
+    await refusesUnchanged(root, { mode: 'platform' }, 'mode');
+    await writeFile(join(root, '.env'), readyBackend + 'TANSR_APP_KEY_ID=' + ID + '\n');
+    assert.equal((await inspectProject(root)).variables[0].active, 'duplicate');
+    await refusesUnchanged(root, { mode: 'platform' }, 'credentials');
+    await writeFile(join(root, '.env'), readyBackend + '# TANSR_APP_KEY_ID=' + ID + '\n');
+    await refusesUnchanged(root, { mode: 'platform' }, 'credentials');
+    await writeFile(join(root, '.env'), 'TANSR_APP_ID=' + ID + '\nTANSR_APP_KEY="' + KEY + '"\n');
+    assert.deepEqual((await inspectProject(root)).missingConfigurationNames, type === 'serve' ? ['TANSR_APP_KEY_ID', 'DEMO_AUTH_SECRET', 'DEMO_LOGIN_PASSWORD'] : ['TANSR_APP_KEY_ID']);
+    await refusesUnchanged(root, { mode: 'platform' }, 'credentials');
+  }
+});
+
+test('backend marker alone cannot authorize configuration of an unrelated project', async t => {
+  const root = await fixture(t, 'TANSR_APP_KEY_ID=' + ID + '\nTANSR_APP_KEY="' + KEY + '"\n', false);
+  await writeFile(join(root, 'tansr-project.json'), JSON.stringify({ template: 'token-server' }));
+  await refusesUnchanged(root, { mode: 'platform' }, 'project');
+});
+
+test('Serve separates local authentication readiness from platform credentials without altering login material', async t => {
+  const base = 'TANSR_APP_KEY_ID=' + ID + '\nTANSR_APP_KEY="' + KEY + '"\n';
+  const root = await backendFixture(t, 'serve', base + 'DEMO_AUTH_SECRET=short\nDEMO_LOGIN_PASSWORD=\n');
+  let report = await inspectProject(root);
+  assert.equal(report.platformConfigured, true);
+  assert.equal(report.authReady, false);
+  assert.equal(report.configurationStatus, 'needs-attention');
+  assert.deepEqual(report.missingConfigurationNames, ['DEMO_AUTH_SECRET', 'DEMO_LOGIN_PASSWORD']);
+  assert.equal(report.configureCommand, 'npm run configure');
+  const text = base + 'DEMO_AUTH_SECRET=' + 'synthetic-secret-'.repeat(3) + '\nDEMO_LOGIN_PASSWORD=synthetic-login-only\n';
+  await writeFile(join(root, '.env'), text);
+  report = await inspectProject(root);
+  assert.equal(report.platformConfigured, true);
+  assert.equal(report.authReady, true);
+  assert.equal(report.configurationStatus, 'ready');
+  noValues(report, ['synthetic-secret-', 'synthetic-login-only']);
+  assert.equal((await configureProject({ project: root, mode: 'platform', apply: true })).status, 'unchanged');
+  assert.equal(await readFile(join(root, '.env'), 'utf8'), text);
+});

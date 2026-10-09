@@ -5,13 +5,13 @@ import { tmpdir } from 'node:os';
 import { join, dirname, relative, sep } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { gzipSync } from 'node:zlib';
-import { buildInstaller, PAYLOAD_FILES, INSTALLER_FILES, repositoryRoot, BUILD_RECEIPT, payloadSourcePath, validateRelease } from '../scripts/build-installer.mjs';
+import { buildInstaller, PAYLOAD_FILES, INSTALLER_FILES, repositoryRoot, BUILD_RECEIPT, payloadSourcePath, validateRelease, checkTemplateBaseline } from '../scripts/build-installer.mjs';
 import { checkInstallerPackage, auditTarball, readTarball, validatePackedContent } from '../scripts/check-installer-package.mjs';
 import { listHosts } from '../installer/hosts.mjs';
 
-const release = { schemaVersion: 1, packageName: '@tansr/skill', binName: 'tansr-skill', version: '0.1.4',
+const release = { schemaVersion: 1, packageName: '@tansr/skill', binName: 'tansr-skill', version: '0.1.5',
   node: '>=22.19', license: 'MIT', homepage: 'https://tansr.com/', repository: 'https://github.com/tansrai/tansr-skill',
-  skillVersion: '0.1.4', templateBaselines: [{ id: 'node', version: '1.0.0' }, { id: 'web', version: '0.1.0' }],
+  skillVersion: '0.1.5', templateBaselines: [{ id: 'node', version: '1.0.0' }, { id: 'web', version: '0.1.0' }, { id: 'token-server', version: '0.1.1' }, { id: 'serve', version: '0.1.1' }],
   runtimeBaselines: [{ id: 'serve', name: '@tansr/serve', version: '0.15.0' }, { id: 'sdk', name: '@tansr/sdk', version: '0.18.1' }] };
 
 async function fixture(t) {
@@ -87,6 +87,23 @@ test('release candidate metadata records the current host registry without asser
     }
     assert.equal(declared.currentCandidateHostValidation.packageVersion, currentRelease.version);
     for (const scope of ['project', 'user']) assert.equal(declared.currentCandidateHostValidation[scope], host.scopes.includes(scope) ? 'not_tested' : 'not_applicable');
+  }
+});
+
+test('companion templates require exact declared dependencies and lockfile versions', async () => {
+  const compatibility = JSON.parse(await readFile(join(repositoryRoot, 'compatibility.json'), 'utf8'));
+  const runtimes = [compatibility.packages.sdk, compatibility.packages.serve];
+  for (const id of ['token-server', 'serve']) {
+    const template = compatibility.templates.find(item => item.id === id);
+    assert.ok(template);
+    const pkg = JSON.parse(await readFile(join(repositoryRoot, template.directory, 'package.json'), 'utf8'));
+    const lock = JSON.parse(await readFile(join(repositoryRoot, template.directory, 'package-lock.json'), 'utf8'));
+    assert.doesNotThrow(() => checkTemplateBaseline(template, pkg, lock, runtimes));
+    const changed = structuredClone(lock);
+    changed.packages[`node_modules/${template.dependencies[0].name}`].version = '999.0.0';
+    assert.throws(() => checkTemplateBaseline(template, pkg, changed, runtimes), /locked dependency drift/);
+    assert.throws(() => checkTemplateBaseline(template, { ...pkg, dependencies: {} }, lock, runtimes), /inventory drift/);
+    assert.throws(() => checkTemplateBaseline({ ...template, dependencies: [] }, pkg, lock, runtimes), /differs/);
   }
 });
 

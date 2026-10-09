@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.env
+*.log
+.env.tansr-configure-*.tmp
+.tansr-configure.lock

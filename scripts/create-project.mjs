@@ -5,7 +5,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { randomUUID } from 'node:crypto';
 
 const skillRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const templates = { web: 'product-starter', node: 'feedback-starter' };
+const templates = { web: 'product-starter', node: 'feedback-starter', 'token-server': 'token-server-starter', serve: 'serve-starter' };
 
 /** @param {string} root @param {string} path */
 function contains(root, path) {
@@ -29,9 +29,9 @@ async function assertNoLinks(path) {
   }
 }
 
-/** @param {{template: 'web'|'node', target: string, name: string}} options */
+/** @param {{template: 'web'|'node'|'token-server'|'serve', target: string, name: string}} options */
 export async function createProject(options) {
-  if (!Object.hasOwn(templates, options.template)) throw new Error('template 必须是 web 或 node。');
+  if (!Object.hasOwn(templates, options.template)) throw new Error('template 必须是 web、node、token-server 或 serve。');
   if (!isAbsolute(options.target)) throw new Error('target 必须是新工程的绝对路径。');
   if (!/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(options.name)) throw new Error('name 请使用 1–63 个小写英文字母、数字或连字符，首尾不能为连字符。');
   const target = resolve(options.target);
@@ -53,7 +53,7 @@ export async function createProject(options) {
   /** @param {string} from @param {string} to */
   async function copyTree(from, to) {
     for (const entry of await readdir(from, { withFileTypes: true })) {
-      if (['node_modules', '.git', 'dist', 'data', '.data', 'coverage'].includes(entry.name) || (entry.name.startsWith('.env') && entry.name !== '.env.example')) continue;
+      if (['node_modules', '.git', 'dist', 'data', '.data', '.serve-demo-store', '.serve-demo-cold', 'coverage'].includes(entry.name) || (entry.name.startsWith('.env') && entry.name !== '.env.example')) continue;
       const input = join(from, entry.name);
       const output = join(to, entry.name);
       if (entry.isSymbolicLink() || !contains(source, await realpath(input))) throw new Error('模板含外部链接，停止复制。');
@@ -82,7 +82,22 @@ export async function createProject(options) {
     try { await lstat(target); throw new Error('目标在生成期间已出现，停止以保护现有内容。'); }
     catch (error) { if (/** @type {NodeJS.ErrnoException} */ (error).code !== 'ENOENT') throw error; }
     await rename(staging, target);
-    return { target, template: options.template, files: copied.length + 1, dependenciesInstalled: false, next: ['进入生成目录', 'npm ci --ignore-scripts', 'npm test', ...(options.template === 'web' ? ['npm run build', 'npm start（默认本机离线模式，参阅 README）'] : ['参阅 README 配置后 npm start'])] };
+    const environmentFilePath = join(target, '.env');
+    const backend = options.template === 'token-server' || options.template === 'serve';
+    const next = ['进入生成目录', 'npm ci --ignore-scripts', 'npm test'];
+    if (options.template === 'web') next.push('npm run build', 'npm start（默认本机离线模式，参阅 README）');
+    else {
+      next.push(options.template === 'serve' ? 'npm run configure（仅初始化缺失本机登录材料，保留已有配置）' : '在本机从 .env.example 创建 .env，已有配置保持原样');
+      if (backend) next.push('填写官方 TANSR_APP_KEY_ID / TANSR_APP_KEY；缺值时后端可启动但平台功能未就绪');
+      next.push('参阅 README 配置后 npm start');
+      if (options.template === 'serve') next.push('Serve 启动后，在另一终端 npm run login 启动配套登录服务，保留原登录态');
+    }
+    return {
+      target, template: options.template, files: copied.length + 1, dependenciesInstalled: false,
+      environmentFilePath, environmentFileLink: '[.env](<' + environmentFilePath.replaceAll('\\', '/') + '>)',
+      startCommand: 'npm start', ...(options.template === 'serve' ? { configureCommand: 'npm run configure', loginCommand: 'npm run login' } : {}),
+      networkAccessed: false, applicationStarted: false, next,
+    };
   } catch (error) {
     // staging 为本函数在已检查父目录下创建的唯一目录，不处理任何用户目标。
     if (contains(dirname(target), staging) && basename(staging).includes('-tansr-')) await rm(staging, { recursive: true, force: true });
@@ -93,13 +108,13 @@ export async function createProject(options) {
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   try {
     const args = process.argv.slice(2);
-    if (args.length !== 6 || new Set(args.filter((_, index) => index % 2 === 0)).size !== 3) throw new Error('用法：node scripts/create-project.mjs --template web|node --target <绝对路径> --name <项目名>');
+    if (args.length !== 6 || new Set(args.filter((_, index) => index % 2 === 0)).size !== 3) throw new Error('用法：node scripts/create-project.mjs --template web|node|token-server|serve --target <绝对路径> --name <项目名>');
     /** @type {Record<string,string>} */ const options = {};
     for (let i = 0; i < args.length; i += 2) {
       if (!['--template', '--target', '--name'].includes(args[i])) throw new Error('未知参数。');
       options[args[i].slice(2)] = args[i + 1];
     }
-    if (!['web', 'node'].includes(options.template)) throw new Error('template 必须是 web 或 node。');
-    console.log(JSON.stringify(await createProject({ template: /** @type {'web'|'node'} */ (options.template), target: options.target, name: options.name }), null, 2));
+    if (!Object.hasOwn(templates, options.template)) throw new Error('template 必须是 web、node、token-server 或 serve。');
+    console.log(JSON.stringify(await createProject({ template: /** @type {'web'|'node'|'token-server'|'serve'} */ (options.template), target: options.target, name: options.name }), null, 2));
   } catch (error) { console.error(error instanceof Error ? error.message : '生成失败。'); process.exitCode = 1; }
 }

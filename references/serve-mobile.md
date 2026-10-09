@@ -20,7 +20,7 @@
 
 ## 多用户服务与登录
 
-`@tansr/serve` 是嵌入 Node 后端的 REST + SSE 服务库。使用该版本公开的 `createAgentSessionFactory`、`createServeAgentSessionStore`、`startServer`，复用官方 Demo 的宿主装配。`myAuth.verify` 等业务占位函数要由应用实现，不能当作库自带登录。
+`@tansr/serve` 是嵌入 Node 后端的 REST + SSE 服务库。使用该版本公开的 `createAgentSessionFactory`、`createServeAgentSessionStore`、`startServer`，复用官方 Demo 的宿主装配。项目已有受控后端就复用；缺少时由助手沿官方资产建立并完成客户端地址、登录和业务接线，不能把“自己的 Serve”留作用户另行准备的前提。`myAuth.verify` 等业务占位函数由助手在应用中实现或接入现有登录，不能当作库自带登录；本地准备与缺凭据边界见[前后端交付](build.md#把所需后端一起交付)。
 
 `startServer.createSession` 与 `v2.createSession` 在旧例中分别对应不同工厂合同；即使外部改走 `/api`，宿主内部装配也不等于把两个字段合并。不要把同一个 `build.factory` 盲填所有入口，不为未使用的管理入口杜撰终端用户身份。以安装版本类型和官方 Demo 的完整装配核对。
 
@@ -62,7 +62,7 @@
 
 ## 部署、停止与验证
 
-本地先绑定回环。生产由宿主提供 HTTPS、登录与必要的网络控制；SSE 反代关闭缓冲并让读超时覆盖心跳。健康/指标入口的暴露依实际配置，不把管理面直接当公开 API。
+本地先绑定回环。助手分别启动客户端和所需 Serve / 登录服务，核对各端运行状态、健康及实际连接地址，再从客户端验证端到端流程；缺凭据时保留平台调用未验状态。生产由宿主提供 HTTPS、登录与必要的网络控制；SSE 反代关闭缓冲并让读超时覆盖心跳。健康/指标入口的暴露依实际配置，不把管理面直接当公开 API。
 
 宿主接 SIGINT/SIGTERM，按所选包执行 drain、等待资源收尾，再释放 store/MCP 等资源。`@tansr/serve@0.15.0` 的官方 Demo 使用 `settleResources()`；停止 HTTP 监听、手机断开或有限观察超时都不能代替资源结算成功。持久化失败要让界面显示未可靠保存，原始请求或 cause 不能无筛选写进日志。
 

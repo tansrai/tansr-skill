@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "packageName": "@tansr/skill",
   "binName": "tansr-skill",
-  "version": "0.1.4",
-  "skillVersion": "0.1.4",
+  "version": "0.1.5",
+  "skillVersion": "0.1.5",
   "templateBaselines": [
     {
       "id": "web",
@@ -12,6 +12,14 @@
     {
       "id": "node",
       "version": "1.0.0"
+    },
+    {
+      "id": "token-server",
+      "version": "0.1.1"
+    },
+    {
+      "id": "serve",
+      "version": "0.1.1"
     }
   ],
   "runtimeBaselines": [

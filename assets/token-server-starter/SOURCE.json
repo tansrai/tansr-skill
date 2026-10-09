@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "asset": "token-server-starter",
+  "owner": "TPB-01 Skill 0.1.5",
+  "source": {
+    "url": "https://download.tansr.com/demo/electron/electron.zip",
+    "sha256": "345cff2d2c3d370f25eba2801d8f1cba6e2cde3960e361ea4f32e09ff634cb42",
+    "nestedArchive": "token-server.zip",
+    "nestedSha256": "e1e8a882b19547d0eeea1ae0c82c063cf814bb7fe185ad1852286fb04553c6f6",
+    "version": "0.1.1",
+    "license": "MIT",
+    "licenseFile": "LICENSE"
+  },
+  "originalFiles": [
+    {
+      "path": "server.mjs",
+      "bytes": 10866,
+      "sha256": "6d1d812001a7d218f564cedce9466766a5c5eae3138fc4a3fcb879c6de7a3da4"
+    },
+    {
+      "path": "launch.mjs",
+      "bytes": 1104,
+      "sha256": "98c2666dce2ca34857740470023a2c1b4f8759e55e2c7f68984189ecc0d2f875"
+    },
+    {
+      "path": "package.json",
+      "bytes": 496,
+      "sha256": "5227ad97b3ed8c07c7a6daa5b8e3152f0db54848937c95a6e36ec9a4cde151cb"
+    },
+    {
+      "path": "package-lock.json",
+      "bytes": 31139,
+      "sha256": "e8938208d698b2a9a70a9f10644d554e3f9a795de0b29548f7acd6dc515fb253"
+    },
+    {
+      "path": "LICENSE",
+      "bytes": 1095,
+      "sha256": "a2376ef366cbf8b064a73156845b4813ba700f1349771e59bdaf145aa43c1cd8"
+    },
+    {
+      "path": ".npmrc",
+      "bytes": 60,
+      "sha256": "6e55aa84f7394184d4e5b26e38bbc5dcb099de321e5ceca2ddad0474a2a66ec5"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 31,
+      "sha256": "b63ce42e2babc54a13558cf679f775191d18649bca9dc04072126ef50987e1a4"
+    },
+    {
+      "path": ".env.example",
+      "bytes": 196,
+      "sha256": "d72bf6faa39e13cd1852a833a5da9b08be949d8240f3b575f876c07595e99a57"
+    }
+  ],
+  "changes": [
+    "Keep published login/session/token/TWP1 contract and exact dependency lock.",
+    "Add loopback-only configuration readiness and no-credential HTTP startup; protect token/usage with existing authentication then explicit 503.",
+    "Use local .env or process configuration without updating dependencies; add real TCP synthetic tests.",
+    "Ignore the shared configuration helper temporary credential files (.env.tansr-configure-*.tmp) and its ownership lock (.tansr-configure.lock); .env.example remains distributable.",
+    "Reject non-loopback/wrong-port Host and foreign/null browser Origin before routing to prevent DNS rebinding; native no-Origin clients and the published login/token contract remain supported."
+  ],
+  "notCopied": [
+    ".env",
+    "SDK-INTEGRATION-TOKEN-SERVER.md",
+    "demo-dependencies.mjs",
+    "update-runtime.mjs",
+    "DISTRIBUTION-MANIFEST.json"
+  ],
+  "boundary": "This is an adapted consumer starter, not the unchanged published ZIP. No platform call or deployment is claimed."
+}

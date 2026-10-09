@@ -102,6 +102,10 @@ test('generation from a previously used template excludes saved data and secrets
   await mkdir(join(fakeSkill, 'scripts'), { recursive: true });
   await mkdir(join(template, '.data'), { recursive: true });
   await mkdir(join(template, '.tansr'));
+  await mkdir(join(template, '.serve-demo-store'));
+  await mkdir(join(template, '.serve-demo-cold'));
+  await writeFile(join(template, '.serve-demo-store', 'state.json'), 'synthetic-existing-conversation');
+  await writeFile(join(template, '.serve-demo-cold', 'state.json'), 'synthetic-existing-history');
   await writeFile(join(fakeSkill, 'scripts', 'create-project.mjs'), await readFile(new URL('../scripts/create-project.mjs', import.meta.url)));
   await writeFile(join(fakeSkill, 'compatibility.json'), JSON.stringify({ skill: { version: '0.1.4' } }));
   await writeFile(join(template, 'package.json'), JSON.stringify({ name: 'template', private: true }));
@@ -114,4 +118,32 @@ test('generation from a previously used template excludes saved data and secrets
   assert.equal(run.status, 0, run.stderr);
   assert.deepEqual((await readdir(target)).sort(), ['.env.example', '.tansr', 'package.json', 'tansr-project.json'].sort());
   assert.equal(await readFile(join(template, '.data', 'state.json'), 'utf8'), '{"privateRecord":"synthetic"}');
+});
+
+test('backend templates generate new independent projects with preserved official dependencies and startup guidance', async t => {
+  const root = await fixture(t);
+  for (const template of ['token-server', 'serve']) {
+    const target = join(root, template + '-with-spaces');
+    const result = await createProject({ template, target, name: 'custom-' + template });
+    assert.equal(result.networkAccessed, false);
+    assert.equal(result.applicationStarted, false);
+    assert.equal(result.dependenciesInstalled, false);
+    assert.equal(result.environmentFilePath, join(target, '.env'));
+    assert.equal(result.startCommand, 'npm start');
+    assert.equal(result.loginCommand, template === 'serve' ? 'npm run login' : undefined);
+    const pkg = JSON.parse(await readFile(join(target, 'package.json'), 'utf8'));
+    const lock = JSON.parse(await readFile(join(target, 'package-lock.json'), 'utf8'));
+    assert.equal(pkg.name, 'custom-' + template);
+    assert.equal(lock.name, pkg.name);
+    assert.equal(lock.packages[''].name, pkg.name);
+    assert.equal((await inspectProject(target)).projectType, template);
+    const files = await readdir(target);
+    assert.equal(files.includes('.env'), false);
+    assert.equal(files.includes('node_modules'), false);
+    assert.equal(JSON.parse(await readFile(join(target, 'tansr-project.json'), 'utf8')).template, template);
+    const keptEnv = 'USER_EXISTING=do-not-overwrite\n';
+    await writeFile(join(target, '.env'), keptEnv);
+    await assert.rejects(createProject({ template, target, name: 'other-name' }), /目标已存在/);
+    assert.equal(await readFile(join(target, '.env'), 'utf8'), keptEnv);
+  }
 });

@@ -41,7 +41,7 @@ export const PAYLOAD_FILES = Object.freeze([
   'assets/product-starter/src/types.ts', 'assets/product-starter/test/platform.test.ts',
   'assets/product-starter/test/runtime.test.ts', 'assets/product-starter/tsconfig.build.json',
   'assets/product-starter/tsconfig.json',
-  'references/assistant-setup.md', 'references/build.md', 'references/platforms.md',
+  'references/assistant-setup.md', 'references/build.md', 'references/language-sdks.md', 'references/platforms.md',
   'references/product-brief.md', 'references/product.md', 'references/quickstart-en.md',
   'references/sdk.md', 'references/serve-mobile.md', 'references/troubleshoot.md',
   'references/use.md', 'references/validation.md',
